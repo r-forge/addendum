@@ -2293,3 +2293,12 @@ randomFillDS<-function(ds)
 	}
 	return(fakeData)
 }
+
+marginalProbPerCat<-function(dfr)
+{
+	catCols<-which(sapply(dfr[1,], is.factor))
+	lapply(catCols, function(curcol){
+			tbl<-table(dfr[,curcol])
+			return(tbl/sum(tbl))
+		})
+}

@@ -111,6 +111,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{qrmvnormsqrt}}
 		\item \code{\link{randomFillDS}}
 		\item \code{\link{refactor}}
+		\item \code{\link{marginalProbPerCat}}
 		\item \code{\link{removeItems}}
 		\item \code{\link{removeCols}}
 		\item \code{\link{removeUnivariateOutliers}}
