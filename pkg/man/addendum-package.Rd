@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.1\cr
-Date: \tab 2011-06-22\cr
+Version: \tab 1.2\cr
+Date: \tab 2011-07-13\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -117,6 +117,8 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{removeUnivariateOutliers}}
 		\item \code{\link{repeatDataRow}}
 		\item \code{\link{similarSizeGroups}}
+		\item \code{\link{randomString}}
+		\item \code{\link{randomStrings}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
@@ -127,6 +129,8 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{outlierIndices}}
 		\item \code{\link{pickBestConservative}}
 		\item \code{\link{safeLowess}}
+		\item \code{\link{uniqueCharID}}
+		\item \code{\link{categoricalUniqueIdentifiers}}
 	}
 	\item Internal \enumerate{
 		\item \code{\link{demoCodeWorkSpace}}

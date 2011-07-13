@@ -2302,3 +2302,60 @@ marginalProbPerCat<-function(dfr)
 			return(tbl/sum(tbl))
 		})
 }
+
+randomString<-function(maxLength=100, minLength=1, alphabet=c(letters, LETTERS), separator="")
+{
+	minLength<-as.integer(max(minLength, 1))
+	maxLength<-as.integer(max(maxLength, minLength))
+	if(minLength == maxLength)
+	{
+		l<-minLength
+	}
+	else
+	{
+		l<-sample(minLength:maxLength, 1)
+	}
+	paste(sample(alphabet, l, replace=TRUE), collapse=separator)
+}
+
+randomStrings<-function(n, maxLength=100, minLength=1, alphabet=c(letters, LETTERS), separator="")
+{
+	replicate(n, randomString(maxLength=maxLength, minLength=minLength, alphabet=alphabet, separator=separator))
+}
+
+
+#note: if you do not expect there to be NA's in the data, pass na.becomes=NA, this
+#   should be faster
+categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+")
+{
+	forCols<-which(sapply(dfr, is.factor))
+	dfr<-sapply(dfr[,forCols], function(curcol){as.character(as.numeric(curcol))})
+	if(! is.na(na.becomes)) dfr[is.na(dfr)]<-na.becomes #this works!!
+	apply(dfr, 1, paste, collapse=separator)
+}
+
+#x: vector of characters containing identifiers, and may contain duplicates
+#This function returns the set of unique identifiers and their first occurrence
+# in x
+#note: providing this as a separate function allows to optimize it later on
+uniqueCharID<-function(x, needSort=FALSE, includeOccurrence=TRUE, impNr=1)
+{
+	stopifnot(is.character(x))
+	if(needSort)
+	{
+		uniquex<-switch(impNr,sort(unique(x)),unique(sort(x)),rle(sort(x))$values)
+	}
+	else
+	{
+		uniquex<-switch(impNr,unique(x),unique(x),rle(sort(x))$values)
+	}
+	if(includeOccurrence)
+	{
+		return(list(uniquex=uniquex, firstOccurrence=match(uniquex, x)))
+	}
+	else
+	{
+		return(uniquex)
+	}
+	
+}
