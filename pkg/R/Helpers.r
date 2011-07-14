@@ -2359,3 +2359,105 @@ uniqueCharID<-function(x, needSort=FALSE, includeOccurrence=TRUE, impNr=1)
 	}
 	
 }
+
+#note: n is drawn uniformly between minn and maxn. For other purposes this may be unwanted.
+randomProbabilities<-function(minn=2, maxn=minn)
+{
+	minn<-as.integer(max(minn, 2))
+	maxn<-as.integer(max(maxn, minn))
+	if(maxn == minn){n<-minn}else{n<-sample(minn:maxn, 1)}
+	rv<-runif(n)
+	rv/sum(rv)
+}
+#randomProbabilities(5,10)
+#randomProbabilities(3)
+#randomProbabilities()
+
+randomCategoricalVector<-function(numObs, catProbs=rep(1/3,3), asFactor=FALSE, verbosity=0,...)
+{
+	if(is.function(catProbs))
+	{
+		cattif(verbosity>0, "Generate probabilities.")
+		catProbs<-catProbs(...) #use the function to generate a vector of probabilities
+		cattif(verbosity>0, "Resulting probabilities:\n\t", catProbs)
+	}
+	cattif(verbosity>0, "Number of items per category")
+	numpercat<-rmultinom(1, numObs, catProbs)
+	if(length(names(catProbs)) > 0){nms<-names(catProbs)}else{nms<-letters[seq(length(catProbs))]}
+	names(catProbs)<-nms
+	cattif(verbosity>0, "Draw them in order")
+	sampledinorder<-rep(nms, numpercat)
+	cattif(verbosity>0, "Shuffle them")
+	rv<-sample(sampledinorder)
+	if(asFactor) rv<-factor(rv)
+	attr(rv, "probs")<-catProbs
+	return(rv)
+}
+#randomCategoricalVector(20, catProbs=rep(1/3,3), verbosity=1)
+#randomCategoricalVector(20, catProbs=randomProbabilities, verbosity=1, minn=3)
+
+randomRandomNorm<-function(n, minmu=0, maxmu=minmu, minsig2=1, maxsig2=minsig2)
+{
+	maxmu<-max(maxmu, minmu)
+	minsig2<-max(minsig2, 0)
+	maxsig2<-max(maxsig2, minsig2)
+	mu<-runif(1, minmu, maxmu)
+	sig2<-runif(1, minsig2, maxsig2)
+	rv<-rnorm(n, mean=mu, sd=sqrt(sig2))
+	attr(rv, "mu")<-mu
+	attr(rv, "sig2")<-sig2
+	return(rv)
+}
+#randomRandomNorm(20)
+#randomRandomNorm(20, minmu=-3, maxmu=3, minsig2=0, maxsig2=2)
+#randomRandomNorm(20, minmu=-3, maxmu=3)
+
+typicalRandomNorm<-function(n, absmu=10)
+{
+	absmu=abs(absmu)
+	randomRandomNorm(n, minmu=-absmu, maxmu=absmu, minsig2=0, maxsig2=absmu)
+}
+#typicalRandomNorm(20)
+#typicalRandomNorm(20, 0.5)
+#typicalRandomNorm(20, 2)
+
+
+#note: ... is only passed on to the function for the categorical variables, so
+#   if you want extra params for continuous, you'll have to create a new function!
+#You can also simply pass rnorm or similar as rcnt
+generateTypicalIndependentDfr<-function(numCat, numCnt, numObs,
+	catProbs=rep(1/3,3), rcnt=typicalRandomNorm, doShuffle=TRUE, verbosity=0,...)
+{
+	catcols<-replicate(numCat, randomCategoricalVector(numObs, catProbs, verbosity=verbosity-1, ...))
+	colnames(catcols)<-paste("cat", seq(numCat), sep="")
+	cntcols<-replicate(numCnt, rcnt(numObs))
+	colnames(cntcols)<-paste("cnt", seq(numCnt), sep="")
+	rv<-data.frame(catcols, cntcols)
+	if(doShuffle){rv<-rv[,sample(ncol(rv))]}
+	return(rv)
+}
+#generateTypicalIndependentDfr(5,5,20,catProbs=randomProbabilities, verbosity=1, minn=2, maxn=4)
+
+randomNA<-function(dfr, n, atMost=FALSE, tolerance=0.0001, verbosity=0)#maybe later use an "option" for tolerance??
+{
+	stopifnot(n>=0)
+	nr<-nrow(dfr)
+	totalAvailable<-nr*ncol(dfr)
+	if(abs(as.integer(n)-n) > tolerance)
+	{
+		stopifnot(n < 1)		#a fraction is passed, so should be smaller than 1
+		n<-as.integer(n*totalAvailable)
+	}
+	#n is now surely an integer between 0 and totalAvailable.
+	to.set.na<-(sample.int(totalAvailable, n, replace=atMost))-1
+	cattif(verbosity > 0, "length of positions chosen to be set NA:", length(to.set.na))
+	for(pos in to.set.na)
+	{
+		curc<-(pos %/% nr)+1
+		curr<-(pos %% nr)+1
+		cattif(verbosity > 1, "set NA for position:", pos, ", i.e.:(", curr, ",", curc, ")")
+		dfr[curr, curc]<-NA
+	}
+	dfr
+}
+#randomNA(iris, 50, verbosity=2)

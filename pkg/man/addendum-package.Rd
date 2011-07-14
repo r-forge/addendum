@@ -101,14 +101,23 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{calcAUC.Binary}}
 		\item \code{\link{seAUC}}
 	}
+	\item Data generation \enumerate{
+		\item \code{\link{qrmvnorm}}
+		\item \code{\link{qrmvnormsqrt}}
+		\item \code{\link{randomString}}
+		\item \code{\link{randomStrings}}
+		\item \code{\link{randomProbabilities}}
+		\item \code{\link{randomCategoricalVector}}
+		\item \code{\link{randomRandomNorm}}
+		\item \code{\link{typicalRandomNorm}}
+		\item \code{\link{generateTypicalIndependentDfr}}
+	}
 	\item Data manipulation \enumerate{
 		\item \code{\link{combineSimilarDfrList}}
 		\item \code{\link{combineSimilarDfrList.prev}}
 		\item \code{\link{doSimplify}}
 		\item \code{\link{getListItemsAsColumn}}
 		\item \code{\link{invertSymmetric}}
-		\item \code{\link{qrmvnorm}}
-		\item \code{\link{qrmvnormsqrt}}
 		\item \code{\link{randomFillDS}}
 		\item \code{\link{refactor}}
 		\item \code{\link{marginalProbPerCat}}
@@ -117,8 +126,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{removeUnivariateOutliers}}
 		\item \code{\link{repeatDataRow}}
 		\item \code{\link{similarSizeGroups}}
-		\item \code{\link{randomString}}
-		\item \code{\link{randomStrings}}
+		\item \code{\link{randomNA}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
