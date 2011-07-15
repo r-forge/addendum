@@ -127,6 +127,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{repeatDataRow}}
 		\item \code{\link{similarSizeGroups}}
 		\item \code{\link{randomNA}}
+		\item \code{\link{dfr2mat}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
