@@ -63,7 +63,7 @@ x<-rnorm(100)
 y<-runif(100)
 z<-rexp(100)
 u<-seq(100)
-plot4d(x,y,z,u, main="demo", xlab="normal", ylab="uniform", zlab="exponential", ulab="ordinal")
+\dontrun{plot4d(x,y,z,u, main="demo", xlab="normal", ylab="uniform", zlab="exponential", ulab="ordinal")}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

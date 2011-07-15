@@ -1,22 +1,23 @@
-\name{display}
-\alias{display}
+\name{dfr2mat}
+\alias{dfr2mat}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Display a data.frame
+Convert data.frame to numerical matrix
 }
 \description{
-The same as \code{\link{edit}}, but returning invisible.
+As the title says
 }
 \usage{
-display(dfr)
+dfr2mat(dfr)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
-The data.frame to display
-}}
+data.frame to be converted.
+}
+}
 \value{
-invisible data.frame with potential changes during 'edit' incorporated.
+matrix with the same dimensions as the data.frame
 }
 \author{
 Nick Sabbe
@@ -24,13 +25,10 @@ Nick Sabbe
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-\code{\link{edit}}
-}
 \examples{
-\dontrun{display(iris)}
-}
+dfr2mat(iris)
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
+}
 \keyword{ ~data.frame }
-\keyword{ ~edit }
+\keyword{ ~matrix }

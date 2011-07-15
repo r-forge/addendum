@@ -1630,8 +1630,7 @@ refactor<-function(x, labels)
 #Not pretty, but a lot better than rbind!
 combineSimilarDfrList<-function(dfrlst)
 {#http://stackoverflow.com/questions/5980240/performance-of-rbind-data-frame
-	tempRes <- lapply(dfrlst, function(x)
-	                     matrix(unlist(x), ncol=ncol(x)))
+	tempRes <- lapply(dfrlst, dfr2mat)
 	result<-as.data.frame(do.call(rbind, tempRes))
 	a <- dfrlst[[1]]
 	f <- which(sapply(a, class)=="factor")
@@ -2465,4 +2464,12 @@ randomNA<-function(dfr, n, atMost=FALSE, tolerance=0.0001, verbosity=0)#maybe la
 display<-function(dfr)
 {
 	invisible(edit(dfr))
+}
+
+dfr2mat<-function(dfr)
+{
+	orgnames<-colnames(dfr)
+	dfr<-matrix(unlist(dfr), ncol=ncol(dfr)) #convert to matrix!!
+	colnames(dfr)<-orgnames
+	return(dfr)
 }
