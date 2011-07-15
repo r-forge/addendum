@@ -2427,7 +2427,8 @@ typicalRandomNorm<-function(n, absmu=10)
 generateTypicalIndependentDfr<-function(numCat, numCnt, numObs,
 	catProbs=rep(1/3,3), rcnt=typicalRandomNorm, doShuffle=TRUE, verbosity=0,...)
 {
-	catcols<-replicate(numCat, randomCategoricalVector(numObs, catProbs, verbosity=verbosity-1, ...))
+	parmlist<-c(list(numObs=numObs, catProbs=catProbs, verbosity=verbosity-1), list(...))
+	catcols<-replicate(numCat, do.call(randomCategoricalVector, parmlist))
 	colnames(catcols)<-paste("cat", seq(numCat), sep="")
 	cntcols<-replicate(numCnt, rcnt(numObs))
 	colnames(cntcols)<-paste("cnt", seq(numCnt), sep="")
