@@ -2474,3 +2474,18 @@ dfr2mat<-function(dfr)
 	colnames(dfr)<-orgnames
 	return(dfr)
 }
+
+toFactorCorrecting<-function(vr,crval="-9")
+{
+  if((! is.null(crval)) & (! is.na(crval))) vr[vr==crval]<-NA
+  vr<-as.factor(as.character(vr))
+  vr
+}
+
+toNumericCorrecting<-function(vr, crval="-9", replaceComma=TRUE)
+{
+  if((! is.null(crval)) & (! is.na(crval))) vr[vr==crval]<-NA
+  vr<-as.character(vr)
+  if(replaceComma) vr<-sub(",", ".", vr, fixed=TRUE)
+  as.numeric(vr)
+}

@@ -128,6 +128,8 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{similarSizeGroups}}
 		\item \code{\link{randomNA}}
 		\item \code{\link{dfr2mat}}
+		\item \code{\link{toFactorCorrecting}}
+		\item \code{\link{toNumericCorrecting}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
