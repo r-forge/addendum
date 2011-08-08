@@ -10,7 +10,7 @@ Every value equal to \code{crval} is replaced with NA, the rest is turned into f
 }
 \usage{
 toFactorCorrecting(vr,crval="-9")
-toNumericCorrecting(vr,crval="-9")
+toNumericCorrecting(vr,crval="-9",replaceComma=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
