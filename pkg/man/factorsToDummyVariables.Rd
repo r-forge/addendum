@@ -1,5 +1,6 @@
 \name{factorsToDummyVariables}
 \alias{factorsToDummyVariables}
+\alias{factorsToDummyVariables.default}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Quickly create design matrix for simple cases
@@ -9,7 +10,7 @@ Quickly create design matrix for simple cases
 is a lot more swift, but only works for formulas with all main effects.
 }
 \usage{
-factorsToDummyVariables(dfr, betweenColAndLevel = "")
+\method{factorsToDummyVariables}{default}(dfr, betweenColAndLevel = "", \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +19,9 @@ Dataframe for which the design matrix must be made
 }
   \item{betweenColAndLevel}{
 If factors are present, what character should be between the original name and the value name?
+}
+  \item{\dots}{
+Ignored in standard implementations
 }
 }
 \details{

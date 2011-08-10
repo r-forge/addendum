@@ -800,11 +800,12 @@ qrmvnorm<-function (n, mean, sigma)
   retval
 }
 
+factorsToDummyVariables<-function(dfr, betweenColAndLevel = "",...)  UseMethod("factorsToDummyVariables")
 #Typical use: for glmnet. Convert a dataframe to a matrix, where factor
 #   columns are split into dummy variables (first level = reference)
 #betweenColAndLevel: in the name of the dummy columns, what comes between the
 #   original column name and the column level
-factorsToDummyVariables<-function(dfr, betweenColAndLevel="")
+factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="",...)
 {
 	#note this version seems a lot faster than
 	#dfrTmp<-model.frame(dfrPredictors, na.action=na.pass)
@@ -2293,9 +2294,12 @@ randomFillDS<-function(ds)
 	return(fakeData)
 }
 
+.findCatColNums<-function(dfr) UseMethod(".findCatColNums")
+.findCatColNums.data.frame<-function(dfr) {which(sapply(dfr, is.factor))}
+
 marginalProbPerCat<-function(dfr)
 {
-	catCols<-which(sapply(dfr[1,], is.factor))
+	catCols<-.findCatColNums(dfr)
 	lapply(catCols, function(curcol){
 			tbl<-table(dfr[,curcol])
 			return(tbl/sum(tbl))
@@ -2322,10 +2326,11 @@ randomStrings<-function(n, maxLength=100, minLength=1, alphabet=c(letters, LETTE
 	replicate(n, randomString(maxLength=maxLength, minLength=minLength, alphabet=alphabet, separator=separator))
 }
 
+categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+") UseMethod("categoricalUniqueIdentifiers")
 
 #note: if you do not expect there to be NA's in the data, pass na.becomes=NA, this
 #   should be faster
-categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+")
+categoricalUniqueIdentifiers.data.frame<-function(dfr, separator=",", na.becomes="\\d+")
 {
 	forCols<-which(sapply(dfr, is.factor))
 	dfr<-sapply(dfr[,forCols], function(curcol){as.character(as.numeric(curcol))})
