@@ -2294,12 +2294,16 @@ randomFillDS<-function(ds)
 	return(fakeData)
 }
 
-.findCatColNums<-function(dfr) UseMethod(".findCatColNums")
-.findCatColNums.data.frame<-function(dfr) {which(sapply(dfr, is.factor))}
+findCatColNums<-function(dfr) UseMethod("findCatColNums")
+findCatColNums.data.frame<-function(dfr) {which(sapply(dfr, is.factor))}
+
+colsAsNumericMatrix<-function(dfr) UseMethod("colsAsNumericMatrix")
+colsAsNumericMatrix.default<-function(dfr) {as.numeric(dfr)}
+colsAsNumericMatrix.data.frame<-function(dfr) {vapply(dfr, function(curcol){as.numeric(curcol)}, numeric(nrow(dfr)))}
 
 marginalProbPerCat<-function(dfr)
 {
-	catCols<-.findCatColNums(dfr)
+	catCols<-findCatColNums(dfr)
 	lapply(catCols, function(curcol){
 			tbl<-table(dfr[,curcol])
 			return(tbl/sum(tbl))
@@ -2326,14 +2330,12 @@ randomStrings<-function(n, maxLength=100, minLength=1, alphabet=c(letters, LETTE
 	replicate(n, randomString(maxLength=maxLength, minLength=minLength, alphabet=alphabet, separator=separator))
 }
 
-categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+") UseMethod("categoricalUniqueIdentifiers")
-
 #note: if you do not expect there to be NA's in the data, pass na.becomes=NA, this
 #   should be faster
-categoricalUniqueIdentifiers.data.frame<-function(dfr, separator=",", na.becomes="\\d+")
+categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+")
 {
-	forCols<-which(sapply(dfr, is.factor))
-	dfr<-sapply(dfr[,forCols], function(curcol){as.character(as.numeric(curcol))})
+	forCols<-findCatColNums(dfr)
+	dfr<-colsAsNumericMatrix(dfr[,forCols])
 	if(! is.na(na.becomes)) dfr[is.na(dfr)]<-na.becomes #this works!!
 	apply(dfr, 1, paste, collapse=separator)
 }

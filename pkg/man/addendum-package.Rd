@@ -130,6 +130,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{dfr2mat}}
 		\item \code{\link{toFactorCorrecting}}
 		\item \code{\link{toNumericCorrecting}}
+		\item \code{\link{colsAsNumericMatrix}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
@@ -142,6 +143,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{safeLowess}}
 		\item \code{\link{uniqueCharID}}
 		\item \code{\link{categoricalUniqueIdentifiers}}
+		\item \code{\link{findCatColNums}}
 	}
 	\item Internal \enumerate{
 		\item \code{\link{demoCodeWorkSpace}}
