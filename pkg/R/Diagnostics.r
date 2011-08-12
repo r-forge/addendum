@@ -18,10 +18,11 @@ demoMemUsage1<-function()
 
 #list memory sizes of all non-function objects present in memory
 	#threshold<-100
-showMemoryUsage<-function(threshold, depth=1)
+showMemoryUsage<-function(threshold, depth=1, forEnvironment=globalenv())
 {
-	invisible(sapply(objects(globalenv()), function(curobname){
-			curob<-get(curobname)
+	if(is.null(forEnvironment)) forEnvironment<-parent.frame()
+	invisible(sapply(objects(forEnvironment), function(curobname){
+			curob<-get(curobname, envir=forEnvironment)
 			if(!is.function(curob))
 			{
 				msize<-round(object.size(curob)/1024, 1L)

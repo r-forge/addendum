@@ -2304,8 +2304,8 @@ colsAsNumericMatrix.data.frame<-function(dfr) {vapply(dfr, function(curcol){as.n
 marginalProbPerCat<-function(dfr)
 {
 	catCols<-findCatColNums(dfr)
-	lapply(catCols, function(curcol){
-			tbl<-table(dfr[,curcol])
+	lapply(dfr[,catCols], function(curcol){
+			tbl<-table(curcol)
 			return(tbl/sum(tbl))
 		})
 }
