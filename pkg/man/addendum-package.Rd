@@ -131,6 +131,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{toFactorCorrecting}}
 		\item \code{\link{toNumericCorrecting}}
 		\item \code{\link{colsAsNumericMatrix}}
+		\item \code{\link{quickFactor}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}

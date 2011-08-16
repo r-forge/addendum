@@ -2496,3 +2496,13 @@ toNumericCorrecting<-function(vr, crval="-9", replaceComma=TRUE)
   if(replaceComma) vr<-sub(",", ".", vr, fixed=TRUE)
   as.numeric(vr)
 }
+
+quickFactor<-function(x, labels)
+{
+	#should only be used if you know for certain that:
+	#x holds integers between 1 and length(labels)
+	if(! is.integer(x)) x<-as.integer(x)
+	levels(x)<-labels
+	class(x)<-"factor"
+	x
+}
