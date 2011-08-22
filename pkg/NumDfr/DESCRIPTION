@@ -1,0 +1,11 @@
+Package: NumDfr
+Type: Package
+Title: Provide a performant alternative to data.frame wrt factors
+Version: 1.0
+Date: 2011-08-22
+Author: Nick Sabbe
+Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
+Description: This package is created with GLoMo as its main goal, but contains interesting options. For some applications, especially involving mostly numeric columns and some categorical ones, this will be a speedy alternative.
+License: GPL (>= 2)
+LazyLoad: yes
+Depends: addendum
