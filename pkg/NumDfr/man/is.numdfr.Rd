@@ -2,10 +2,10 @@
 \alias{is.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Check whether object is \code{numdfr}
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Finds out whether a given object is of class \code{\link{numdfr}}
 }
 \usage{
 is.numdfr(x)
@@ -13,47 +13,27 @@ is.numdfr(x)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+object to investigate
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+\code{TRUE} or \code{FALSE}
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{is}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x) 
-{
-    numdfr.debugtxt("is.numdfr")
-    inherits(x, "numdfr")
-  }
+is.numdfr(iris)
+iris.nd<-numdfr(iris)
+is.numdfr(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ numdfr }

@@ -2,78 +2,51 @@
 \alias{as.data.frame.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Convert \code{\link{numdfr}} (back) to \code{data.frame}
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Functions to coerce (\code{\link{numdfr}}) object to \code{data.frame} if possible
 }
 \usage{
-as.data.frame.numdfr(x, row.names = NULL, optional = FALSE, ...)
+\method{as.data.frame}{numdfr}(x, row.names = NULL, optional = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+\code{\link{numdfr}} object to coerce
 }
   \item{row.names}{
-%%     ~~Describe \code{row.names} here~~
+ignored for now, but see \code{\link{as.data.frame}}
 }
   \item{optional}{
-%%     ~~Describe \code{optional} here~~
+ignored for now, but see \code{\link{as.data.frame}}
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+ignored for now, but see \code{\link{as.data.frame}}
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+In most cases, this is the inverse of \code{\link{numdfr}}.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+\code{\link{as.data.frame}} with the same dimensions as the original \code{\link{numdfr}},
+and with factors in the 'standard way'.
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{as.data.frame}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, row.names = NULL, optional = FALSE, ...) 
-{
-    value <- rv <- lapply(seq(ncol(x$mat)), function(cc) {
-        lev <- x$lvls[[cc]]
-        if (length(lev) > 0) {
-            quickFactor(x$mat[, cc], labels = lev)
-        }
-        else {
-            x$mat[, cc]
-        }
-    })
-    names(rv) <- colnames(x$mat)
-    attr(value, "row.names") <- rownames(x$mat)
-    class(value) <- "data.frame"
-    value
-  }
+iris.nd<-numdfr(iris)
+iris.cpy<-as.data.frame(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ numdfr }
+\keyword{ data.frame }
+\keyword{ coerce }% __ONLY ONE__ keyword per line

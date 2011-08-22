@@ -2,58 +2,37 @@
 \alias{as.double.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Double-Precision Vectors
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Coerce to double-precision vector from \code{\link{numdfr}}.
 }
 \usage{
-as.double.numdfr(x)
+\method{as.double}{numdfr}(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+\code{\link{numdfr}} object to coerce
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+vector of type "double"
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{as.double}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x) 
-{
-    numdfr.debugtxt("as.double.numdfr")
-    x$mat
-  }
+iris.nd<-numdfr(iris)
+as.double(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ double }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

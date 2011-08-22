@@ -2,58 +2,37 @@
 \alias{findCatColNums.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Which columns are categorical (factors)
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Which columns are categorical (factors), implemented for \code{\link{numdfr}}.
 }
 \usage{
-findCatColNums.numdfr(dfr)
+\method{findCatColNums}{numdfr}(dfr)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
-%%     ~~Describe \code{dfr} here~~
+\code{\link{numdfr}} object to find the indices of the cetagorical columns for.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+vector holding the column numbers that are considered categorical
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{addendum}}, \code{\link{findCatColNums}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dfr) 
-{
-    numdfr.debugtxt("findCatColNums.numdfr")
-    which(sapply(dfr$lvls, length) > 0)
-  }
+iris.nd<-numdfr(iris)
+findCatColNums(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ factor }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

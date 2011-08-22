@@ -2,57 +2,41 @@
 \alias{is.na.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+‘Not Available’ / Missing Values
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+finds out which of the items are \code{NA}
 }
 \usage{
-is.na.numdfr(x)
+\method{is.na}{numdfr}(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+\code{\link{numdfr}} object to investigate.
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+Array of the same dimensions as \code{x}, holding \code{boolean} values.
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{is.na}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x) 
-{
-    is.na(x$mat)
-  }
+library(addendum)
+iris.nd<-numdfr(randomNA(iris, n=20))
+is.na(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ NA }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

@@ -2,65 +2,56 @@
 \alias{as.list.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Coerce to list
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Function to coerce to R lists.
 }
 \usage{
-as.list.numdfr(x, ...)
+\method{as.list}{numdfr}(x, returnFactors=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+\code{\link{numdfr}} object to coerce
+}
+  \item{returnFactors}{
+if TRUE (the default), return columns that represent factors as factors. If not, 
+they are returned as numerical vectors.
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+ignored for now, but see \code{\link{as.list}}
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Often used internally by e.g. \code{\link{lapply}}. This function is not expected
+to perform swiftly, so use with caution. Mainly provided so code can be shared (at
+the cost of performance) with \code{\link{data.frame}}.
+
+See \code{\link{as.list.data.frame}} for more explanation on how this function
+is supposed to work. It is not extensively tested, but appears to work in the
+\code{\link{lapply}} case.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+list consisting of the columns (either numerical or as factors), similar (equal?)
+to this method for \code{\link{data.frame}}.
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{as.list}}, \code{\link{as.list.data.frame}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, ...) 
-{
-    numdfr.debugtxt("as.list.numdfr")
-    rv <- lapply(seq(ncol(x$mat)), function(cc) {
-        x$mat[, cc]
-    })
-    names(rv) <- colnames(x$mat)
-    return(rv)
-  }
+iris.nd<-numdfr(iris)
+lapply(iris, is.factor) 
+lapply(iris.nd, is.factor) #should give the same result
+lapply(as.list(iris.nd, returnFactors=FALSE), is.factor) #should give different result (all FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ list }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

@@ -3,12 +3,12 @@
 \alias{NumDfr}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Provide a performant alternative to data.frame wrt factors
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+This package is created with GLoMo as its main goal, but contains interesting
+options. For some applications, especially involving mostly numeric columns and
+some categorical ones, this will be a speedy alternative.
 }
 \details{
 \tabular{ll}{
@@ -16,26 +16,38 @@ Package: \tab NumDfr\cr
 Type: \tab Package\cr
 Version: \tab 1.0\cr
 Date: \tab 2011-08-22\cr
-License: \tab What license is it under?\cr
+License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+Add list of functions here later on (similar to addendum)
+#\enumerate{
+#	\item \code{\link{glmnet}} extensions \enumerate{
+#		\item \code{\link{addCVPlot}}
+#		\item \code{\link{addLamIndexAxis}}
+#		\item \code{\link{factorsToDummyVariables}}
+#		\item \code{\link{originalColumnNamesFromDummyVars}}
+#		\item \code{\link{makeFactorsAndSetFrontal}}
+#		\item \code{\link{plot2.cv.glmnet}}
+#		\item \code{\link{showNonZeroCoef}}
+#	}
+#	\item plotting \enumerate{
+#		\item \code{\link{getColorRange}}
+#		\item \code{\link{histAndDensity}}
+#		\item \code{\link{plot4d}}
+#		\item \code{\link{plotAllScatters}}
+#		\item \code{\link{plotAndSmooth}}
+#		\item \code{\link{qqWithPred}}
+#		\item \code{\link{smartpairs}}
+#		\item \code{\link{showNumericalHeatMap}}
+#	}
+#}
 }
 \author{
-Who wrote it
+Nick Sabbe
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+Maintainer: <nick.sabbe@ugent.be>
 }
-\references{
-~~ Literature or other references for background information ~~
-}
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }
-\seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
 \examples{
-~~ simple examples of the most important functions ~~
+iris.nd<-numdfr(iris)
 }
