@@ -10,19 +10,16 @@ Retrieve or set the dimnames of a \code{\link{numdfr}} object.
 }
 \usage{
 \method{dimnames}{numdfr}(x)
-\method{dimnames<-}{numdfr}(x, value)
+\method{dimnames}{numdfr}(x) <- value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 \code{\link{numdfr}} object to get/set te dimnames of.
 }
-  \item{value{
+  \item{value}{
 new value for the dimnames
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 list of two (possibly named) items, the first one holding the row names (if any),

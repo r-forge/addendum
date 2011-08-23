@@ -20,27 +20,29 @@ License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
 Add list of functions here later on (similar to addendum)
-#\enumerate{
-#	\item \code{\link{glmnet}} extensions \enumerate{
-#		\item \code{\link{addCVPlot}}
-#		\item \code{\link{addLamIndexAxis}}
-#		\item \code{\link{factorsToDummyVariables}}
-#		\item \code{\link{originalColumnNamesFromDummyVars}}
-#		\item \code{\link{makeFactorsAndSetFrontal}}
-#		\item \code{\link{plot2.cv.glmnet}}
-#		\item \code{\link{showNonZeroCoef}}
-#	}
-#	\item plotting \enumerate{
-#		\item \code{\link{getColorRange}}
-#		\item \code{\link{histAndDensity}}
-#		\item \code{\link{plot4d}}
-#		\item \code{\link{plotAllScatters}}
-#		\item \code{\link{plotAndSmooth}}
-#		\item \code{\link{qqWithPred}}
-#		\item \code{\link{smartpairs}}
-#		\item \code{\link{showNumericalHeatMap}}
-#	}
-#}
+\enumerate{
+	\item Debugging \enumerate{
+		\item \code{\link{setDebugmode}}
+		\item \code{\link{str.numdfr}}
+	}
+	\item Coercion \enumerate{
+		\item \code{\link{numdfr}}
+		\item \code{\link{as.data.frame.numdfr}}
+		\item \code{\link{as.double.numdfr}}
+		\item \code{\link{as.list.numdfr}}
+		\item \code{\link{is.na.numdfr}}
+	}
+	\item Properties/utility \enumerate{
+		\item \code{\link{dim.numdfr}}
+		\item \code{\link{dimnames.numdfr}}
+		\item \code{\link{factorsToDummyVariables.numdfr}}
+		\item \code{\link{findCatColNums.numdfr}}
+		\item \code{\link{is.numdfr}}
+		\item \code{\link{length.numdfr}}
+		\item \code{\link{names.numdfr}}
+		\item \code{\link{[.numdfr}}
+	}
+}
 }
 \author{
 Nick Sabbe

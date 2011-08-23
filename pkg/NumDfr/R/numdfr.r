@@ -77,7 +77,7 @@ is.numdfr<-function(x){
 	inherits(x, "numdfr")
 }
 
-as.double.numdfr<-function(x){
+as.double.numdfr<-function(x,...){
 	.debugtxt("as.double.numdfr")
 	x$mat
 }
@@ -131,20 +131,30 @@ findCatColNums.numdfr<-function(dfr){
 	which(sapply(dfr$lvls, length) > 0)
 }
 
-if(FALSE)
-{
-	#do either to turn on/off debug text
-	.debugmode<-TRUE
-	.debugmode<-FALSE
-}
+#if(FALSE)
+#{
+#	#do either to turn on/off debug text
+#	.numdfr.debugmode<-TRUE
+#	.numdfr.debugmode<-FALSE
+#}
 
-.debugmode<-FALSE
+.numdfr_debugmode <- function() {
+  .debugging <- FALSE
+
+  list(
+    get = function() .debugging,
+    set = function(value) .debugging <<- value
+  )
+}
+.actual_debugmode <- .numdfr_debugmode()
+.isNumdfrDebugging<-function(){.actual_debugmode$get()}
+
 setDebugmode<-function(doDebug=TRUE){
-	oldDebug<-.debugmode
-	.debugmode<<-doDebug
+	oldDebug<-.actual_debugmode$get()
+	.actual_debugmode$set(doDebug)
 	invisible(oldDebug)
 }
-.debugtxt<-function(...){if(.debugmode) cat("**D:", ..., "\n")}
+.debugtxt<-function(...){if(.isNumdfrDebugging()) cat("**D:", ..., "\n")}
 
 
 factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "",...)

@@ -10,7 +10,7 @@ Functions to get or set the names of a \code{\link{numdfr}} object.
 }
 \usage{
 \method{names}{numdfr}(x)
-\method{names<-}{numdfr}(x, value)
+\method{names}{numdfr}(x) <- value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

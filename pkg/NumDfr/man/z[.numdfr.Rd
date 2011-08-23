@@ -6,16 +6,16 @@
 Extract or Replace Parts of an Object
 }
 \description{
-Subset \code{\link{numdf}} object.
+Subset \code{\link{numdfr}} object.
 }
 \usage{
-[.numdfr(x, i, j, returnAsMatrix = drop, drop = FALSE)
-[<-.numdfr(x, i, j, value)
+\method{[}{numdfr}(x, i, j, returnAsMatrix = drop, drop = FALSE)
+\method{[}{numdfr}(x, i, j) <- value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-\code{\link{numdf}} object
+\code{\link{numdfr}} object
 }
   \item{i, j}{
 elements to extract or replace. Numeric or character or, empty. Numeric values are coerced to integer as if by as.integer. For replacement, a logical matrix is allowed.
@@ -50,7 +50,7 @@ iris.nd<-numdfr(iris)
 iris.nd[1,1]
 iris.nd[1,1]<-8
 iris.nd[1,1]
-iris.nd[,"Sepal.Length"]<-iris.nd[,"Sepal.Length"]*2
+iris.nd[,"Sepal.Length"]<-iris.nd[,"Sepal.Length", drop=TRUE]*2
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

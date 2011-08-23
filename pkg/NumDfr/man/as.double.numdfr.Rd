@@ -8,12 +8,15 @@ Double-Precision Vectors
 Coerce to double-precision vector from \code{\link{numdfr}}.
 }
 \usage{
-\method{as.double}{numdfr}(x)
+\method{as.double}{numdfr}(x,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 \code{\link{numdfr}} object to coerce
+}
+  \item{\dots}{
+ignored for now
 }
 }
 \value{

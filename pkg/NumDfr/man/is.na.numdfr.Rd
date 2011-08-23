@@ -2,7 +2,7 @@
 \alias{is.na.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-‘Not Available’ / Missing Values
+Not Available or Missing Values
 }
 \description{
 finds out which of the items are \code{NA}
@@ -15,9 +15,6 @@ finds out which of the items are \code{NA}
   \item{x}{
 \code{\link{numdfr}} object to investigate.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 Array of the same dimensions as \code{x}, holding \code{boolean} values.
