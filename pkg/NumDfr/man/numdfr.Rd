@@ -2,10 +2,10 @@
 \alias{numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Constructor for \code{numdfr} class
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Turna \code{\link{data.frame}} into a \code{numdfr}
 }
 \usage{
 numdfr(dfr)
@@ -13,56 +13,29 @@ numdfr(dfr)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
-%%     ~~Describe \code{dfr} here~~
+\code{\link{data.frame}} to coerce
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Preserves as much of the information as possible from the \code{\link{data.frame}}
+into the \code{numdfr}. Order of factors and some other details may be lost in the process.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+returns an object of class \code{numdfr}. Althoug you are not supposed to use this
+directly, this is a list containing two items:
+  \item{mat }{Numerical matrix representation of the data}
+  \item{lvls }{list	with for each column a character vector of the levels (length zero if the column wasn't a factor)}
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dfr) 
-{
-    lvls <- lapply(dfr, function(cc) {
-        if (is.factor(cc)) 
-            return(levels(cc))
-        else return(character(0))
-    })
-    mat <- matrix(unlist(dfr), ncol = ncol(dfr))
-    colnames(mat) <- colnames(dfr)
-    rownames(mat) <- rownames(dfr)
-    retval <- list(mat = mat, lvls = lvls)
-    class(retval) <- "numdfr"
-    return(retval)
-  }
+iris.nd<-numdfr(iris)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ data.frame }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

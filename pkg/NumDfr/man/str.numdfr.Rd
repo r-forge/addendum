@@ -2,68 +2,40 @@
 \alias{str.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Display contents of a \code{\link{numdf}} object
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Display contents of a \code{\link{numdf}} object
 }
 \usage{
-str.numdfr(object, ...)
+\method{str}{numdfr}(object, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{object}{
-%%     ~~Describe \code{object} here~~
+\code{\link{numdf}} object
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+ignored for now.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+returns nothing (and invisibly so)
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{str}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (object, ...) 
-{
-    cat("numdfr object with dimensions:", dim(object), "\n")
-    cat("->Rownames: ", rownames(object), "\n")
-    cat("->Colnames: ", colnames(object), "\n")
-    cat("\nThe following variables are factor-like:\n")
-    for (i in findCatColNums(object)) {
-        cat("\t", names(object$lvls)[i], ":", object$lvls[[i]], 
-            "\n")
-    }
-    invisible()
-  }
+iris.nd<-numdfr(iris)
+str(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ structure }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

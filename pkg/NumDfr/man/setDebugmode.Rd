@@ -2,10 +2,10 @@
 \alias{setDebugmode}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Set tracing of all calls on/off
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+If set to TRUE, every call to a \code{\link{numdfr}} specific implementation is traced.
 }
 \usage{
 setDebugmode(doDebug = TRUE)
@@ -13,48 +13,27 @@ setDebugmode(doDebug = TRUE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{doDebug}{
-%%     ~~Describe \code{doDebug} here~~
+if \code{TRUE}, set on, else off.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+returns the previous value (a boolean)
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (doDebug = TRUE) 
-{
-    oldDebug <- .debugmode
-    .debugmode <<- doDebug
-    invisible(oldDebug)
-  }
+iris.nd<-numdfr(iris)
+setDebugmode(FALSE)
+length(iris.nd)
+setDebugmode(TRUE)
+length(iris.nd)
+setDebugmode(FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ debug }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line

@@ -1,84 +1,58 @@
 \name{[.numdfr}
 \alias{[.numdfr}
+\alias{[<-.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Extract or Replace Parts of an Object
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Subset \code{\link{numdf}} object.
 }
 \usage{
 [.numdfr(x, i, j, returnAsMatrix = drop, drop = FALSE)
+[<-.numdfr(x, i, j, value)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
-%%     ~~Describe \code{x} here~~
+\code{\link{numdf}} object
 }
-  \item{i}{
-%%     ~~Describe \code{i} here~~
-}
-  \item{j}{
-%%     ~~Describe \code{j} here~~
+  \item{i, j}{
+elements to extract or replace. Numeric or character or, empty. Numeric values are coerced to integer as if by as.integer. For replacement, a logical matrix is allowed.
 }
   \item{returnAsMatrix}{
-%%     ~~Describe \code{returnAsMatrix} here~~
+if \code{TRUE}, the result is not a \code{\link{numdfr}} object, but a regular matrix. Default is \code{FALSE}, unless \code{drop} is \code{TRUE}.
 }
   \item{drop}{
-%%     ~~Describe \code{drop} here~~
+if \code{TRUE}, the dimsensions of size 1 are removed from the return value.
+}
+  \item{value}{
+new values(s)
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Mostly designed to work similarly to \code{\link{[.data.frame}}, but needed to provide an extra parameter \code{returnAsMatrix}.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+Depending on the logical parameters, a \code{\link{numdfr}}, a matrix (2-dimensional) or a vector.
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{NumDfr}}, \code{\link{[}}, \code{\link{[.data.frame}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, i, j, returnAsMatrix = drop, drop = FALSE) 
-{
-    numdfr.debugtxt("[.numdfr")
-    numdfr.debugtxt(ifelse(missing(i), "no i", paste("i:", i)))
-    numdfr.debugtxt(ifelse(missing(j), "no j", paste("j:", j)))
-    numdfr.debugtxt("returnAsMatrix:", returnAsMatrix)
-    numdfr.debugtxt("drop:", drop)
-    if (returnAsMatrix) {
-        return(x$mat[i, j, drop = drop])
-    }
-    newlvls <- if (missing(j)) 
-        x$lvls
-    else x$lvls[j]
-    newmat <- x$mat[i, j, drop = FALSE]
-    retval <- list(mat = newmat, lvls = newlvls)
-    class(retval) <- "numdfr"
-    return(retval)
-  }
+iris.nd<-numdfr(iris)
+iris.nd[1,1]
+iris.nd[1,1]<-8
+iris.nd[1,1]
+iris.nd[,"Sepal.Length"]<-iris.nd[,"Sepal.Length"]*2
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ subset }
+\keyword{ numdfr }% __ONLY ONE__ keyword per line
