@@ -32,7 +32,8 @@ numdfr<-function(dfr)
 
 "[<-.numdfr"<-function (x, i, j, value)
 {
-	.debugtxt("[<-.numdfr")
+	#.debugtxt("[<-.numdfr")
+	if(is.numdfr(value)) value<-value$mat
 	x$mat[i,j]<-value
 	return(x)
 }
@@ -121,7 +122,14 @@ as.list.numdfr<-function(x, returnFactors=TRUE,...){
 as.data.frame.numdfr<-function(x, row.names = NULL, optional = FALSE, ...)
 {
 	value<-as.list(x, returnFactors=TRUE,...)
-	attr(value, "row.names") <- rownames(x$mat)
+	if(is.null(row.names))
+	{
+		attr(value, "row.names") <- postfixToMakeUnique(rownames(x$mat))
+	}
+	else
+	{
+		attr(value, "row.names") <- row.names
+	}
 	class(value) <- "data.frame"
 	value
 }
@@ -131,6 +139,49 @@ findCatColNums.numdfr<-function(dfr){
 	which(sapply(dfr$lvls, length) > 0)
 }
 
+#note: _assumes_ all parameters are numdfr of the same structure!!
+#Will probably not fail if this is not the case, but results are unpredictable
+rbind.numdfr<-function(..., ensure.unique.rownames=FALSE, separator=".", postfixcol=NULL, allowemptypostfix=TRUE, deparse.level = 1)
+{
+	allparams<-list(...)
+	allmats<-lapply(allparams, "[[", "mat")
+	newmat<-do.call(rbind, allmats)
+	if((ensure.unique.rownames) & (!is.null(rownames(newmat))))
+	{
+		rownames(newmat)<-postfixToMakeUnique(rownames(newmat), separator=separator,
+			postfixcol=postfixcol, allowemptypostfix=allowemptypostfix)
+	}
+	retval<-list(mat=newmat, lvls=(allparams[[1]])$lvls)
+	class(retval)<-"numdfr"
+	return(retval)
+}
+
+print.numdfr<-function(x, ..., digits = NULL, quote = FALSE, right = TRUE,
+    row.names = TRUE)
+{
+	#note: code mostly ripped from print.data.frame :-)
+	#mostly with aim of easily reusing format.data.frame
+    n <- length(row.names(x))
+    if (length(x) == 0L) {
+        cat(gettextf("numdfr with 0 columns and %d rows\n",
+            n))
+    }
+    else if (n == 0L) {
+        print.default(names(x), quote = FALSE)
+        cat(gettext("<0 rows> (or 0-length row.names)\n"))
+    }
+    else {
+				x2<-as.data.frame.numdfr(x)
+        m <- as.matrix(format.data.frame(x2, digits = digits,
+            na.encode = FALSE))
+        if (!isTRUE(row.names))
+            dimnames(m)[[1L]] <- if (identical(row.names, FALSE))
+                rep.int("", n)
+            else row.names
+        print(m, ..., quote = quote, right = right)
+    }
+    invisible(x)
+}
 #if(FALSE)
 #{
 #	#do either to turn on/off debug text
