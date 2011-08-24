@@ -132,6 +132,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{toNumericCorrecting}}
 		\item \code{\link{colsAsNumericMatrix}}
 		\item \code{\link{quickFactor}}
+		\item \code{\link{postfixToMakeUnique}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}

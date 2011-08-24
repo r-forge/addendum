@@ -2506,3 +2506,50 @@ quickFactor<-function(x, labels)
 	class(x)<-"factor"
 	x
 }
+
+#may not be the most efficient implementation (certainly not in memory)
+#Advised to provide your own postfixcol: this should work better if you
+postfixToMakeUnique<-function(cvect, separator=".", postfixcol=NULL, allowemptypostfix=TRUE)
+{
+	uvect<-unique(cvect)
+	if(length(uvect)==length(cvect)) return(cvect) #was already unique so leave it unchanged
+	numperu<-sapply(uvect, function(curu){sum(curu==cvect)}) #may be better to use table here?
+	maxrep<-max(numperu)
+	if(is.null(postfixcol)) #provide enough numbers then, and
+	{
+		if(allowemptypostfix)
+		{
+			postfixcol<-c("", as.character(seq(maxrep-1)))
+		}
+		else
+		{
+			postfixcol<-as.character(seq(maxrep))
+		}
+	}
+	else
+	{
+		postfixcol<-unique(postfixcol) #just in case!!
+		if(!allowemptypostfix)
+		{
+			postfixcol<-setdiff(postfixcol, "")
+		}
+		while(length(postfixcol) < maxrep)
+		{
+			#add some unique items
+			newuniques<-setdiff(as.character(seq(maxrep)), postfixcol)
+			postfixcol<-c(postfixcol, newuniques[seq(maxrep-length(postfixcol))])
+		}
+	}
+	postfixcol<-paste(separator, postfixcol, sep="")
+	if(allowemptypostfix)
+	{
+		postfixcol[postfixcol==separator]<-""
+	}
+	for(curu in uvect)
+	{
+		relv<-which(curu==cvect)
+		cvect[relv]<-paste(cvect[relv], postfixcol[seq_along(relv)], sep="")
+	}
+	return(cvect)
+}
+
