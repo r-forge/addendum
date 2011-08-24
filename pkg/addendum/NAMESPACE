@@ -1,2 +1,2 @@
 exportPattern("^[^\\.]")
-import(glmnet, snowfall, rgl, Matrix, ipred)
+import(glmnet, rgl, Matrix)

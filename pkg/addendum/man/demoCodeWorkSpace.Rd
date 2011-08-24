@@ -1,6 +1,5 @@
 \name{demoCodeWorkSpace}
 \alias{demoCodeWorkSpace}
-\alias{demoMemUsage1}
 \alias{demoMemUsage2}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{

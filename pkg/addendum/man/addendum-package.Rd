@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2011-07-13\cr
+Version: \tab 1.3\cr
+Date: \tab 2011-08-24\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -43,19 +43,6 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{modelText}}
 		\item \code{\link{asString}}
 		\item \code{\link{formulaCols}}
-	}
-	\item Generalized binary classification/regression \enumerate{
-		\item \code{\link{displayPreds}}
-		\item \code{\link{doFormulaContCV}}
-		\item \code{\link{crossPredictContinuous}}
-		\item \code{\link{fitAndPredictContinuous.General}}
-		\item \code{\link{createCVResult}}
-		\item \code{\link{evaluatePredictions.lms}}
-		\item \code{\link{getFormulaCVDescription}}
-		\item \code{\link{print.CVRes}}
-		\item \code{\link{doFormulaCV}}
-		\item \code{\link{crossPredictBinary}}
-		\item \code{\link{fitAndPredictBinary.General}}
 	}
 	\item Multiple testing \enumerate{
 		\item \code{\link{checkSig}}
@@ -149,9 +136,7 @@ LazyLoad: \tab yes\cr
 	}
 	\item Internal \enumerate{
 		\item \code{\link{demoCodeWorkSpace}}
-		\item \code{\link{demoMemUsage1}}
 		\item \code{\link{demoMemUsage2}}
-		\item \code{\link{doSf}}
 	}
 }
 }
