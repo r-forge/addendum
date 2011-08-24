@@ -1,0 +1,11 @@
+Package: genpred
+Type: Package
+Title: Generalized prediction with classification or regression
+Version: 1.0
+Date: 2011-08-24
+Author: Nick Sabbe
+Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
+Description: Enables to run a lot of different classification/regression mechanisms and compare the results.
+License: GPL (>= 2)
+LazyLoad: yes
+Depends: gbm, ipred, mgcv, randomForest, addendum
