@@ -1,0 +1,11 @@
+Package: nspack
+Type: Package
+Title: Utility functions only useful on computers accessible to Nick Sabbe
+Version: 1.0
+Date: 2011-08-24
+Author: Nick Sabbe
+Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
+Description: Utility functions only useful on computers accessible to Nick Sabbe
+License: GPL (>= 2)
+LazyLoad: yes
+Depends: snowfall, addendum
