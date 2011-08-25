@@ -32,8 +32,29 @@ numdfr<-function(dfr)
 
 "[<-.numdfr"<-function (x, i, j, value)
 {
-	#.debugtxt("[<-.numdfr")
+	.debugtxt("[<-.numdfr")
 	if(is.numdfr(value)) value<-value$mat
+	if(any(is.character(value)))
+	{
+		#probably means the user is assigning like a factor
+		#For now, we'll make some assumptions on how this assignment occurs
+		#find out which columns that are being assigned are categorical:
+		if(missing(i)) tmpi<-seq(nrow(x)) else tmpi<-i
+		if(missing(j)) tmpj<-seq(ncol(x)) else tmpj<-j
+		tmplvls<-x$lvls[tmpj]
+		if(is.array(value)) tmpvalue<-value else tmpvalue<-array(value, dim=c(length(tmpi), length(tmpj)))
+		for(curcoli in which(sapply(tmplvls, length)>0))
+		{
+			newvals<-match(tmpvalue[,curcoli], tmplvls[[curcoli]], nomatch=-1)
+			unmatched<-which(newvals==-1)
+			if(length(unmatched) > 0)
+			{
+				stop(paste("Tried to assign invalid 'factor' values: ", tmpvalue[unmatched,curcoli], "to column", tmpj[curcoli]))
+			}
+			tmpvalue[,curcoli]<-newvals
+		}
+		value<-as.numeric(tmpvalue) #if this gives a warning, there were probably some errors...
+	}
 	x$mat[i,j]<-value
 	return(x)
 }
