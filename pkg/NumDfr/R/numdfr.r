@@ -104,7 +104,10 @@ as.double.numdfr<-function(x,...){
 	x$mat
 }
 
-is.na.numdfr<-function(x){is.na(x$mat)}
+is.na.numdfr<-function(x){
+	.debugtxt("is.na.numdfr")
+	is.na(x$mat)
+}
 
 str.numdfr<-function(object,...){
 	cat("numdfr object with dimensions:", dim(object), "\n")
@@ -142,6 +145,7 @@ as.list.numdfr<-function(x, returnFactors=TRUE,...){
 
 as.data.frame.numdfr<-function(x, row.names = NULL, optional = FALSE, ...)
 {
+	.debugtxt("as.data.frame.numdfr")
 	value<-as.list(x, returnFactors=TRUE,...)
 	if(is.null(row.names))
 	{
@@ -164,6 +168,7 @@ findCatColNums.numdfr<-function(dfr){
 #Will probably not fail if this is not the case, but results are unpredictable
 rbind.numdfr<-function(..., ensure.unique.rownames=FALSE, separator=".", postfixcol=NULL, allowemptypostfix=TRUE, deparse.level = 1)
 {
+	.debugtxt("rbind.numdfr")
 	allparams<-list(...)
 	allmats<-lapply(allparams, "[[", "mat")
 	newmat<-do.call(rbind, allmats)
@@ -203,6 +208,45 @@ print.numdfr<-function(x, ..., digits = NULL, quote = FALSE, right = TRUE,
     }
     invisible(x)
 }
+
+display.numdfr<-function(dfr)
+{
+	.debugtxt("display.numdfr")
+	display(as.data.frame(dfr))
+}
+
+as.matrix.numdfr<-function(x, ...)
+{
+	return(x$mat)
+}
+
+allLevels<-function(x, onlyNonEmpty=FALSE) UseMethod("allLevels")
+allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
+	.debugtxt("allLevels.numdfr")
+	if(! onlyNonEmpty)
+	{
+		return(x$lvls)
+	}
+	else
+	{
+		return(lapply(x$lvls, function(curlvls){if(length(curlvls) > 0) curlvls else NULL}))
+	}
+}
+allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
+	if(onlyNonEmpty)
+	{
+		return(lapply(x, levels))
+	}
+	else
+	{
+		return(lapply(x, function(curcol){
+				tmp<-levels(curcol)
+				if(is.null(tmp)) tmp<-character()
+				return(tmp)
+			}))
+	}
+}
+
 #if(FALSE)
 #{
 #	#do either to turn on/off debug text
