@@ -2058,7 +2058,9 @@ randomNA<-function(dfr, n, atMost=FALSE, tolerance=0.0001, verbosity=0)#maybe la
 }
 #randomNA(iris, 50, verbosity=2)
 
-display<-function(dfr)
+display<-function(dfr) UseMethod("display")
+
+display.default<-function(dfr)
 {
 	invisible(edit(dfr))
 }

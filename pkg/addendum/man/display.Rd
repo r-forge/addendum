@@ -1,5 +1,6 @@
 \name{display}
 \alias{display}
+\alias{display.default}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Display a data.frame
