@@ -1,6 +1,8 @@
 \name{[.numdfr}
 \alias{[.numdfr}
 \alias{[<-.numdfr}
+\alias{[[.numdfr}
+\alias{$.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Extract or Replace Parts of an Object
@@ -11,6 +13,8 @@ Subset \code{\link{numdfr}} object.
 \usage{
 \method{[}{numdfr}(x, i, j, returnAsMatrix = drop, drop = FALSE)
 \method{[}{numdfr}(x, i, j) <- value
+\method{[[}{numdfr}(x, ..., exact=TRUE)
+\method{$}{numdfr}(x, name)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,6 +32,15 @@ if \code{TRUE}, the dimsensions of size 1 are removed from the return value.
 }
   \item{value}{
 new values(s)
+}
+  \item{\ldots}{
+column names. For now, only one column is allowed.
+}
+  \item{exact}{
+if \code{TRUE} (the default) the column name is exactly matched, otherwise, partial matching is applied.
+}
+  \item{name}{
+Single column name
 }
 }
 \details{

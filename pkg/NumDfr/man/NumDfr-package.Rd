@@ -41,7 +41,11 @@ Add list of functions here later on (similar to addendum)
 		\item \code{\link{length.numdfr}}
 		\item \code{\link{names.numdfr}}
 		\item \code{\link{[.numdfr}}
+		\item \code{\link{[<-.numdfr}}
+		\item \code{\link{[[.numdfr}}
+		\item \code{\link{$.numdfr}}
 		\item \code{\link{display.numdfr}}
+		\item \code{\link{allLevels}}
 	}
 }
 }

@@ -15,16 +15,16 @@ numdfr<-function(dfr)
 "[.numdfr"<-function (x, i, j, returnAsMatrix = drop, drop = FALSE)
 {
 	.debugtxt("[.numdfr")
-	.debugtxt(ifelse(missing(i), "no i", paste("i:", i)))
-	.debugtxt(ifelse(missing(j), "no j", paste("j:", j)))
-	.debugtxt("returnAsMatrix:", returnAsMatrix)
-	.debugtxt("drop:", drop)
+#	.debugtxt(ifelse(missing(i), "no i", paste("i:", i)))
+#	.debugtxt(ifelse(missing(j), "no j", paste("j:", j)))
+#	.debugtxt("returnAsMatrix:", returnAsMatrix)
+#	.debugtxt("drop:", drop)
 	if(returnAsMatrix)
 	{
-		return(x$mat[i,j, drop=drop])
+		return(.getMatrix(x)[i,j, drop=drop])
 	}
-	newlvls<-if (missing(j)) x$lvls else x$lvls[j]
-	newmat<-x$mat[i,j, drop=FALSE]
+	newlvls<-if (missing(j)) .getLevels(x) else .getLevels(x)[j]
+	newmat<-.getMatrix(x)[i,j, drop=FALSE]
 	retval<-list(mat=newmat, lvls=newlvls)
 	class(retval)<-"numdfr"
 	return(retval)
@@ -33,7 +33,7 @@ numdfr<-function(dfr)
 "[<-.numdfr"<-function (x, i, j, value)
 {
 	.debugtxt("[<-.numdfr")
-	if(is.numdfr(value)) value<-value$mat
+	if(is.numdfr(value)) value<-.getMatrix(value)
 	if(any(is.character(value)))
 	{
 		#probably means the user is assigning like a factor
@@ -41,7 +41,7 @@ numdfr<-function(dfr)
 		#find out which columns that are being assigned are categorical:
 		if(missing(i)) tmpi<-seq(nrow(x)) else tmpi<-i
 		if(missing(j)) tmpj<-seq(ncol(x)) else tmpj<-j
-		tmplvls<-x$lvls[tmpj]
+		tmplvls<-.getLevels(x)[tmpj]
 		if(is.array(value)) tmpvalue<-value else tmpvalue<-array(value, dim=c(length(tmpi), length(tmpj)))
 		for(curcoli in which(sapply(tmplvls, length)>0))
 		{
@@ -55,42 +55,51 @@ numdfr<-function(dfr)
 		}
 		value<-as.numeric(tmpvalue) #if this gives a warning, there were probably some errors...
 	}
+	oldclass<-class(x)
+	x<-unclass(x)
 	x$mat[i,j]<-value
+	class(x)<-oldclass
 	return(x)
 }
 
 length.numdfr<-function(x){
 	.debugtxt("length.numdfr")
-	ncol(x$mat)
+	ncol(.getMatrix(x))
 }
 
 dimnames.numdfr<-function(x){
 	.debugtxt("dimnames.numdfr")
-	dimnames(x$mat)
+	dimnames(.getMatrix(x))
 }
 
 "dimnames<-.numdfr"<-function(x, value){
 	.debugtxt("dimnames<-.numdfr")
+	oldclass<-class(x)
+	x<-unclass(x)
 	dimnames(x$mat)<-value
 	names(x$lvls)<-value[[2]]
+	class(x)<-oldclass
 	return(x)
 }
 
 dim.numdfr<-function(x){
 	.debugtxt("dim.numdfr")
-	dim(x$mat)
+	dim(.getMatrix(x))
 }
 #"dim<-.numdfr" #similar as data.frame: not directly supported!!
 
 names.numdfr<-function(x){
 	.debugtxt("names.numdfr")
-	colnames(x$mat)
+	colnames(.getMatrix(x))
 }
 
 "names<-.numdfr"<-function(x, value){
 	.debugtxt("names<-.numdfr")
+	oldclass<-class(x)
+	x<-unclass(x)
 	colnames(x$mat)<-value
 	names(x$lvls)<-value
+	class(x)<-oldclass
 	return(x)
 }
 
@@ -101,12 +110,12 @@ is.numdfr<-function(x){
 
 as.double.numdfr<-function(x,...){
 	.debugtxt("as.double.numdfr")
-	x$mat
+	.getMatrix(x)
 }
 
 is.na.numdfr<-function(x){
 	.debugtxt("is.na.numdfr")
-	is.na(x$mat)
+	is.na(.getMatrix(x))
 }
 
 str.numdfr<-function(object,...){
@@ -114,9 +123,10 @@ str.numdfr<-function(object,...){
 	cat("->Rownames: ", rownames(object), "\n")
 	cat("->Colnames: ", colnames(object), "\n")
 	cat("\nThe following variables are factor-like:\n")
+	lvls<-.getLevels(object)
 	for(i in findCatColNums(object))
 	{
-		cat("\t", names(object$lvls)[i], ":", object$lvls[[i]], "\n")
+		cat("\t", names(lvls)[i], ":", lvls[[i]], "\n")
 	}
 	invisible()
 }
@@ -125,6 +135,7 @@ str.numdfr<-function(object,...){
 #		on data.frame,though I suspect quite a performance penalty (???)
 as.list.numdfr<-function(x, returnFactors=TRUE,...){
 	.debugtxt("as.list.numdfr")
+	x<-unclass(x)
 	rv<-lapply(seq(ncol(x$mat)), function(cc){
 			lev<-x$lvls[[cc]]
 		  if((length(lev) > 0) & (returnFactors==TRUE))
@@ -149,7 +160,7 @@ as.data.frame.numdfr<-function(x, row.names = NULL, optional = FALSE, ...)
 	value<-as.list(x, returnFactors=TRUE,...)
 	if(is.null(row.names))
 	{
-		attr(value, "row.names") <- postfixToMakeUnique(rownames(x$mat))
+		attr(value, "row.names") <- postfixToMakeUnique(rownames(.getMatrix(x)))
 	}
 	else
 	{
@@ -161,7 +172,7 @@ as.data.frame.numdfr<-function(x, row.names = NULL, optional = FALSE, ...)
 
 findCatColNums.numdfr<-function(dfr){
 	.debugtxt("findCatColNums.numdfr")
-	which(sapply(dfr$lvls, length) > 0)
+	which(sapply(.getLevels(dfr), length) > 0)
 }
 
 #note: _assumes_ all parameters are numdfr of the same structure!!
@@ -170,14 +181,14 @@ rbind.numdfr<-function(..., ensure.unique.rownames=FALSE, separator=".", postfix
 {
 	.debugtxt("rbind.numdfr")
 	allparams<-list(...)
-	allmats<-lapply(allparams, "[[", "mat")
+	allmats<-lapply(allparams, .getMatrix)
 	newmat<-do.call(rbind, allmats)
 	if((ensure.unique.rownames) & (!is.null(rownames(newmat))))
 	{
 		rownames(newmat)<-postfixToMakeUnique(rownames(newmat), separator=separator,
 			postfixcol=postfixcol, allowemptypostfix=allowemptypostfix)
 	}
-	retval<-list(mat=newmat, lvls=(allparams[[1]])$lvls)
+	retval<-list(mat=newmat, lvls=.getLevels((allparams[[1]])))
 	class(retval)<-"numdfr"
 	return(retval)
 }
@@ -217,34 +228,80 @@ display.numdfr<-function(dfr)
 
 as.matrix.numdfr<-function(x, ...)
 {
-	return(x$mat)
+	return(.getMatrix(x))
 }
 
 allLevels<-function(x, onlyNonEmpty=FALSE) UseMethod("allLevels")
 allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	.debugtxt("allLevels.numdfr")
+	lvls<-.getLevels(x)
 	if(! onlyNonEmpty)
 	{
-		return(x$lvls)
+		return(lvls)
 	}
 	else
 	{
-		return(lapply(x$lvls, function(curlvls){if(length(curlvls) > 0) curlvls else NULL}))
+		keep<-sapply(lvls, length) > 0
+		return(lvls[keep])
 	}
 }
 allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
+	retval<-lapply(x, function(curcol){
+			tmp<-levels(curcol)
+			if(is.null(tmp)) tmp<-character(0)
+			return(tmp)
+		})
 	if(onlyNonEmpty)
 	{
-		return(lapply(x, levels))
+		keep<-sapply(retval, length) > 0
+		retval<-retval[keep]
+	}
+	return(retval)
+}
+
+.findIndexOfColumnName<-function(x, name, exact=TRUE)
+{
+	.debugtxt(".findIndexOfColumnName")
+	if(exact)
+	{
+		match(name, colnames(x))
 	}
 	else
 	{
-		return(lapply(x, function(curcol){
-				tmp<-levels(curcol)
-				if(is.null(tmp)) tmp<-character()
-				return(tmp)
-			}))
+		pmatch(name, colnames(x), duplicates.ok=TRUE)
 	}
+}
+
+"[[.numdfr"<-function(x, ..., exact=TRUE)
+{
+	.debugtxt("[[.numdfr")
+	thecol<-unlist(as.list(...))
+	if(length(thecol) != 1) stop("Unsupported operation: passing more than one paramter to [[.numdfr")
+	thelvls<-.getLevels(x)[[thecol]]
+	thecol<-.getMatrix(x)[,thecol]
+	if(length(thelvls) > 0)
+	{
+		return(quickFactor(thecol, labels=thelvls))
+	}
+	return(thecol)
+}
+
+"$.numdfr"<-function(x, name)
+{
+	.debugtxt("$.numdfr")
+	return("[[.numdfr"(x, name, exact=TRUE))
+}
+
+.getMatrix<-function(x)
+{
+	#.subset2 is like "[[" but without method dispatch!
+	return(.subset2(x, "mat", exact=TRUE))
+}
+
+.getLevels<-function(x)
+{
+	#.subset2 is like "[[" but without method dispatch!
+	return(.subset2(x, "lvls", exact=TRUE))
 }
 
 #if(FALSE)
@@ -276,31 +333,33 @@ setDebugmode<-function(doDebug=TRUE){
 factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "",...)
 {
 	.debugtxt("factorsToDummyVariables.numdfr")
-	nc<-dim(dfr$mat)[2]
-	nr<-dim(dfr$mat)[1]
-	coln<-colnames(dfr$mat)
+	mat<-.getMatrix(dfr)
+	lvls<-.getLevels(dfr)
+	nc<-dim(mat)[2]
+	nr<-dim(mat)[1]
+	coln<-colnames(mat)
 	retval<-do.call(cbind, lapply(seq(nc), function(ci){
-			lvls<-dfr$lvls[[ci]]
-			if(length(lvls)>0)
+			clvls<-lvls[[ci]]
+			if(length(clvls)>0)
 			{
-				lvls<-lvls[-1]
-				stretchedcols<-dfr$mat[,rep(ci, length(lvls))]
-				comparelvls<-matrix(rep(seq_along(lvls)+1, each=nr), nrow=nr)
+				clvls<-clvls[-1]
+				stretchedcols<-mat[,rep(ci, length(clvls))]
+				comparelvls<-matrix(rep(seq_along(clvls)+1, each=nr), nrow=nr)
 				stretchedcols<-stretchedcols==comparelvls
 				mode(stretchedcols)<-"integer"
 				if(!is.matrix(stretchedcols)){
 					warning("In factorsToDummyVariables.numdfr: stretchedcols was not a matrix?")
 					stretchedcols<-matrix(stretchedcols, nrow=1)}
-				colnames(stretchedcols)<-paste(coln[ci], lvls, sep=betweenColAndLevel)
+				colnames(stretchedcols)<-paste(coln[ci], clvls, sep=betweenColAndLevel)
 				return(stretchedcols)
 			}
 			else
 			{
-				curcol<-dfr$mat[,ci, drop=FALSE]
+				curcol<-mat[,ci, drop=FALSE]
 				return(curcol)
 			}
 		}))
-	rownames(retval)<-rownames(dfr)
+	rownames(retval)<-rownames(mat)
 	return(retval)
 }
 
