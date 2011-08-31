@@ -2,10 +2,10 @@
 \alias{GLoMo}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Fit naive General Location Model
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Fit a naive General Location Model, only supporting cells that are present in the data.
 }
 \usage{
 GLoMo(dfr, weights = rep(1, dim(dfr)[1]), uniqueIdentifiersPerRow = NULL, separator = ",", pooledCov = TRUE, verbosity = 0, ...)
@@ -13,111 +13,81 @@ GLoMo(dfr, weights = rep(1, dim(dfr)[1]), uniqueIdentifiersPerRow = NULL, separa
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
-%%     ~~Describe \code{dfr} here~~
+\code{\link{data.frame}} or \code{\link{numdfr}} to fit the model to
 }
   \item{weights}{
-%%     ~~Describe \code{weights} here~~
+vector of weights attributed to each row in \code{dfr}
 }
   \item{uniqueIdentifiersPerRow}{
-%%     ~~Describe \code{uniqueIdentifiersPerRow} here~~
+List of uids (see \code{\link{categoricalUniqueIdentifiers}}) for each row of \code{dfr}. If not provided, it is calculated.
 }
   \item{separator}{
-%%     ~~Describe \code{separator} here~~
+Only relevant if \code{uniqueIdentifiersPerRow} was not provided. This parameter is then passed on to \code{\link{categoricalUniqueIdentifiers}}.
 }
   \item{pooledCov}{
-%%     ~~Describe \code{pooledCov} here~~
+If \code{TRUE}, the pooled covariance is used. This is relevant because often some if not all cells contain only 1 observation.
 }
   \item{verbosity}{
-%%     ~~Describe \code{verbosity} here~~
+The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+Ignored for now
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Finds all 'cells' defined by the combinations of categorical variables in
+\code{dfr}, and finds their (weighted) probability. Then it finds the mean per
+cell for all continuous variables, and a covariance matrix (which is typically
+pooled, although theoretically it should be unpooled)
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+List of class "GLoMo", consisting of the following items:
+  \item{uid }{unique identifiers of each cell (vector of characters)}
+  \item{pihat }{probability of each cell (numerical vector)}
+  \item{omegahat }{covariance matrix (named) of the continuous variables}
+  \item{orgdatadim }{dimensions of the \code{dfr} that was passed to the GLoMo call}
+  \item{uniqueFactorCombinationsAndContinuousMeans }{object of the same class and column structure as \code{dfr}. Holds the means in the continuous columns.}
+  \item{factorCols }{named vector of the column indexes of categorical columns}
+  \item{guidSeparator }{character that was used as separator for the uids}
 }
 \references{
-%% ~put references to the literature/web site here ~
+"Statistical Analysis with Missing Values"
 }
 \author{
-%%  ~~who you are~~
+Nick Sabbe (nick.sabbe@ugent.be)
 }
 \note{
-%%  ~~further notes~~
-}
+The \code{dfr} passed is supposed to not contain any \code{NA} values!
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+Further more, in the return value, the order of the columns (in e.g.
+\code{omegahat} and \code{uniqueFactorCombinationsAndContinuousMeans}) is the
+same as in the original \code{dfr}.
+
+The length of \code{uid} and \code{pihat} is the same as the number of rows in
+\code{uniqueFactorCombinationsAndContinuousMeans} (i.e. the number of unique
+'cells' in \code{dfr}). Their order also matches (i.e. first item of \code{uid}
+matches the first row of \code{uniqueFactorCombinationsAndContinuousMeans} etc.)
+
+The number of columns/rows in \code{omegahat} and the number of items in
+\code{factorCols} is also the total number of columns in \code{dfr} and thus
+also in \code{uniqueFactorCombinationsAndContinuousMeans}.
+}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{GLoMo-package}}, \code{\link{NumDfr}}, \code{\link{predict}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dfr, weights = rep(1, dim(dfr)[1]), uniqueIdentifiersPerRow = NULL, 
-    separator = ",", pooledCov = TRUE, verbosity = 0, ...) 
-{
-    stopifnot(!.hasNA(dfr))
-    numCols <- ncol(dfr)
-    factorCols <- findCatColNums(dfr)
-    numCat <- length(factorCols)
-    stopifnot(numCols != numCat)
-    stopifnot(numCat > 0)
-    dfrDim <- dim(dfr)
-    cattif(verbosity > 0, "GLoMo: ", class(dfr), "(", dfrDim, 
-        "), factorCols=", factorCols)
-    nobs <- dfrDim[1]
-    numCont <- dfrDim[2] - numCat
-    if (is.null(uniqueIdentifiersPerRow)) {
-        cattif(verbosity > 0, "GLoMo: uniqueIdentifiersPerRow were not provided so recalculating.")
-        require(addendum)
-        uniqueIdentifiersPerRow <- categoricalUniqueIdentifiers(dfr, 
-            separator = separator, na.becomes = NA)
-    }
-    cattif(verbosity > 0, "GLoMo: uniqueIdentifiersPerRow str: ", 
-        str(uniqueIdentifiersPerRow))
-    weights <- weights/sum(weights)
-    cattif(verbosity > 0, "GLoMo: Unique uniqueIdentifiersPerRow.")
-    uids <- uniqueCharID(uniqueIdentifiersPerRow, needSort = TRUE, 
-        includeOccurrence = FALSE, impNr = 1)
-    cattif(verbosity > 0, length(uids), "found.")
-    firstOccurrenceOfEachUMidInDfr <- match(uids, uniqueIdentifiersPerRow)
-    uniqueFactorCombinationsAndContinuousMeans <- dfr[firstOccurrenceOfEachUMidInDfr, 
-        ]
-    cattif(verbosity > 0, "GLoMo: Find the pihat + means")
-    matw <- sparseMatrix(i = match(uniqueIdentifiersPerRow, uids), 
-        j = seq_along(uniqueIdentifiersPerRow), x = weights)
-    contDataAsMat <- .contDataAsMat(dfr)
-    pihat <- rowSums(matw)
-    themeans <- as.matrix(matw \%*\% contDataAsMat)
-    contCols <- seq(ncol(dfr))[-factorCols]
-    contnames <- colnames(dfr)[contCols]
-    uniqueFactorCombinationsAndContinuousMeans[, contCols] <- themeans
-    if (!pooledCov) 
-        stop("GLoMo for non-pooled covariance matrix has not been implemented yet.")
-    if (verbosity > 0) 
-        catt("Getting centralized covariances")
-    omegahat <- cov.wt(contDataAsMat, wt = weights, method = "ML")$cov
-    dimnames(omegahat) <- list(rowvar = contnames, colvar = contnames)
-    retval <- list(uid = uids, pihat = pihat, omegahat = omegahat, 
-        orgdatadim = dim(dfr), uniqueFactorCombinationsAndContinuousMeans = uniqueFactorCombinationsAndContinuousMeans, 
-        factorCols = factorCols, guidSeparator = separator)
-    class(retval) <- "GLoMo"
-    return(retval)
-  }
+iris.md<-randomNA(iris, 0.1)
+iris.md.nd<-numdfr(iris.md)
+iris.nd.rnd<-rCatsAndCntInDfr(iris.md.nd, orgriName=NULL, verbosity=1)
+iris.weights<-iris.nd.rnd$weights
+iris.nd.rnd<-iris.nd.rnd[,1:5]
+iris.glomo<-GLoMo(iris.nd.rnd, weights=iris.weights, verbosity=1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ fit }
+\keyword{ General }
+\keyword{ Location }
+\keyword{ Model }
+\keyword{ GLoMo }% __ONLY ONE__ keyword per line

@@ -1,2 +1,2 @@
 exportPattern("^[^\\.]")
-import(addendum)
+import(addendum, NumDfr, Matrix)

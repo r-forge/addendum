@@ -2,10 +2,14 @@
 \alias{randomFillAndRepeatDataRow}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Fill unmatched datarow in GLoMo
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Is only called from within \code{\link{predict.GLoMo}} to handle the unlikely 
+case of a row that has no matching row(s) in the GLoMo uids.
+
+Note: this really only is unlikely in the setting that I plan to use it in,
+i.e.: impute in the original data from a GLoMo fit to it.
 }
 \usage{
 randomFillAndRepeatDataRow(currow, obsneeded, levelslist, newdata)
@@ -13,71 +17,46 @@ randomFillAndRepeatDataRow(currow, obsneeded, levelslist, newdata)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{currow}{
-%%     ~~Describe \code{currow} here~~
+(unmatched) row of data for which to sample
 }
   \item{obsneeded}{
-%%     ~~Describe \code{obsneeded} here~~
+how many rows should be 'sampled'
 }
   \item{levelslist}{
-%%     ~~Describe \code{levelslist} here~~
+list holding (possible) levels for all columns in \code{currow}
 }
   \item{newdata}{
-%%     ~~Describe \code{newdata} here~~
+complete dataset from which currow was one.
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+a \code{\link{data.frame}} or \code{\link{numdfr}} (dependent
+	on the \code{dfr} that was used in the original call to \code{\link{GLoMo}}
+	that holds the sampled data.
 }
 \author{
-%%  ~~who you are~~
+Nick Sabbe (nick.sabbe@ugent.be)
 }
 \note{
-%%  ~~further notes~~
+Really only intended as an internal function. Kept public for who knows what.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{GLoMo-package}}, \code{\link{NumDfr}}, \code{\link{predict.GLoMo}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (currow, obsneeded, levelslist, newdata) 
-{
-    fcols <- which(sapply(levelslist, length) > 0)
-    curnacols <- which(is.na(currow))
-    retval <- currow[rep(1, obsneeded), ]
-    for (curnacol in curnacols) {
-        if (curnacol \%in\% fcols) {
-            retval[, curnacol] <- sample.int(length(levelslist[[currowi]]), 
-                size = obsneeded, replace = TRUE)
-        }
-        else {
-            coldata <- newdata[, curnacol, drop = TRUE]
-            uwmean <- mean(coldata, na.rm = TRUE)
-            uwsd <- sd(coldata, na.rm = TRUE)
-            retval[, curnacol] <- rnorm(obsneeded, mean = uwmean, 
-                sd = uwsd)
-        }
-    }
-    return(retval)
-  }
+iris.md<-randomNA(iris, 0.1)
+iris.md.nd<-numdfr(iris.md)
+mdrow<-min(which(apply(iris.md, 1, function(currow){any(is.na(currow))})))
+randomFillAndRepeatDataRow(currow=iris.md.nd[mdrow,], obsneeded=10,
+	levelslist=allLevels(iris.md.nd), iris.md.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ predict }
+\keyword{ General }
+\keyword{ Location }
+\keyword{ Model }
+\keyword{ GLoMo }% __ONLY ONE__ keyword per line

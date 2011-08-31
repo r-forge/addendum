@@ -1,11 +1,13 @@
 \name{reusableDataForGLoMoSampling}
 \alias{reusableDataForGLoMoSampling}
+\alias{ReusableDataForGLoMoSampling}
+\alias{ReusableDataForGLoMoSamplingForOneRow}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Calculate GLoMo data that is usable for repeated 'completing' of the same data row.
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculate GLoMo data that is usable for repeated 'completing' of the same data row.
 }
 \usage{
 reusableDataForGLoMoSampling(glomo, dfr, forrows = seq(nrow(dfr)), guiddata = NULL, verbosity = 0)
@@ -13,136 +15,69 @@ reusableDataForGLoMoSampling(glomo, dfr, forrows = seq(nrow(dfr)), guiddata = NU
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{glomo}{
-%%     ~~Describe \code{glomo} here~~
+\code{\link{GLoMo}} object
 }
   \item{dfr}{
-%%     ~~Describe \code{dfr} here~~
+\code{\link{data.frame}} or \code{\link{numdfr}} that needs to be 'completed'.
 }
   \item{forrows}{
-%%     ~~Describe \code{forrows} here~~
+which of the rows in \code{dfr} need completion (defaults to all of them)
 }
   \item{guiddata}{
-%%     ~~Describe \code{guiddata} here~~
+"GuidData" class object for the rows in question, or character vector of uids
+for those rows, or \code{NULL}
 }
   \item{verbosity}{
-%%     ~~Describe \code{verbosity} here~~
+The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
 }
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A list of class "ReusableDataForGLoMoSampling", holding items:
+  \item{guiddata }{like to the return value of \code{\link{getGuidData}}}
+  \item{forrows }{copy of the \code{forrows} that was passed in the function}
+  \item{perrow }{list that holds one item of class "ReusableDataForGLoMoSamplingForOneRow" per element of \code{forrows}}
+  
+The structure of lists of class "ReusableDataForGLoMoSamplingForOneRow" is like this:
+  \item{a }{See "Analysis of Incomplete Multivariate Data" around p349}
+  \item{useSigma }{covariance for missing continuous values of that row}
+  \item{sigLeft }{See "Analysis of Incomplete Multivariate Data" around p349}
+  \item{probs }{conditional probabilities of each 'cell' (see the members of \code{guiddata})}
+  \item{whichCntColNotNA }{within the continuous columns, the how manieth of them was not NA for this row}
+  \item{whichCntColNA }{within the continuous columns, the how manieth of them was NA for this row}
+  \item{presentCntColsInDfr }{column indices within \code{dfr} of the continuous columns that did not have NA for this row}
+  \item{missingCntColsInDfr }{column indices within \code{dfr} of the continuous columns that had NA for this row}
 }
 \references{
-%% ~put references to the literature/web site here ~
+"Analysis of Incomplete Multivariate Data" around p349, and also "Statistical Analysis with Missing Values"
 }
 \author{
-%%  ~~who you are~~
+Nick Sabbe (nick.sabbe@ugent.be)
 }
 \note{
-%%  ~~further notes~~
+This method is mainly present because of \code{\link{predict.conditional.GLoMo}},
+where there is repeated sampling from the same row.
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{GLoMo-package}}, \code{\link{NumDfr}}, \code{\link{predict.conditional.GLoMo}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (glomo, dfr, forrows = seq(nrow(dfr)), guiddata = NULL, 
-    verbosity = 0) 
-{
-    if (is.null(guiddata) | (!is(guiddata, "GuidData"))) {
-        cattif(verbosity > 0, "reusableDataForGLoMoSampling: guiddata were not (completely) provided so recalculating.")
-        guiddata <- getGuidData(glomo, dfr, guidPerObservation = guiddata)
-    }
-    catcols <- glomo$factorCols
-    numCat <- length(catcols)
-    cntcols <- seq(ncol(dfr))[-catcols]
-    numCont <- length(cntcols)
-    perrow <- lapply(forrows, function(currowi) {
-        if ((length(forrows) > 1) & (verbosity > 1)) {
-            catt("reusableDataForGLoMoSampling: working on row", 
-                match(currowi, forrows), "/", length(forrows))
-        }
-        currow <- dfr[currowi, ]
-        glomorowsforcurrow <- guiddata$possibleGlomoGuidPerObs[[currowi]]
-        whichCntColNotNA <- which(!is.na(currow[, cntcols, drop = TRUE]))
-        whichCntColNA <- (1:numCont)[-whichCntColNotNA]
-        presentCntColsInDfr <- cntcols[whichCntColNotNA]
-        missingCntColsInDfr <- cntcols[whichCntColNA]
-        if (length(whichCntColNotNA) > 0) {
-            omega <- glomo$omegahat[whichCntColNotNA, whichCntColNotNA, 
-                drop = FALSE]
-            invSig22 <- invertSymmetric(omega, careful = FALSE)
-            aanwezigeXs <- matrix(currow[, presentCntColsInDfr, 
-                drop = TRUE], nrow = 1)
-            if (length(whichCntColNA) != numCont) {
-                sig11 <- glomo$omegahat[whichCntColNA, whichCntColNA, 
-                  drop = FALSE]
-                sig12 <- glomo$omegahat[whichCntColNA, whichCntColNotNA, 
-                  drop = FALSE]
-                a <- currow[, presentCntColsInDfr, drop = TRUE]
-                useSigma <- sig11 - sig12 \%*\% invSig22 \%*\% t(sig12)
-                sigLeft <- sig12 \%*\% invSig22
-            }
-            else {
-                a <- NULL
-                useSigma <- glomo$omegahat
-                sigLeft <- NULL
-            }
-        }
-        if (length(glomorowsforcurrow) > 1) {
-            if (length(whichCntColNotNA) == 0) {
-                deltas <- glomo$pihat[glomorowsforcurrow]
-            }
-            else {
-                deltas <- sapply(glomorowsforcurrow, function(curcatrow) {
-                  pi.c <- glomo$pihat[curcatrow]
-                  relvMus <- matrix(glomo$uniqueFactorCombinationsAndContinuousMeans[curcatrow, 
-                    presentCntColsInDfr, drop = TRUE], ncol = 1)
-                  partr <- invSig22 \%*\% relvMus
-                  part1 <- aanwezigeXs \%*\% partr
-                  part2 <- -1/2 * t(relvMus) \%*\% partr
-                  delta.c <- part1 + part2 + log(pi.c)
-                  return(delta.c)
-                })
-                maxd <- max(deltas)
-                if (maxd > 100) {
-                  subtr <- maxd - 100
-                  deltas <- deltas - subtr
-                }
-                deltas <- exp(deltas)
-            }
-            deltasum <- sum(deltas)
-            probs <- deltas/deltasum
-        }
-        else {
-            probs <- NULL
-        }
-        retval <- list(a = a, useSigma = useSigma, sigLeft = sigLeft, 
-            probs = probs, whichCntColNotNA = whichCntColNotNA, 
-            whichCntColNA = whichCntColNA, presentCntColsInDfr = presentCntColsInDfr, 
-            missingCntColsInDfr = missingCntColsInDfr)
-        class(retval) <- "ReusableDataForGLoMoSamplingForOneRow"
-        return(retval)
-    })
-    retval <- list(guiddata = guiddata, forrows = forrows, perrow = perrow)
-    class(retval) <- "ReusableDataForGLoMoSampling"
-    return(retval)
-  }
+iris.md<-randomNA(iris, 0.1)
+iris.md.nd<-numdfr(iris.md)
+mdrow<-min(which(apply(iris.md, 1, function(currow){any(is.na(currow))})))
+iris.nd.rnd<-rCatsAndCntInDfr(iris.md.nd, orgriName=NULL, verbosity=1)
+iris.weights<-iris.nd.rnd$weights
+iris.nd.rnd<-iris.nd.rnd[,1:5]
+iris.glomo<-GLoMo(iris.nd.rnd, weights=iris.weights, verbosity=1)
+reusableDataForGLoMoSampling(glomo=iris.glomo, dfr=iris.md.nd, forrows = mdrow,
+	verbosity = 1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ sample }
+\keyword{ General }
+\keyword{ Location }
+\keyword{ Model }
+\keyword{ GLoMo }% __ONLY ONE__ keyword per line

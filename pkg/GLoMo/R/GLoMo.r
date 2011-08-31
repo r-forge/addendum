@@ -202,7 +202,7 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyCategor
 	return(result)
 }
 
-rCatsAndCntInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyCategorical=FALSE,
+rCatsAndCntInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	weightsName="weights", orgriName="orgri", reweightPerRow=FALSE, verbosity=0,...)
 {
 	catCols<-findCatColNums(dfr)
@@ -227,7 +227,7 @@ rCatsAndCntInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyC
 
 	cattif(verbosity>0, "rCatsAndCntInDfr: categorical columns")
 	retval<-rCatsInDfr(dfr=dfr, maxFullNACatCols=maxFullNACatCols,
-		howManyIfTooMany=howManyIfTooMany, onlyCategorical=onlyCategorical,
+		howManyIfTooMany=howManyIfTooMany, onlyCategorical=FALSE,
 		weightsName=weightsName, orgriName=orgriName, reweightPerRow=reweightPerRow,
 		verbosity=verbosity-1,...)
 		
@@ -284,10 +284,7 @@ if(FALSE)
 # -> arranged by parameter pooledCov
 #
 #Food for thought: does it still make sense to use the weights then??
-#GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
-#	separator=",", pooledCov=TRUE, verbosity=0,...) UseMethod("GLoMo")
 
-#GLoMo.data.frame<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 	separator=",", pooledCov=TRUE, verbosity=0,...)
 {
@@ -432,7 +429,7 @@ randomFillAndRepeatDataRow<-function(currow, obsneeded, levelslist, newdata)
 		if(curnacol %in% fcols)
 		{
 			#pick a completely random level
-			retval[,curnacol]<-sample.int(length(levelslist[[currowi]]), size=obsneeded, replace=TRUE)
+			retval[,curnacol]<-sample.int(length(levelslist[[curnacol]]), size=obsneeded, replace=TRUE)
 		}
 		else
 		{
@@ -555,7 +552,7 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)), guidd
 #if not, it holds the number of observations to generate per original observation
 #that holds missing data
 predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata)),
-	reusabledata=NULL, returnRepeats=FALSE, returnSelectedGlomoRows=FALSE, verbosity=0)
+	reusabledata=NULL, returnRepeats=FALSE, returnSelectedGlomoRows=FALSE, verbosity=0,...)
 {
 	#of interest: the combinations of categorical values in GLoMo are always unique!
 	glomo<-object #to make it more recognizable in the following code
@@ -564,6 +561,7 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 		warning("You should not provide reusabledata if newdata is NULL. It will be ignored.")
 		reusabledata<-NULL #just in case
 	}
+	cntcols<-seq(ncol(newdata))[-glomo$factorCols]
 	if(is.null(newdata))
 	{
 		cattif(verbosity > 1, "predict.GLoMo: _fully_ predicting dataset.")
@@ -583,7 +581,7 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 			useMu<-unlist(glomo$uniqueFactorCombinationsAndContinuousMeans[curglomorowi,cntcols, drop=TRUE])
 			gen<-qrmvnorm(howmanysamplesforcurglomorow, mean=useMu,sigma=glomo$omegahat)
 			allposinresforcurglomorow<-seq(from=firstposofeachglomorowinresult[i], to=lastposofeachglomorowinresult[i])
-			retval[allposinresforcurglomorow, missingCntColsInDfr]<-gen
+			retval[allposinresforcurglomorow, cntcols]<-gen
 		}
 		if(returnSelectedGlomoRows)
 		{
@@ -654,7 +652,7 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 				#in fact this should never happen
 				cattif(verbosity > 1, "predict.GLoMo: row has no matching glomorows.")
 				warning(paste("predict.GLoMo: Row passed along for which there are no valid predictions. There is no matching combination of categories in the GLoMo object. The rownumber was", currowi, ". Will simply pick random values."))
-				retval<-randomFillAndRepeatDataRow(currow=currow, howmanysamplesforcurrow=howmanysamplesforcurrow,
+				retval<-randomFillAndRepeatDataRow(currow=currow, obsneeded=howmanysamplesforcurrow,
 					levelslist=levelslist, newdata=newdata)
 				if(returnSelectedGlomoRows)
 				{
@@ -746,7 +744,7 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 				return(retval)
 			}
 		})
-	debug.predPerRow<<-predPerRow
+	#debug.predPerRow<<-predPerRow
 	#now recombine the 'subdatasets' in predPerRow, just like it's done at
 	#the end of rCatsInDfr
 	if(returnSelectedGlomoRows)
@@ -808,8 +806,8 @@ if(FALSE)
 	save.image("C:\\Users\\nisabbe\\Documents\\My Dropbox\\Doctoraat\\Bayesian Lasso\\GLoMo.RData")
 }
 
-#will have to see whather this really provides a speedup
-#maybe doing the grep again with the reduces uids will be faster than this
+#will have to see whether this really provides a speedup
+#maybe doing the grep again with the reduced uids will be faster than this
 updateGuidData<-function(oldglomo, newglomo, oldrowsused=seq(nrow(oldglomo$uid)), oldguiddata)
 {
 	oldrowsused<-unique(oldrowsused)
@@ -831,7 +829,7 @@ validateFunction.acceptall<-function(attempts, otherData, forrow, verbosity=0)
 validateFunction.useprob<-function(attempts, otherData, forrow, verbosity=0)
 {
 	theprob<-otherData[forrow]
-	if(is.null(theprob) | (theprob < 0) | (theprob > 1))
+	if(is.null(theprob) || (theprob < 0) || (theprob > 1))
 	{
 		cattif(verbosity > 0, "invalid probability for row", forrow, "in validateFunction.useprob. Using 50%.")
 		theprob<-0.5
@@ -842,16 +840,17 @@ validateFunction.useprob<-function(attempts, otherData, forrow, verbosity=0)
 
 validateFunction.default<-function(attempts, otherData, forrow, verbosity=0)
 {
-	if(is.null(otherData)) otherData<-rep(0.5, nrow(attempts$predicted))
+	if(is.null(otherData)) otherData<-rep(0.5, max(forrow))
 	return(validateFunction.useprob(attempts, otherData, forrow, verbosity=verbosity))
 }
 
 #validateFunction, like the examples above, is a function that must return the
 #		indices (rownumbers) of rows that are accepted
-predict.conditional.GLoMo<-function(glomo, nobs=1, dfr, forrow, #only supported for 1 row at a time
+predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported for 1 row at a time
 	validateFunction=validateFunction.default, guiddata=NULL,
-	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0)
+	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,...)
 {
+	glomo<-object #to make it more recognizable in the following code
 	cattif(verbosity > 0, "predict.conditional.GLoMo for row", forrow)
 	if(! .hasNA(dfr[forrow,]))
 	{
@@ -864,7 +863,7 @@ predict.conditional.GLoMo<-function(glomo, nobs=1, dfr, forrow, #only supported 
 		{
 			guidToFind<-guiddata$guidPerObservation[forrow]
 		}
-		return(list(dfr[forrow, ], glomorowsused=match(guidToFind, glomo$uid)))
+		return(list(predicted=dfr[forrow, ], glomorowsused=match(guidToFind, glomo$uid)))
 	}
 	successes<-0
 	attempts<-0
@@ -920,10 +919,11 @@ predict.conditional.GLoMo<-function(glomo, nobs=1, dfr, forrow, #only supported 
 	return(list(predicted=acceptedRows, glomorowsused=acceptedGLoMoRowsRows))
 }
 
-predict.conditional.allrows.GLoMo<-function(glomo, nobs=1, dfr, forrows=seq(nrow(dfr)),
+predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr, forrows=seq(nrow(dfr)),
 	validateFunction=validateFunction.default, guiddata=NULL,
-	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0)
+	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,...)
 {
+	glomo<-object #to make it more recognizable in the following code
 	if(length(nobs) != length(forrows))
 	{
 		if(length(nobs) != 1) stop("Unsupported nobs passed along.")
@@ -936,7 +936,7 @@ predict.conditional.allrows.GLoMo<-function(glomo, nobs=1, dfr, forrows=seq(nrow
 		guiddata<-getGuidData(glomo, dfr, guidPerObservation=guiddata)
 	}
 	predPerRow<-lapply(seq_along(forrows), function(currowi){
-			predict.conditional.GLoMo(glomo=glomo, nobs=nobs[currowi], 
+			predict.conditional.GLoMo(object=glomo, nobs=nobs[currowi],
 				dfr=dfr, forrow=forrows[currowi], validateFunction=validateFunction, 
 				guiddata=guiddata,otherData=otherData,
 				initialSuccessRateGuess=initialSuccessRateGuess, verbosity=verbosity-1)

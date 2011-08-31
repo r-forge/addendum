@@ -1,104 +1,85 @@
 \name{rCatsAndCntInDfr}
 \alias{rCatsAndCntInDfr}
+\alias{rCatsInDfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+(Multiply) complete dataset based on marginal properties of each column
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+(Multiply) complete dataset based on marginal properties of each column
 }
 \usage{
-rCatsAndCntInDfr(dfr, maxFullNACatCols = 6, howManyIfTooMany = 1000, onlyCategorical = FALSE, weightsName = "weights", orgriName = "orgri", reweightPerRow = FALSE, verbosity = 0, ...)
+rCatsAndCntInDfr(dfr, maxFullNACatCols = 6, howManyIfTooMany = 1000, weightsName = "weights", orgriName = "orgri", reweightPerRow = FALSE, verbosity = 0, ...)
+rCatsInDfr(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyCategorical=FALSE,	weightsName="weights", orgriName="orgri", reweightPerRow=FALSE, verbosity=0,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
-%%     ~~Describe \code{dfr} here~~
+\code{\link{data.frame}} or \code{\link{numdfr}} to complete
 }
-  \item{maxFullNACatCols}{
-%%     ~~Describe \code{maxFullNACatCols} here~~
-}
-  \item{howManyIfTooMany}{
-%%     ~~Describe \code{howManyIfTooMany} here~~
+  \item{maxFullNACatCols, howManyIfTooMany}{
+If a row from \code{dfr} contains more than \code{maxFullNACatCols} (default: 6)
+\code{NA} values, not all combinations are generated, but a +/- random subset of
+size \code{howManyIfTooMany} (default: 1000)
 }
   \item{onlyCategorical}{
-%%     ~~Describe \code{onlyCategorical} here~~
+if \code{TRUE}, only the categorical columns are returned from \code{rCatsInDfr}
 }
   \item{weightsName}{
-%%     ~~Describe \code{weightsName} here~~
+if not \code{NULL}, an extra column (with this name) is added to the return
+value, holding a 'weight' so that all rows that originate from the same row of
+\code{dfr} have total weight 1 (dependent on \code{reweightPerRow}). Defaults to
+"weights"
 }
   \item{orgriName}{
-%%     ~~Describe \code{orgriName} here~~
+if not \code{NULL}, an extra column (with this name) is added to the return
+value, holding the rownumber in \code{dfr} that this row originates from.
+Defaults to "orgri"
 }
   \item{reweightPerRow}{
-%%     ~~Describe \code{reweightPerRow} here~~
+If weights are returned, then for rows having more than \code{maxFullNACatCols}
+\code{NA} values, the weights (that are originally only relative to all possible
+combinations) are 'reweighted' so they sum to 1.
 }
   \item{verbosity}{
-%%     ~~Describe \code{verbosity} here~~
+The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
 }
   \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
+Ignored for now
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+The 'random subset' is created by drawing the missing categorical values based
+on their marginal probability in \code{dfr}.
+
+The continuous missing data is simply filled out with the mean.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
+Object of the same class as \code{dfr}. Dependent on \code{onlyCategorical}, it
+may only contain the categorical columns. For the rest it mainly has the same
+structure as \code{dfr}, though it may contain two extra columns based on
+\code{weightsName} and \code{orgriName}.
 }
 \author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+Nick Sabbe (nick.sabbe@ugent.be)
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{GLoMo-package}}, \code{\link{NumDfr}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+iris.md<-randomNA(iris, 0.1)
+iris.md.nd<-numdfr(iris.md)
+iris.nd.rnd<-rCatsAndCntInDfr(iris.md.nd, orgriName=NULL, verbosity=1)
 
-## The function is currently defined as
-function (dfr, maxFullNACatCols = 6, howManyIfTooMany = 1000, 
-    onlyCategorical = FALSE, weightsName = "weights", orgriName = "orgri", 
-    reweightPerRow = FALSE, verbosity = 0, ...) 
-{
-    catCols <- findCatColNums(dfr)
-    numCols <- ncol(dfr)
-    contCols <- (seq(numCols))[-catCols]
-    cln <- 0
-    for (i in contCols) {
-        cln <- cln + 1
-        cattif(verbosity > 0, "rCatsAndCntInDfr: continuous column (", 
-            i, "):", cln, "/", length(contCols))
-        curcol <- dfr[, i, drop = TRUE]
-        wherenas <- which(is.na(curcol))
-        if (length(wherenas) > 0) {
-            colm <- mean(curcol, na.rm = TRUE)
-            dfr[wherenas, i] <- colm
-        }
-    }
-    cattif(verbosity > 0, "rCatsAndCntInDfr: categorical columns")
-    retval <- rCatsInDfr(dfr = dfr, maxFullNACatCols = maxFullNACatCols, 
-        howManyIfTooMany = howManyIfTooMany, onlyCategorical = onlyCategorical, 
-        weightsName = weightsName, orgriName = orgriName, reweightPerRow = reweightPerRow, 
-        verbosity = verbosity - 1, ...)
-    return(retval)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ random }
+\keyword{ NA }
+\keyword{ General }
+\keyword{ Location }
+\keyword{ Model }
+\keyword{ GLoMo }% __ONLY ONE__ keyword per line

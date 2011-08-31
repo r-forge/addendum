@@ -22,26 +22,19 @@ LazyLoad: \tab yes\cr
 \enumerate{
 	\item Helpers \enumerate{
 		\item \code{\link{getGuidData}}
-		\item \code{\link{str.numdfr}}
+		\item \code{\link{updateGuidData}}
+		\item \code{\link{randomFillAndRepeatDataRow}}
+		\item \code{\link{rCatsAndCntInDfr}}
+		\item \code{\link{rCatsInDfr}}
+		\item \code{\link{reusableDataForGLoMoSampling}}
 	}
 	\item Fitting \enumerate{
-		\item \code{\link{numdfr}}
-		\item \code{\link{as.data.frame.numdfr}}
-		\item \code{\link{as.double.numdfr}}
-		\item \code{\link{as.list.numdfr}}
-		\item \code{\link{is.na.numdfr}}
+		\item \code{\link{GLoMo}}
 	}
 	\item Prediction \enumerate{
-		\item \code{\link{dim.numdfr}}
-		\item \code{\link{dimnames.numdfr}}
-		\item \code{\link{factorsToDummyVariables.numdfr}}
-		\item \code{\link{findCatColNums.numdfr}}
-		\item \code{\link{is.numdfr}}
-		\item \code{\link{length.numdfr}}
-		\item \code{\link{names.numdfr}}
-		\item \code{\link{[.numdfr}}
-		\item \code{\link{display.numdfr}}
-		\item \code{\link{allLevels}}
+		\item \code{\link{predict.GLoMo}}
+		\item \code{\link{predict.conditional.allrows.GLoMo}}
+		\item \code{\link{predict.conditional.GLoMo}}
 	}
 }
 }
@@ -54,9 +47,8 @@ Maintainer: <nick.sabbe@ugent.be>
 \examples{
 iris.md<-randomNA(iris, 0.1)
 iris.md.nd<-numdfr(iris.md)
-iris.nd<-numdfr(iris)
-iris.nd.rnd<-rCatsAndCntInDfr(iris.nd, orgriName=NULL, verbosity=1)
-iris.weights<-unlist(iris.nd.rnd[,"weights", drop=TRUE])
+iris.nd.rnd<-rCatsAndCntInDfr(iris.md.nd, orgriName=NULL, verbosity=1)
+iris.weights<-iris.nd.rnd$weights
 iris.nd.rnd<-iris.nd.rnd[,1:5]
 iris.glomo<-GLoMo(iris.nd.rnd, weights=iris.weights, verbosity=1)
 iris.nsamplesperrow<-sample.int(10, size=nrow(iris.md.nd), replace=TRUE)

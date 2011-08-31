@@ -1,6 +1,6 @@
 \name{getGuidData}
 \alias{getGuidData}
-%- Also NEED an '\alias' for EACH other topic documented here.
+\alias{GuidData}%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Unique identifiers for all rows of dfr and their matches in glomo
 }
@@ -13,10 +13,10 @@ getGuidData(glomo, dfr, guidPerObservation = NULL)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{glomo}{
-GLoMo object (result of \code\link{GLoMo}} call with a 'matching' dfr)
+GLoMo object (result of \code{\link{GLoMo}} call with a 'matching' dfr)
 }
   \item{dfr}{
-\code\link{data.frame}} or \code\link{numdfr}} to get the uids for.
+\code{\link{data.frame}} or \code{\link{numdfr}} to get the uids for.
 }
   \item{guidPerObservation}{
 if some of the information is already present (e.g. the uids of the rows, you can pass them here)
@@ -32,7 +32,7 @@ List object of class \code{GuidData} with items:
   \item{separator }{The separator that was used (in glomo and now in the new uids)}
 }
 \author{
-Nick Sabbe
+Nick Sabbe (nick.sabbe@ugent.be)
 }
 
 \seealso{
@@ -41,9 +41,8 @@ Nick Sabbe
 \examples{
 iris.md<-randomNA(iris, 0.1)
 iris.md.nd<-numdfr(iris.md)
-iris.nd<-numdfr(iris)
-iris.nd.rnd<-rCatsAndCntInDfr(iris.nd, orgriName=NULL, verbosity=1)
-iris.weights<-unlist(iris.nd.rnd[,"weights", drop=TRUE])
+iris.nd.rnd<-rCatsAndCntInDfr(iris.md.nd, orgriName=NULL, verbosity=1)
+iris.weights<-iris.nd.rnd$weights
 iris.nd.rnd<-iris.nd.rnd[,1:5]
 iris.glomo<-GLoMo(iris.nd.rnd, weights=iris.weights, verbosity=1)
 iris.guids<-getGuidData(iris.glomo, dfr=iris.md.nd)
