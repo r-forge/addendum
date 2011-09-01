@@ -1598,7 +1598,9 @@ refactor<-function(x, labels)
 #When you have a list of dataframes of the same format, and you want to combine
 #them (as rows) into one...
 #Not pretty, but a lot better than rbind!
-combineSimilarDfrList<-function(dfrlst)
+combineSimilarDfrList<-function(dfrlst) UseMethod("combineSimilarDfrList")
+combineSimilarDfrList.default<-function(dfrlst){do.call(rbind, dfrlst)}
+combineSimilarDfrList.data.frame<-function(dfrlst)
 {#http://stackoverflow.com/questions/5980240/performance-of-rbind-data-frame
 	tempRes <- lapply(dfrlst, dfr2mat)
 	result<-as.data.frame(do.call(rbind, tempRes))
@@ -1614,7 +1616,7 @@ combineSimilarDfrList<-function(dfrlst)
 }
 
 #older version of this
-combineSimilarDfrList.prev<-function(dfrlst)
+combineSimilarDfrList_prev<-function(dfrlst)
 {#http://stackoverflow.com/questions/5980240/performance-of-rbind-data-frame
 	n <- 1:ncol(dfrlst[[1]])
 	names(n) <- names(dfrlst[[1]])

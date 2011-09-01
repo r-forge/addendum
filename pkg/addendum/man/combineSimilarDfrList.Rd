@@ -1,6 +1,8 @@
 \name{combineSimilarDfrList}
 \alias{combineSimilarDfrList}
-\alias{combineSimilarDfrList.prev}
+\alias{combineSimilarDfrList.default}
+\alias{combineSimilarDfrList.data.frame}
+\alias{combineSimilarDfrList_prev}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Combine dataframes of the same structure (like rbind)
@@ -14,7 +16,7 @@ The original implementation of this is still given as \code{combineSimilarDfrLis
 There are some conditions on the dataframes for this function to work - see \code{dfrlst}
 }
 \usage{
-combineSimilarDfrList(dfrlst)
+\method{combineSimilarDfrList}{data.frame}(dfrlst)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

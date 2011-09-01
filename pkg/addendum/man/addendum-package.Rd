@@ -101,7 +101,7 @@ LazyLoad: \tab yes\cr
 	}
 	\item Data manipulation \enumerate{
 		\item \code{\link{combineSimilarDfrList}}
-		\item \code{\link{combineSimilarDfrList.prev}}
+		\item \code{\link{combineSimilarDfrList_prev}}
 		\item \code{\link{doSimplify}}
 		\item \code{\link{getListItemsAsColumn}}
 		\item \code{\link{invertSymmetric}}
