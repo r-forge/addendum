@@ -749,12 +749,12 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 	#the end of rCatsInDfr
 	if(returnSelectedGlomoRows)
 	{
-		result<-do.call(rbind, lapply(predPerRow, "[[", "predicted")) #this should be OK for numdfr, but probably slow for data.frame
+		result<-combineSimilarDfrList(lapply(predPerRow, "[[", "predicted")) #this should be OK for numdfr, but probably slow for data.frame
 		glomorowsused<-do.call(c, lapply(predPerRow, "[[", "glomorowsused"))
 	}
 	else
 	{
-		result<-do.call(rbind, predPerRow) #this should be OK for numdfr, but probably slow for data.frame
+		result<-combineSimilarDfrList(predPerRow) #this should be OK for numdfr, but probably slow for data.frame
 	}
 	if(!is.null(rownames(predPerRow)))
 	{
@@ -941,7 +941,7 @@ predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr, forrows=seq(nro
 				guiddata=guiddata,otherData=otherData,
 				initialSuccessRateGuess=initialSuccessRateGuess, verbosity=verbosity-1)
 		})
-	result<-do.call(rbind, lapply(predPerRow, "[[", "predicted")) #this should be OK for numdfr, but probably slow for data.frame
+	result<-combineSimilarDfrList(lapply(predPerRow, "[[", "predicted")) #this should be OK for numdfr, but probably slow for data.frame
 	repsPerRow<-sapply(predPerRow, function(resCurRow){nrow(resCurRow$predicted)})
 	glomorowsused<-do.call(c, lapply(predPerRow, "[[", "glomorowsused"))
 	return(list(predicted=result, glomorowsused=glomorowsused, repsperrow=repsPerRow))
