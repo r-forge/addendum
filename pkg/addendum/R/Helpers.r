@@ -1039,6 +1039,18 @@ catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
 		sep = sep, fill = fill, labels = labels, append = append)
 }
 
+catw<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
+	append = FALSE, prefix=1)
+{
+	if(is.numeric(prefix))
+	{
+		curcall<-sys.call(sys.parent(n=prefix))
+		prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
+	}
+	cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
+		file = file, sep = sep, fill = fill, labels = labels, append = append)
+}
+
 #only output if condition is TRUE
 catif<-function(cond=TRUE, ...)
 {
@@ -1054,6 +1066,23 @@ cattif<-function(cond=TRUE, ...)
 	if(cond)
 	{
 		catt(...)
+	}
+}
+
+catwif<-function(cond=TRUE, ..., file = "", sep = " ", fill = FALSE, 
+	labels = NULL, append = FALSE, prefix=1)
+{
+	if(cond)
+	{
+		#note: cannot use a call to catw here, since it would mess up finding the
+		#calling function's name
+		if(is.numeric(prefix))
+		{
+			curcall<-sys.call(sys.parent(n=prefix))
+			prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
+		}
+		cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
+			file = file, sep = sep, fill = fill, labels = labels, append = append)
 	}
 }
 
