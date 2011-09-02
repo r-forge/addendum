@@ -123,13 +123,14 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyCategor
 			cattif(verbosity>1, "\trCatsInDfr: too many categoricals missing")
 			#if these are 3-level categories, this means already >= 2187 possible combinations
 			#in this case, we draw howManyIfTooMany random ones from the marginal multinomials
-			stopifnot(howManyIfTooMany > 1)
+			stopifnot(howManyIfTooMany > 0)
 			if(is.null(weightsName) || (nchar(weightsName)==0))
 			{
 				cattif(verbosity>1, "\t\trCatsInDfr: no need to calculate weights")
 				catvals<-sapply(curnas, function(ci){
 						sample.int(length(naLevels[[ci]]), howManyIfTooMany, replace=TRUE, prob=probs[[ci]])
 					})
+				catCombProbs<-rep(1, howManyIfTooMany)
 			}
 			else
 			{
@@ -167,10 +168,10 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000, onlyCategor
 			catCombProbs<-1
 			retval<-dfr[ri,, drop=FALSE]
 		}
-		toAdd<-rep(ri, length(catCombProbs))
 
 		if(((!is.null(weightsName)) && (nchar(weightsName)>0)) || ((!is.null(orgriName)) && (nchar(orgriName)>0)))
 		{
+			toAdd<-rep(ri, length(catCombProbs))
 			cattif(verbosity>1, "\trCatsInDfr: need to add either weight or orgri")
 			if((!is.null(weightsName)) && (nchar(weightsName)>0))
 			{
@@ -583,6 +584,7 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 			allposinresforcurglomorow<-seq(from=firstposofeachglomorowinresult[i], to=lastposofeachglomorowinresult[i])
 			retval[allposinresforcurglomorow, cntcols]<-gen
 		}
+		#note: in this case, returnRepeats has no meaningful interpretation
 		if(returnSelectedGlomoRows)
 		{
 			return(list(predicted=retval, glomorowsused=glomorowschosen))
