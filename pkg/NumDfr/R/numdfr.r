@@ -322,7 +322,7 @@ allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
 .actual_debugmode <- .numdfr_debugmode()
 .isNumdfrDebugging<-function(){.actual_debugmode$get()}
 
-setDebugmode<-function(doDebug=TRUE){
+setDebugmodeNumDfr<-function(doDebug=TRUE){
 	oldDebug<-.actual_debugmode$get()
 	.actual_debugmode$set(doDebug)
 	invisible(oldDebug)

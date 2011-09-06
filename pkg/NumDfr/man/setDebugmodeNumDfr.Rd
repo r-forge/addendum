@@ -1,5 +1,5 @@
-\name{setDebugmode}
-\alias{setDebugmode}
+\name{setDebugmodeNumDfr}
+\alias{setDebugmodeNumDfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Set tracing of all calls on/off
@@ -8,7 +8,7 @@ Set tracing of all calls on/off
 If set to TRUE, every call to a \code{\link{numdfr}} specific implementation is traced.
 }
 \usage{
-setDebugmode(doDebug = TRUE)
+setDebugmodeNumDfr(doDebug = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,11 +27,11 @@ Nick Sabbe
 
 \examples{
 iris.nd<-numdfr(iris)
-setDebugmode(FALSE)
+setDebugmodeNumDfr(FALSE)
 length(iris.nd)
-setDebugmode(TRUE)
+setDebugmodeNumDfr(TRUE)
 length(iris.nd)
-setDebugmode(FALSE)
+setDebugmodeNumDfr(FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

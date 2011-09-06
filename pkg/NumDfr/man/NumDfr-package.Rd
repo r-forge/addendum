@@ -22,7 +22,7 @@ LazyLoad: \tab yes\cr
 Add list of functions here later on (similar to addendum)
 \enumerate{
 	\item Debugging \enumerate{
-		\item \code{\link{setDebugmode}}
+		\item \code{\link{setDebugmodeNumDfr}}
 		\item \code{\link{str.numdfr}}
 	}
 	\item Coercion \enumerate{
