@@ -1040,16 +1040,120 @@ catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
 }
 
 catw<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
-	append = FALSE, prefix=1)
+	append = FALSE, prefix=0)
 {
 	if(is.numeric(prefix))
 	{
-		curcall<-sys.call(sys.parent(n=prefix))
-		prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
+		prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
+		prefix<-paste(prefix, ":", sep="")
 	}
 	cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
 		file = file, sep = sep, fill = fill, labels = labels, append = append)
 }
+
+curfntester<-function()
+{
+	for(i in sys.parents())
+	{
+		cat("Working on", i, "\n")
+		curcall<-sys.call(sys.parent(n=i))
+		cat("curcall object:\n")
+		print(curcall)
+		mcall<-tryRet(match.call(call=curcall), silent=TRUE, errRet=list("No_Call"))
+		cat("match.call object:\n")
+		print(mcall)
+		cat("match.call structure:\n")
+		str(mcall)
+		cat("probable name:'", mcall[[1]] , "'\n")
+	}
+}
+
+.addendum_debugmode <- function() {
+  .debugging <- FALSE
+
+  list(
+    get = function() .debugging,
+    set = function(value) .debugging <<- value
+  )
+}
+.actual_debugmode <- .addendum_debugmode()
+.isaddendumDebugging<-function(){.actual_debugmode$get()}
+
+setDebugmodeAddendum<-function(doDebug=TRUE){
+	oldDebug<-.actual_debugmode$get()
+	.actual_debugmode$set(doDebug)
+	invisible(oldDebug)
+}
+.debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
+.debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
+
+curfnfinder<-function(skipframes=0, skipnames="(FUN)|(.+apply)|(replicate)",
+	retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
+{
+	#.debugtxt("skipnames: ", skipnames)
+	prefix<-sapply(3 + skipframes+1:sys.nframe(), function(i){
+			currv<-sys.call(sys.parent(n=i))[[1]]
+			tocat<-currv
+			if(is.function(tocat))
+			{
+#				debug.closure<<-currv
+#				debug.sp<<-sys.parent(n=i)
+#				debug.sc<<-sys.call(sys.parent(n=i))
+#				debug.mc<-match.call(call=debug.sc)
+				tocat<-"unknown function (closure)"
+			}
+			.debugtxt("*curfnfinder* for item", i, tocat)
+			return(currv)
+		})
+	prefix[grep(skipnames, prefix)] <- NULL
+	prefix<-gsub("function \\(.*", "do.call", prefix)
+	if(length(prefix)==0)
+	{
+		return(retIfNone)
+	}
+	else if(retStack)
+	{
+		return(paste(rev(prefix), collapse = "|"))
+	}
+	else
+	{
+		retval<-as.character(unlist(prefix[1]))
+		if(length(prefix) > 1)
+		{
+			retval<-paste(paste(rep(extraPrefPerLevel, length(prefix) - 1), collapse=""), retval, sep="")
+		}
+		return(retval)
+	}
+}
+#
+#	skipprefix<-sapply(prefix, function(curpref){length(do.call(c, sapply(skipnames, grep, x=curpref, ignore.case=TRUE)))})
+#	prefix[skipprefix>0]<-NULL
+#	for(i in tobesearchedframes)
+#	{
+##		curcall<-sys.call(sys.parent(n=i))
+##		mcall<-tryRet(match.call(call=curcall), silent=TRUE, errRet=list(nocallname))
+##		fname<-mcall[[1]]
+#		fname<-tryRet(sys.call(sys.parent(n=i))[[1]], silent=TRUE, errRet=nocallname)
+#		#note: apparently, sometimes (e.g. for lapply), this 'name' object returned
+#		#from match.call is a "symbol", which cannot be used directly as character
+#		#I solved it now by casting, but would be interested to know how R knows
+#		#this to be a "symbol" (it is not by class or attributes, so it seems)
+#		#Dunno about it now, as I removed the match.call at suggestion of Andrie
+#		#must... check... soon
+#		fname<-as.character(fname)
+#		.debugtxt("Frame", i, ": '", fname, "'")
+##		catt("tempres: '", fname, "'")
+##		str(fname)
+##		catt("to be skipped: ", skipnames)
+##		debug.tmp<<-fname
+##		if(! inherits(fname, "symbol"))
+##		{
+#			specs<-do.call(c, sapply(skipnames, grep, x=fname, ignore.case=TRUE))
+#			if(length(specs) == 0) return(fname)
+##		}
+#	}
+#	return(retIfNone)
+#}
 
 #only output if condition is TRUE
 catif<-function(cond=TRUE, ...)
@@ -1069,20 +1173,22 @@ cattif<-function(cond=TRUE, ...)
 	}
 }
 
-catwif<-function(cond=TRUE, ..., file = "", sep = " ", fill = FALSE, 
-	labels = NULL, append = FALSE, prefix=1)
+catwif<-function(cond=TRUE, ..., prefix=0)
 {
 	if(cond)
 	{
-		#note: cannot use a call to catw here, since it would mess up finding the
-		#calling function's name
-		if(is.numeric(prefix))
-		{
-			curcall<-sys.call(sys.parent(n=prefix))
-			prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
-		}
-		cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
-			file = file, sep = sep, fill = fill, labels = labels, append = append)
+		catw(..., prefix=prefix+1)
+#		#note: cannot use a call to catw here, since it would mess up finding the
+#		#calling function's name
+#		if(is.numeric(prefix))
+#		{
+##			curcall<-sys.call(sys.parent(n=prefix))
+##			prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
+#			prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
+#			prefix<-paste(prefix, ":", sep="")
+#		}
+#		cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
+#			file = file, sep = sep, fill = fill, labels = labels, append = append)
 	}
 }
 

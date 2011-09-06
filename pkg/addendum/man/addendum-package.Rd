@@ -56,6 +56,9 @@ LazyLoad: \tab yes\cr
 			\item \code{\link{cattif}}
 			\item \code{\link{printif}}
 			\item \code{\link{newLine}}
+			\item \code{\link{catw}}
+			\item \code{\link{catwif}}
+			\item \code{\link{setDebugmodeAddendum}}
 		}
 		\item Memory \enumerate{
 			\item \code{\link{getAllCurrentObjectMemoryUsage}}
