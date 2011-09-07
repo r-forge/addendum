@@ -22,7 +22,7 @@ catw(..., file = "", sep = " ", fill = FALSE, labels = NULL, append = FALSE, pre
 catwif(cond=TRUE, ..., prefix=0)
 printif(cond=TRUE, ...)
 curfntester()
-curfnfinder(skipframes=0, skipnames="(FUN)|(.+apply)|(replicate)", retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
+curfnfinder(skipframes=0, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,9 +55,8 @@ function at that position in the call stack is used, followed by a ":"
 From the frame within \code{curfnfinder}, do not look at the first \code{skipframes}
 frames to find named function calls
 }
-  \item{skipnames}{
-If any of the named function calls is in this set of names, it is not returned.
-Note: these are matched with \code{\link{grep}}.
+  \item{cils, defaultCI}{
+See \code{\link{clean_cs}}.
 }
   \item{retIfNone}{
 What does \code{curfnfinder} return if no (unskipped) named functions were found
@@ -76,11 +75,7 @@ Similarly, \code{printif} is a conditional version of \code{print}.
 
 The 'w' version precede each (conditional) cat with the text in prefix, or, if
 it is an integer, the name of the calling function at that point in the stack
-and a semicolon is used. The default (1) works if no anonymous methods are used. 
-
-If you do use the apply family of functions or similar, with anonymous functions,
-you may need to add at least 2 (to prefix) within that anonymous method, to get
-the name of the 'actual' calling function. May need some experimenting...
+and a semicolon is used. The default typically works.
 
 \code{curfntester} is a function that is added to allow for this experimentation:
 it shows for each level in `sys.parents` the relevant call, match.call and some
@@ -128,4 +123,4 @@ do.call(testct2, list(showTester=TRUE))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~cat }
+\keyword{ cat }

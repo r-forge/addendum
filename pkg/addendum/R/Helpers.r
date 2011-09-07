@@ -1031,6 +1031,72 @@ invertSymmetric<-function(symMat, careful=FALSE, silent=FALSE)
 	}
 }
 
+mapCleanItem<-function(pattern, useItem)
+{
+	retval<-list(pattern=pattern, useItem=useItem)
+	class(retval)<-"mapCleanItem"
+	return(retval)
+}
+
+matches<-function(pattern, applyTo) UseMethod("matches")
+matches.mapCleanItem<-function(pattern, applyTo)
+{
+	rv<-grepl(pattern$pattern, applyTo[1])
+#	if(rv) .debugtxt("Item '", applyTo[1], "' matched pattern '", pattern$pattern, "'")
+	return(rv)
+}
+applyTransform<-function(transf, applyTo) UseMethod("applyTransform")
+applyTransform.mapCleanItem<-function(transf, applyTo)
+{
+#	.debugtxt("Applying transform w useItem", transf$useItem)
+	if(is.numeric(transf$useItem))
+	{
+		rv<-applyTo[transf$useItem]
+	}
+	else
+	{
+		rv<-transf$useItem
+	}
+#	.debugtxt("-->transformed to", rv)
+	return(rv)
+}
+
+typicalCleanItemList<-function()
+{
+	list(
+		mapCleanItem("(.*apply)", 3),
+		mapCleanItem("(do\\.call)", 2),
+		mapCleanItem("(function)", "FUN"),
+		mapCleanItem("(source)|(eval\\.with\\.vis)", "###")
+	)
+}
+
+applyCleanItemMatch<-function(towhat, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1))
+{
+	matchpos<-match(TRUE, sapply(cils, matches, towhat))
+	if(is.na(matchpos)) tfi<-defaultCI else tfi<-cils[[matchpos]]
+	return(applyTransform(tfi, towhat))
+}
+
+clean_onecall<-function(xt, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1))
+{
+	z<-strsplit(paste(xt, collapse="\t"), "\t")[[1]]
+#	.debugtxt("z=", z)
+	applyCleanItemMatch(z, cils=cils, defaultCI=defaultCI)
+}
+
+clean_cs <- function(x, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1))
+{
+  val <- sapply(x, clean_onecall, cils, defaultCI)
+#  .debugtxt("Cleaned up cs: ", val)
+  val[grepl("\\<function\\>", val)] <- "FUN"
+#  .debugtxt("Post <function>: ", val)
+  val <- val[!grepl("(###|FUN)", val)]
+#  .debugtxt("Post (###|FUN): ", val)
+	unlist(val)
+}
+
+
 #similar as cat, but appends current system time + a newline
 catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
 	append = FALSE)
@@ -1087,7 +1153,29 @@ setDebugmodeAddendum<-function(doDebug=TRUE){
 .debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
 .debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
 
-curfnfinder<-function(skipframes=0, skipnames="(FUN)|(.+apply)|(replicate)",
+curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
+	defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function",
+	retStack=FALSE, extraPrefPerLevel="\t")
+{
+	cs<-sys.calls()
+	cs<-head(cs, -(skipframes+1))
+	ccs<-clean_cs(cs, cils, defaultCI)
+	.debugtxt("After clean up of call stack:", ccs)
+	if(length(ccs)==0)
+	{
+		return(retIfNone)
+	}
+	else if(retStack)
+	{
+		return(paste(rev(ccs), collapse = "|"))
+	}
+	else
+	{
+		return(ccs[length(ccs)]) #last item
+	}
+}
+
+.curfnfinder_old<-function(skipframes=0, skipnames="(FUN)|(.+apply)|(replicate)",
 	retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
 {
 	#.debugtxt("skipnames: ", skipnames)
@@ -1125,35 +1213,7 @@ curfnfinder<-function(skipframes=0, skipnames="(FUN)|(.+apply)|(replicate)",
 		return(retval)
 	}
 }
-#
-#	skipprefix<-sapply(prefix, function(curpref){length(do.call(c, sapply(skipnames, grep, x=curpref, ignore.case=TRUE)))})
-#	prefix[skipprefix>0]<-NULL
-#	for(i in tobesearchedframes)
-#	{
-##		curcall<-sys.call(sys.parent(n=i))
-##		mcall<-tryRet(match.call(call=curcall), silent=TRUE, errRet=list(nocallname))
-##		fname<-mcall[[1]]
-#		fname<-tryRet(sys.call(sys.parent(n=i))[[1]], silent=TRUE, errRet=nocallname)
-#		#note: apparently, sometimes (e.g. for lapply), this 'name' object returned
-#		#from match.call is a "symbol", which cannot be used directly as character
-#		#I solved it now by casting, but would be interested to know how R knows
-#		#this to be a "symbol" (it is not by class or attributes, so it seems)
-#		#Dunno about it now, as I removed the match.call at suggestion of Andrie
-#		#must... check... soon
-#		fname<-as.character(fname)
-#		.debugtxt("Frame", i, ": '", fname, "'")
-##		catt("tempres: '", fname, "'")
-##		str(fname)
-##		catt("to be skipped: ", skipnames)
-##		debug.tmp<<-fname
-##		if(! inherits(fname, "symbol"))
-##		{
-#			specs<-do.call(c, sapply(skipnames, grep, x=fname, ignore.case=TRUE))
-#			if(length(specs) == 0) return(fname)
-##		}
-#	}
-#	return(retIfNone)
-#}
+
 
 #only output if condition is TRUE
 catif<-function(cond=TRUE, ...)
