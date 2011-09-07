@@ -120,14 +120,18 @@ is.na.numdfr<-function(x){
 
 str.numdfr<-function(object,...){
 	cat("numdfr object with dimensions:", dim(object), "\n")
-	cat("->Rownames: ", rownames(object), "\n")
-	cat("->Colnames: ", colnames(object), "\n")
+	cat("->Rownames: ", rownames(object), "\n", fill=TRUE)
+	cat("->Colnames: ", colnames(object), "\n", fill=TRUE)
 	cat("\nThe following variables are factor-like:\n")
 	lvls<-.getLevels(object)
-	for(i in findCatColNums(object))
-	{
-		cat("\t", names(lvls)[i], ":", lvls[[i]], "\n")
-	}
+	ccns<-findCatColNums(object)
+	lvltxts<-sapply(ccns, function(ccn){paste(lvls[[ccn]], collapse=" ")})
+	ccoltxt<-paste("\t", names(lvls)[ccns], ":", lvltxts)
+	cat(ccoltxt, "\n", fill=TRUE)
+#	for(i in findCatColNums(object))
+#	{
+#		cat("\t", names(lvls)[i], ":", lvls[[i]], "\n")
+#	}
 	invisible()
 }
 
