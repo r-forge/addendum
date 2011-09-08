@@ -1171,7 +1171,9 @@ curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	}
 	else
 	{
-		return(ccs[length(ccs)]) #last item
+		rv<-ccs[length(ccs)] #last item
+		if(length(ccs) > 1) rv<-paste(  paste(rep(extraPrefPerLevel, length(ccs)-1), collapse=""), rv)
+		return(rv)
 	}
 }
 
