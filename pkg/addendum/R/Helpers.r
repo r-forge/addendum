@@ -1031,6 +1031,25 @@ invertSymmetric<-function(symMat, careful=FALSE, silent=FALSE)
 	}
 }
 
+.addendum_debugmode <- function() {
+  .debugging <- FALSE
+
+  list(
+    get = function() .debugging,
+    set = function(value) .debugging <<- value
+  )
+}
+.actual_debugmode <- .addendum_debugmode()
+.isaddendumDebugging<-function(){.actual_debugmode$get()}
+
+setDebugmodeAddendum<-function(doDebug=TRUE){
+	oldDebug<-.actual_debugmode$get()
+	.actual_debugmode$set(doDebug)
+	invisible(oldDebug)
+}
+.debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
+.debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
+
 mapCleanItem<-function(pattern, useItem)
 {
 	retval<-list(pattern=pattern, useItem=useItem)
@@ -1096,27 +1115,6 @@ clean_cs <- function(x, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*
 	unlist(val)
 }
 
-
-#similar as cat, but appends current system time + a newline
-catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
-	append = FALSE)
-{
-	cat(..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n", file = file, 
-		sep = sep, fill = fill, labels = labels, append = append)
-}
-
-catw<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
-	append = FALSE, prefix=0)
-{
-	if(is.numeric(prefix))
-	{
-		prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
-		prefix<-paste(prefix, ":", sep="")
-	}
-	cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
-		file = file, sep = sep, fill = fill, labels = labels, append = append)
-}
-
 curfntester<-function()
 {
 	for(i in sys.parents())
@@ -1133,25 +1131,6 @@ curfntester<-function()
 		cat("probable name:'", mcall[[1]] , "'\n")
 	}
 }
-
-.addendum_debugmode <- function() {
-  .debugging <- FALSE
-
-  list(
-    get = function() .debugging,
-    set = function(value) .debugging <<- value
-  )
-}
-.actual_debugmode <- .addendum_debugmode()
-.isaddendumDebugging<-function(){.actual_debugmode$get()}
-
-setDebugmodeAddendum<-function(doDebug=TRUE){
-	oldDebug<-.actual_debugmode$get()
-	.actual_debugmode$set(doDebug)
-	invisible(oldDebug)
-}
-.debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
-.debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
 
 curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function",
@@ -1172,7 +1151,7 @@ curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	else
 	{
 		rv<-ccs[length(ccs)] #last item
-		if(length(ccs) > 1) rv<-paste(  paste(rep(extraPrefPerLevel, length(ccs)-1), collapse=""), rv)
+		if(length(ccs) > 1) rv<-paste(  paste(rep(extraPrefPerLevel, length(ccs)-1), collapse=""), rv, sep="")
 		return(rv)
 	}
 }
@@ -1216,6 +1195,23 @@ curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	}
 }
 
+#similar as cat, but appends current system time + a newline
+catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
+	append = FALSE)
+{
+	cat(..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n", file = file, 
+		sep = sep, fill = fill, labels = labels, append = append)
+}
+
+catw<-function(..., prefix=0)
+{
+	if(is.numeric(prefix))
+	{
+		prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
+		prefix<-paste(prefix, ":", sep="")
+	}
+	catt(prefix, ...)
+}
 
 #only output if condition is TRUE
 catif<-function(cond=TRUE, ...)
@@ -1240,17 +1236,6 @@ catwif<-function(cond=TRUE, ..., prefix=0)
 	if(cond)
 	{
 		catw(..., prefix=prefix+1)
-#		#note: cannot use a call to catw here, since it would mess up finding the
-#		#calling function's name
-#		if(is.numeric(prefix))
-#		{
-##			curcall<-sys.call(sys.parent(n=prefix))
-##			prefix<-paste(match.call(call=curcall)[[1]], ":", sep="")
-#			prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
-#			prefix<-paste(prefix, ":", sep="")
-#		}
-#		cat(prefix, ..., format(Sys.time(), "(%Y-%m-%d %H:%M:%S)"), "\n",
-#			file = file, sep = sep, fill = fill, labels = labels, append = append)
 	}
 }
 

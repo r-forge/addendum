@@ -18,7 +18,7 @@ For debugging purposes: allows to cat only when the condition in the first param
 catif(cond = TRUE, ...)
 catt(..., file = "", sep = " ", fill = FALSE, labels = NULL, append = FALSE)
 cattif(cond=TRUE, ...)
-catw(..., file = "", sep = " ", fill = FALSE, labels = NULL, append = FALSE, prefix=0)
+catw(..., prefix=0)
 catwif(cond=TRUE, ..., prefix=0)
 printif(cond=TRUE, ...)
 curfntester()
