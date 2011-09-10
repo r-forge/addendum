@@ -1050,6 +1050,25 @@ setDebugmodeAddendum<-function(doDebug=TRUE){
 .debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
 .debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
 
+
+.addendum_extraprefix <- function() {
+  .extraprefix <- "\t"
+
+  list(
+    get = function() .extraprefix,
+    set = function(value) .extraprefix <<- value
+  )
+}
+.actual_extraprefix <- .addendum_extraprefix()
+.extraprefix<-function(){.actual_extraprefix$get()}
+
+setExtraPrefix<-function(xp="\t"){
+	oldP<-.actual_extraprefix$get()
+	.actual_extraprefix$set(xp)
+	invisible(oldP)
+}
+
+
 mapCleanItem<-function(pattern, useItem)
 {
 	retval<-list(pattern=pattern, useItem=useItem)
@@ -1207,7 +1226,7 @@ catw<-function(..., prefix=0)
 {
 	if(is.numeric(prefix))
 	{
-		prefix<-curfnfinder(skipframes=prefix+1) #note: the +1 is there to avoid returning catw
+		prefix<-curfnfinder(skipframes=prefix+1, extraPrefPerLevel=.extraprefix()) #note: the +1 is there to avoid returning catw
 		prefix<-paste(prefix, ":", sep="")
 	}
 	catt(prefix, ...)

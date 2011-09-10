@@ -7,6 +7,7 @@
 \alias{printif}
 \alias{curfntester}
 \alias{curfnfinder}
+\alias{setExtraPrefix}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Conditional cat with time indication
@@ -23,6 +24,7 @@ catwif(cond=TRUE, ..., prefix=0)
 printif(cond=TRUE, ...)
 curfntester()
 curfnfinder(skipframes=0, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
+setExtraPrefix(xp="\t")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,6 +68,9 @@ if \code{TRUE}, all named functions on the stack are returned, separated by "|".
 }
   \item{extraPrefPerLevel}{
 if \code{retStack=FALSE}, for every named function in the stack except the 'lowest' one, this text is added to the front of the prefix.
+}
+	\item{xp}{
+prefix for each nondisplayed level of the call stack. Set to "" to not indent.
 }
 }
 \details{
