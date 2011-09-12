@@ -14,7 +14,7 @@ terms on the right hand side
 but doesn't support template (just uses the column names plain and simple).
 }
 \usage{
-basisExpansionFormula(dfr, outCol, patternNumericCols = "X", subPatternCol = "X", fixed = TRUE, ...)
+basisExpansionFormula(dfr, outCol, patternNumericCols = "X", subPatternCol = "X", fixed = TRUE, onlyCols=NULL, allowDot=(!is.null(onlyCols)), ...)
 
 modelText(outCol, predCols)
 }
@@ -34,6 +34,14 @@ String within \code{patternNumericCols} that is replaced by the non-\code{outcol
 }
   \item{fixed}{
 Parameter passed on to \code{grep} family of functions
+}
+  \item{onlyCols}{
+If you wish to use only a subset of the columns of \code{dfr} as predictors,
+pass the set as a character vector. Otherwise pass \code{NULL} (the default).
+}
+  \item{allowDot}{
+Allow the formula to be "." on the right hand or not. If no \code{allowDot} was
+passed, by default this is allowed, otherwise not.
 }
   \item{\dots}{
 Other parameters passed on to \code{grep} family of functions
@@ -76,5 +84,7 @@ lr.fit <- gam(formula(useFrm),family=binomial,data=dat,method="REML")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ formula }
+\keyword{ automatic }
+\keyword{ column }
+\keyword{ name }

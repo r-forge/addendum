@@ -43,6 +43,8 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{modelText}}
 		\item \code{\link{asString}}
 		\item \code{\link{formulaCols}}
+		\item \code{\link{makeNamesFormulaSafe}}
+		\item \code{\link{makeDatasetFormulaSafe}}
 	}
 	\item Multiple testing \enumerate{
 		\item \code{\link{checkSig}}

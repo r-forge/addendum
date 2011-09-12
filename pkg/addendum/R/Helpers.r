@@ -1858,41 +1858,59 @@ similarSizeGroups<-function(ngroups, nobs, rand=TRUE)
 # + SecondColName
 #if only the second column is nonnumeric.
 basisExpansionFormula<-function(dfr, outCol, patternNumericCols="X",
-	subPatternCol="X", fixed=TRUE,...)
+	subPatternCol="X", fixed=TRUE, onlyCols=NULL,
+	allowDot=(!is.null(onlyCols)),...)
 {
-	if((patternNumericCols=="X") | (patternNumericCols=="."))
+	if(allowDot)
 	{
-		#rhs<-paste(removeItems(outcol, colnames(dfr)), collapse=" + ")
-		rhs<-"."
-		return(paste(outCol, rhs, sep=" ~ "))
+		if((patternNumericCols=="X") | (patternNumericCols=="."))
+		{
+			#rhs<-paste(removeItems(outcol, colnames(dfr)), collapse=" + ")
+			rhs<-"."
+			return(paste(outCol, rhs, sep=" ~ "))
+		}
 	}
-	numCols<-colnames(dfr)[sapply(dfr, is.numeric)]
-	otherCols<-colnames(dfr)[!sapply(dfr, is.numeric)]
+	isnumcol<-sapply(dfr, is.numeric)
+	numCols<-colnames(dfr)[isnumcol]
+	otherCols<-colnames(dfr)[!isnumcol]
 	numCols<-removeItems(outCol, numCols)
 	otherCols<-removeItems(outCol, otherCols)
-	dblPattern1<-paste(subPatternCol, subPatternCol, sep=",") #X,X
-	dblPattern2<-paste(subPatternCol, subPatternCol, sep=", ") #X, X
-	#if these are found, replace this by all comma-separated numeric variables
-	#e.g. for te(X, X, k=5) -> becomes te(X1, X2, X3, X4, k=5)
-	if(grepl(dblPattern1, patternNumericCols, fixed=fixed, ...))
+	if(! is.null(onlyCols))
 	{
-		allNumCols<-paste(numCols, collapse=", ")
-		convertedNumCols<-gsub(dblPattern1, allNumCols, patternNumericCols,
-			fixed=fixed,...)
+		numCols<-intersect(numCols, onlyCols)
+		otherCols<-intersect(otherCols, onlyCols)
 	}
-	else if(grepl(dblPattern2, patternNumericCols, fixed=fixed, ...))
+	if(length(numCols) > 0)
 	{
-		allNumCols<-paste(numCols, collapse=", ")
-		convertedNumCols<-gsub(dblPattern2, allNumCols, patternNumericCols,
-			fixed=fixed,...)
+		dblPattern1<-paste(subPatternCol, subPatternCol, sep=",") #X,X
+		dblPattern2<-paste(subPatternCol, subPatternCol, sep=", ") #X, X
+		#if these are found, replace this by all comma-separated numeric variables
+		#e.g. for te(X, X, k=5) -> becomes te(X1, X2, X3, X4, k=5)
+		if(grepl(dblPattern1, patternNumericCols, fixed=fixed, ...))
+		{
+			allNumCols<-paste(numCols, collapse=", ")
+			convertedNumCols<-gsub(dblPattern1, allNumCols, patternNumericCols,
+				fixed=fixed,...)
+		}
+		else if(grepl(dblPattern2, patternNumericCols, fixed=fixed, ...))
+		{
+			allNumCols<-paste(numCols, collapse=", ")
+			convertedNumCols<-gsub(dblPattern2, allNumCols, patternNumericCols,
+				fixed=fixed,...)
+		}
+		else
+		{
+			convertedNumCols<-sapply(numCols, function(cc){
+					gsub(subPatternCol, cc, patternNumericCols, fixed=fixed,...)
+				})
+		}
 	}
 	else
 	{
-		convertedNumCols<-sapply(numCols, function(cc){
-				gsub(subPatternCol, cc, patternNumericCols, fixed=fixed,...)
-			})
+		convertedNumCols<-NULL
 	}
 	rhs<-paste(c(convertedNumCols, otherCols), collapse=" + ")
+	if(gsub("[[:space:]]", "", rhs) == "") rhs<-"1" #ensure a valid formula
 	return(paste(outCol, rhs, sep=" ~ "))
 }
 
@@ -2347,3 +2365,23 @@ postfixToMakeUnique<-function(cvect, separator=".", postfixcol=NULL, allowemptyp
 	return(cvect)
 }
 
+makeNamesFormulaSafe<-function(nms)
+{
+	nms<-gsub("(:)|(\\^)|(\\*)|(\\+)|(-)|(\\()|(\\))|(~)|(%)", "_", nms) #avoid characters that may have a special meaning in formulas
+	return(gsub("[[:space:]]", "", nms)) #avoid spaces and similar that could ruin the formula syntax.
+}
+
+makeDatasetFormulaSafe<-function(dfr) UseMethod("makeDatasetFormulaSafe")
+
+makeDatasetFormulaSafe.data.frame<-function(dfr)
+{
+	for(i in seq(ncol(dfr)))
+	{
+		if(is.factor(dfr[[i]]))
+		{
+			levels(dfr[[i]])<-makeNamesFormulaSafe(levels(dfr[[i]]))
+		}
+	}
+	colnames(dfr)<-makeNamesFormulaSafe(colnames(dfr))
+	return(dfr)
+}
