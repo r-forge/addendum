@@ -15,8 +15,8 @@ to provide an extra function that might reject sampled data based on other
 criteria. The non-allrows version does so for 1 row at a time.
 }
 \usage{
-predict.conditional.allrows.GLoMo(object, nobs = 1, dfr, forrows = seq(nrow(dfr)), validateFunction = validateFunction.default, guiddata = NULL, otherData = NULL, initialSuccessRateGuess = 0.5, verbosity = 0,...)
-predict.conditional.GLoMo(object, nobs=1, dfr, forrow, validateFunction=validateFunction.default, guiddata=NULL, otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,...)
+predict.conditional.allrows.GLoMo(object, nobs = 1, dfr, forrows = seq(nrow(dfr)), validateFunction = validateFunction.default, guiddata = NULL, otherData = NULL, initialSuccessRateGuess = 0.5, verbosity = 0, minimumSuccessRate=0.001,...)
+predict.conditional.GLoMo(object, nobs=1, dfr, forrow, validateFunction=validateFunction.default, guiddata=NULL, otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0, minimumSuccessRate=0.001,...)
 validateFunction.acceptall(attempts, otherData, forrow, verbosity = 0)
 validateFunction.useprob(attempts, otherData, forrow, verbosity = 0)
 validateFunction.default(attempts, otherData, forrow, verbosity = 0)
@@ -53,6 +53,12 @@ Used to sample too many rows with \code{\link{predict.GLoMo}}, based on how many
 }
   \item{verbosity}{
 The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
+}
+	\item{minimumSuccessRate}{
+To prevent conditional prediction to run 'forever' because all observations are
+simply unlikely, you can pass along a minimum success rate (between 0 and 1): if
+the attained success rate goes below this, one more attempt is done, and, if need
+be, predictions are accepted randomly to get enough of them.
 }
   \item{\dots}{
 Ignored for now

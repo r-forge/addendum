@@ -851,7 +851,8 @@ validateFunction.default<-function(attempts, otherData, forrow, verbosity=0)
 #		indices (rownumbers) of rows that are accepted
 predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported for 1 row at a time
 	validateFunction=validateFunction.default, guiddata=NULL,
-	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,...)
+	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,
+	minimumSuccessRate=0.001,...)
 {
 	glomo<-object #to make it more recognizable in the following code
 	catwif(verbosity > 0, "for row", forrow)
@@ -881,6 +882,7 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported
 	acceptedRows<-NULL
 	acceptedGLoMoRowsRows<-NULL
 	howManyLoops<-0
+	lastLoop<-FALSE
 	while(successes < nobs)
 	{
 		howManyLoops<-howManyLoops+1
@@ -893,6 +895,16 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported
 		catwif(verbosity > 1, "will validate results now", howManyLoops)
 		newAttemptValidity<-validateFunction(newAttempts, otherData, forrow, verbosity=verbosity-1)
 		newlyAccepted<-length(newAttemptValidity)
+		if(lastLoop && (newlyAccepted < (nobs - successes)))
+		{
+			#we had sworn that this would be the last loop, so 'accept' randomly
+			#what is still needed.
+			stillOpen<-seq(tryAtATime)
+			if(newlyAccepted > 0) stillOpen<-stillOpen[-newAttemptValidity]
+			fakeAccepted<-sample(stillOpen, nobs - successes - newlyAccepted)
+			newAttemptValidity<-sort(c(newAttemptValidity, fakeAccepted))
+			newlyAccepted<-nobs - successes
+		}
 		if(newlyAccepted > 0)
 		{
 			if(newlyAccepted > nobs - successes)
@@ -915,7 +927,14 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported
 		#cattif(verbosity > 5, "Before: attempts", attempts, ", tryAtATime", tryAtATime)
 		attempts<-attempts+tryAtATime
 		#cattif(verbosity > 5, "Next: attempts", attempts, ", successes", successes, ", successRateSoFar", successRateSoFar)
-		if(successes == 0) successRateSoFar<-successRateSoFar/2 else successRateSoFar<-successes/attempts
+		if(newlyAccepted == 0) successRateSoFar<-successRateSoFar/2 else successRateSoFar<-successes/attempts
+		if((newlyAccepted == 0) & (successRateSoFar < minimumSuccessRate))
+		{
+			#there have been too many failures already, so ensure not too many get
+			#generated + make sure the rest is accepted anyhow in the next loop.
+			successRateSoFar<-minimumSuccessRate
+			lastLoop<-TRUE
+		}
 		#cattif(verbosity > 5, "Next: nobs", nobs, ", successes", successes, ", successRateSoFar", successRateSoFar)
 		tryAtATime<-as.integer((nobs-successes) / successRateSoFar)
 		#cattif(verbosity > 5, "Finally: tryAtATime", tryAtATime)
@@ -927,7 +946,8 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, #only supported
 
 predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr, forrows=seq(nrow(dfr)),
 	validateFunction=validateFunction.default, guiddata=NULL,
-	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,...)
+	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,
+	minimumSuccessRate=0.001, ...)
 {
 	glomo<-object #to make it more recognizable in the following code
 	if(length(nobs) != length(forrows))
@@ -945,7 +965,8 @@ predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr, forrows=seq(nro
 			predict.conditional.GLoMo(object=glomo, nobs=nobs[currowi],
 				dfr=dfr, forrow=forrows[currowi], validateFunction=validateFunction, 
 				guiddata=guiddata,otherData=otherData,
-				initialSuccessRateGuess=initialSuccessRateGuess, verbosity=verbosity-1)
+				initialSuccessRateGuess=initialSuccessRateGuess, verbosity=verbosity-1,
+				minimumSuccessRate=minimumSuccessRate)
 		})
 	result<-combineSimilarDfrList(lapply(predPerRow, "[[", "predicted")) #this should be OK for numdfr, but probably slow for data.frame
 	repsPerRow<-sapply(predPerRow, function(resCurRow){nrow(resCurRow$predicted)})
