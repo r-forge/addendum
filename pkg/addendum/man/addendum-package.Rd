@@ -125,6 +125,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{colsAsNumericMatrix}}
 		\item \code{\link{quickFactor}}
 		\item \code{\link{postfixToMakeUnique}}
+		\item \code{\link{reduce}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
@@ -138,6 +139,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{uniqueCharID}}
 		\item \code{\link{categoricalUniqueIdentifiers}}
 		\item \code{\link{findCatColNums}}
+		\item \code{\link{findRepsPerRow}}
 	}
 	\item Internal \enumerate{
 		\item \code{\link{demoCodeWorkSpace}}

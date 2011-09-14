@@ -1047,8 +1047,28 @@ setDebugmodeAddendum<-function(doDebug=TRUE){
 	.actual_debugmode$set(doDebug)
 	invisible(oldDebug)
 }
-.debugtxt<-function(...){if(.isaddendumDebugging()) cat("**D:", ..., "\n")}
-.debugprt<-function(...){if(.isaddendumDebugging()){cat("**D:\n") ; print(...)}}
+.debugtxt<-function(...)
+{
+	if(.isaddendumDebugging())
+	{
+		if(length(list(...))==0)
+		{
+			cat("**D:", curfnfinder(skipframes=2, extraPrefPerLevel=""), "\n")
+		}
+		else
+		{
+			cat("**D:", ..., "\n")
+		}
+	}
+}
+.debugprt<-function(...)
+{
+	if(.isaddendumDebugging())
+	{
+		cat("**D:\n")
+		print(...)
+	}
+}
 
 
 .addendum_extraprefix <- function() {
@@ -1158,7 +1178,7 @@ curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	cs<-sys.calls()
 	cs<-head(cs, -(skipframes+1))
 	ccs<-clean_cs(cs, cils, defaultCI)
-	.debugtxt("After clean up of call stack:", ccs)
+	#.debugtxt("After clean up of call stack:", ccs)
 	if(length(ccs)==0)
 	{
 		return(retIfNone)
@@ -2384,4 +2404,94 @@ makeDatasetFormulaSafe.data.frame<-function(dfr)
 	}
 	colnames(dfr)<-makeNamesFormulaSafe(colnames(dfr))
 	return(dfr)
+}
+
+findRepsPerRow<-function(newdfr, orgdfr, failIfOrgNotFound=TRUE)
+{
+	resrn<-rownames(newdfr)
+	orgrn<-rownames(orgdfr)
+	orgpat<-paste("^", orgrn, ".*$", sep="")
+	matchespernewrow<-lapply(resrn, function(newrn){
+			rv<-which(sapply(orgpat, grepl, newrn)) #which of the original rownames match?
+			longest<-which.max(nchar(orgrn[rv]))
+			return(rv[longest]) #just return the first matching one (room for improvement?)
+		})
+	matchespernewrow<-do.call(c, matchespernewrow)
+	if(length(matchespernewrow) != length(resrn))
+	{
+		if(failIfOrgNotFound)
+		{
+			stop("Could not find original for one of the rownames.")
+		}
+		else
+		{
+			catw("Could not find original for one of the rownames.")
+		}
+	}
+	matchespernewrow<-rle(matchespernewrow)
+	repsperrow<-matchespernewrow$lengths
+	names(repsperrow)<-matchespernewrow$values
+	return(repsperrow)
+}
+
+reduce<-function(object, ...) UseMethod("reduce")
+reduce.default<-function(object, ...) return(object) #default: do nothing!
+
+unreduce<-function(object, ...) UseMethod("unreduce")
+unreduce.default<-function(object, ...) return(object) #default: do nothing!
+
+reduce.data.frame<-function(object, orgdfr, repsperrow=NULL, keeponlyusedrows=FALSE, ...)
+{
+	.debugtxt()
+	if(is.null(repsperrow))
+	{
+		repsperrow<-findRepsPerRow(object, orgdfr)
+	}
+	if(sum(repsperrow) != nrow(object))
+	{
+		stop("repsperrow total length(", sum(repsperrow), ") is not the same as number of rows in object (", nrow(object), ")")
+	}
+	usedrows<-as.integer(names(repsperrow))
+	if(keeponlyusedrows)
+	{
+		uniqueusedrows<-unique(usedrows)
+		usedrows<-match(usedrows, uniqueusedrows)
+		orgdfr<-orgdfr[uniqueusedrows,]
+		names(repsperrow)<-as.character(usedrows)
+	}
+	startofreps<-cumsum(c(1, repsperrow))
+	#cat("startofreps:", startofreps)
+	repdata<-lapply(seq_along(repsperrow), function(i){
+			curorgrow<-usedrows[i]
+			curnas<-which(is.na(orgdfr[curorgrow,]))
+			names(curnas)<-colnames(orgdfr)[curnas]
+			currws<-seq(startofreps[i], startofreps[i+1]-1)
+			curreps<-object[currws, curnas]
+			list(orgrow=curorgrow, nacols=curnas, repdata=curreps, names=rownames(object)[currws])
+		})
+	usemap<-rep(seq_along(usedrows), repsperrow)
+	#note: so usemap contains 1 item for each "exterior row". It always holds the
+	#row_index_ within orgdata that this exterior row comes from.
+	rv<-list(repdata=repdata, orgdata=orgdfr, keptonlyusedrows=keeponlyusedrows,
+		map=usemap)
+	class(rv)<-paste(class(object), "rep", sep=".")
+	return(rv)
+}
+
+unreduce.data.frame.rep<-function(object, ...)
+{
+	.debugtxt()
+	repdata<-object$repdata
+	orgdata<-object$orgdata
+	parts<-lapply(repdata, function(currepdata){
+			reporgrows<-rep(currepdata$orgrow,length(currepdata$names))
+			rv<-orgdata[reporgrows,]
+			if(length(currepdata$nacols) > 0)
+			{
+				rv[,currepdata$nacols]<-currepdata$repdata
+			}
+			rownames(rv)<-currepdata$names
+			return(rv)
+		})
+	combineSimilarDfrList(parts)
 }
