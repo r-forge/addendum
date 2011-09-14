@@ -47,6 +47,9 @@ Add list of functions here later on (similar to addendum)
 		\item \code{\link{display.numdfr}}
 		\item \code{\link{allLevels}}
 	}
+	\item Properties/utility \enumerate{
+		\item \code{\link{numdfr.rep}}
+	}
 }
 }
 \author{
