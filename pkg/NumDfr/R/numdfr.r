@@ -809,4 +809,7 @@ allLevels.numdfr.rep<-function(x, onlyNonEmpty=FALSE)
 	return("[[.numdfr.rep"(x, name, exact=TRUE))
 }
 
-
+factorsToDummyVariables.numdfr.rep<-function(dfr)
+{
+	factorsToDummyVariables(as.numdfr(dfr))
+}

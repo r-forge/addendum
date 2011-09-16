@@ -22,6 +22,7 @@
 \alias{allLevels.numdfr.rep}
 \alias{[[.numdfr.rep}
 \alias{$.numdfr.rep}
+\alias{factorsToDummyVariables.numdfr.rep}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Functions for \code{numdfr.rep} objects
@@ -53,6 +54,7 @@ is.numdfr.rep(x)
 \method{allLevels}{numdfr.rep}(x, onlyNonEmpty=FALSE)
 \method{[[}{numdfr.rep}(x, ..., exact=TRUE)
 \method{$}{numdfr.rep}(x, name)
+\method{factorsToDummyVariables}{numdfr.rep}(dfr)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -97,7 +99,8 @@ Nick sabbe
 \code{\link{print.numdfr}}, \code{\link{display.numdfr}},
 \code{\link{as.matrix.numdfr}}, \code{\link{allLevels.numdfr}},
 \code{\link{[[.numdfr}}, \code{\link{$.numdfr}},
-\code{\link{reduce.numdfr}}, \code{\link{as.numdfr}}, \code{\link{as.numdfr.rep}}
+\code{\link{reduce.numdfr}}, \code{\link{as.numdfr}},
+\code{\link{as.numdfr.rep}}, \code{\link{factorsToDummyVariables.numdfr.rep}}
 }
 \examples{
 	iris.cpy<-iris
