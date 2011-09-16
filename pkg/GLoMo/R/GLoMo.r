@@ -346,6 +346,7 @@ GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 	#hog in the case of numdfr... -> check to improve on this
 	#2011/08/24: changed the function so that this conversion no longer takes place.
 	#now, uniqueFactorCombinationsAndContinuousMeans has the same class as dfr had.
+	#note: keep in sync with combineGLoMos
 	retval<-list(uid=uids, pihat=pihat, omegahat=omegahat, orgdatadim=dim(dfr),
 		uniqueFactorCombinationsAndContinuousMeans=uniqueFactorCombinationsAndContinuousMeans,
 		factorCols=factorCols, guidSeparator=separator)
@@ -1007,3 +1008,91 @@ if(FALSE)
 #was there, there only needs to be one copy of the repeated values, and 20 different
 #'replacement' values!!! Need to check this!
 #However: this may render the name 'numdfr' somewhat unsatisfying
+#Note: this was implemented to a certain extent in numdfr.rep
+
+
+#note: quite a few assumptions are made on the uniformity of the GLoMos passed in!!
+combineGLoMos<-function(..., verbosity=0)
+{
+	allGLoMos<-list(...)
+	N<-length(allGLoMos)
+	catwif(verbosity > 0, "length of allGLoMos: ", N)
+	numUidsPerGLoMo<-sapply(allGLoMos, function(curGLoMo){length(curGLoMo$uid)})
+	catwif(verbosity > 0, "numUidsPerGLoMo: ", numUidsPerGLoMo)
+	probFactorPerGLoMo<-ifelse(numUidsPerGLoMo==0, 1, 1/numUidsPerGLoMo)
+	
+	catwif(verbosity > 0, "allUids")
+	allUids<-do.call(c, lapply(allGLoMos, "[[", "uid"))
+	catwif(verbosity > 0, length(allUids), "Uids found.")
+	uniqueUids<-sort(unique(allUids))
+	catwif(verbosity > 0, length(uniqueUids), "unique Uids found.")
+	catwif(verbosity > 0, "matchPerUniqueUid")
+	matchPerUniqueUid<-sapply(allGLoMos, function(curGLoMo){match(uniqueUids, curGLoMo$uid)})
+	#matchPerUniqueUid now holds a column per GLoMo and a row per uniqueUid.
+	#if the uniqueUid does not occur in that GLoMo, it holds NA, otherwise it
+	#holds the rowindex of that uniqueUid in that GLoMos uid
+	catwif(verbosity > 0, "newPihat")
+	newPihat<-apply(matchPerUniqueUid, 1, function(curMatchRow){
+			nonNas<-!is.na(curMatchRow)
+			pis<-mapply(function(ri, glomo, prf){glomo$pihat[ri]*prf}, curMatchRow[nonNas], allGLoMos[nonNas], probFactorPerGLoMo[nonNas])
+			curpi<-sum(unlist(pis))
+			return(curpi)
+		})
+	#very _temporary_ solution: simply average out the covariance matrices!!
+	#based on the concept of pooled variance (?):
+	#http://en.wikipedia.org/wiki/Pooled_variance
+	#may need to somehow incorporate sample size (or can I rely on nearly equal
+	#sample sizes for now ?
+	catwif(verbosity > 0, "combinedOmegaHat")
+	omegaHatList<-lapply(allGLoMos, "[[", "omegahat")
+	orgDim<-dim(allGLoMos[[1]]$omegahat)
+	combinedOmegaHat<-array(do.call(c, omegaHatList), dim=c(orgDim, N))
+	newOmegahat<-rowMeans(combinedOmegaHat, dims=length(orgDim))
+	#another dubious one: need to think this over! -> probably not really an issue
+	catwif(verbosity > 0, "allorgdims")
+	allorgdims<-sapply(allGLoMos, "[[", "orgdatadim")
+	newOrgdims<-rowMeans(allorgdims)
+	#disregarding sample size again below
+	colcount<-ncol(allGLoMos[[1]]$uniqueFactorCombinationsAndContinuousMeans)
+	newFactorCols<-allGLoMos[[1]]$factorCols
+	cntcls<-seq(colcount)
+	if(length(newFactorCols) > 0) cntcls<-cntcls[-newFactorCols]
+	catwif(verbosity > 0, "newUniqueFactorCombinationsAndContinuousMeans")
+	newUniqueFactorCombinationsAndContinuousMeans<-apply(matchPerUniqueUid, 1, function(curMatchRow){
+			nonNas<-!is.na(curMatchRow)
+			usedRowList<-mapply(function(ri, glomo){glomo$uniqueFactorCombinationsAndContinuousMeans[ri]}, curMatchRow[nonNas], allGLoMos[nonNas])
+			retrow<-usedRowList[[1]]
+			cntmat<-sapply(usedRowList, function(curnumdfr){return(curnumdfr[1, cntcls, drop=TRUE])})
+			#cntmat now holds a matrix with one row per cnt variable and one col per 'used row'
+			retrow[1,cntcls]<-rowMeans(cntmat)
+			return(retrow)
+		})
+	catwif(verbosity > 0, "newUniqueFactorCombinationsAndContinuousMeans combine")
+	newUniqueFactorCombinationsAndContinuousMeans<-combineSimilarDfrList(newUniqueFactorCombinationsAndContinuousMeans)
+	newGuidSeparator<-allGLoMos[[1]]$guidSeparator
+	
+	retval<-list(uid=uniqueUids, pihat=newPihat, omegahat=newOmegahat, orgdatadim=newOrgdims,
+		uniqueFactorCombinationsAndContinuousMeans=newUniqueFactorCombinationsAndContinuousMeans,
+		factorCols=newFactorCols, guidSeparator=newGuidSeparator)
+	class(retval)<-"GLoMo"
+	return(retval)
+}
+
+if(FALSE)
+{
+	require(addendum)
+	require(NumDfr)
+	require(GLoMo)
+	require(glmnet)
+	setwd("C:/users/nisabbe/Documents/My Dropbox/Doctoraat/Bayesian Lasso")
+	source("EMLasso.R")
+	load("EMLRun\\dysp2\\EMLasso.1l.lognet.cv_parallel_1.saved")
+	tmpeml<-EMLasso.1l.lognet.cv_parallel_1
+	listOfGLoMos<-lapply(tmpeml$actualfits, function(curfit){curfit$fitinfo$glomo})
+
+	class(listOfGLoMos[[1]])
+	str(listOfGLoMos[[1]])
+
+	tstglmo<-do.call(combineGLoMos, c(listOfGLoMos, verbosity=6))
+	
+}
