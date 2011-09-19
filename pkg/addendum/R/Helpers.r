@@ -1124,7 +1124,7 @@ typicalCleanItemList<-function()
 	list(
 		mapCleanItem("(.*apply)", 3),
 		mapCleanItem("(do\\.call)", 2),
-		mapCleanItem("(function)", "FUN"),
+		mapCleanItem("(function)|(doTryCatch)|(tryCatchOne)|(tryCatch)|(try)", "FUN"),
 		mapCleanItem("(source)|(eval\\.with\\.vis)", "###")
 	)
 }
@@ -1768,10 +1768,61 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks)
 
 #combine the glmnet plot with the crossvalidation plot
 plot2.cv.glmnet<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
-	...)
+	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
+	legendCex=0.5, legendOf=20, ..., verbosity=0)
 {
+	catwif(verbosity>0, "simple glmnet plot")
 	plot(cvobj$glmnet.fit, xvar, ...)
+	catwif(verbosity>0, "adding cross validation plot")
 	addCVPlot(cvobj, xvar=xvar, numTicks=numTicks)
+	if(! is.null(lamIndexAxisCol))
+	{
+		catwif(verbosity>0, "adding lambda index axis")
+		if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
+		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,pos=lamIndexAxisPos, col=lamIndexAxisCol)
+	}
+
+	if(!is.null(legendPos))
+	{
+		#plot.glmnet calls plotCoef, which calls matplot with matrix t(beta).
+		#by default, I think matplot uses colors 1:6
+		#There still is something not right, but I'll let it like this for now.
+		fit<-cvobj$glmnet.fit
+		firstAppearance<-apply(fit$beta, 1, function(rw){match(TRUE, abs(rw) > 0)})
+#		catwif(verbosity > 1, "firstAppearance (org):")
+#		printif(verbosity > 1, firstAppearance)
+		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
+#		catwif(verbosity > 1, "firstAppearance (without NAs):")
+#		printif(verbosity > 1, firstAppearance)
+		orderOfFirstAppearance<-order(firstAppearance)[1:legendOf]
+#		catwif(verbosity > 1, "orderOfFirstAppearance:")
+#		printif(verbosity > 1, orderOfFirstAppearance)
+		whereAppearing<-firstAppearance[orderOfFirstAppearance]
+#		catwif(verbosity > 1, "whereAppearing:")
+#		printif(verbosity > 1, whereAppearing)
+		legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
+#		catwif(verbosity > 1, "legendForVars:")
+#		printif(verbosity > 1, legendForVars)
+#
+#		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
+#		catwif(verbosity > 1, "firstAppearance:", firstAppearance)
+#		orderedAppearance<-sort(firstAppearance)
+#		catwif(verbosity > 1, "orderedAppearance:", orderedAppearance)
+#		whereAppearing<-orderedAppearance[1:legendOf]
+#		catwif(verbosity > 1, "whereAppearing:", whereAppearing)
+#		#firstCoef<-fit$lambda[whereAppearing]
+#		legendForVars<-names(whereAppearing)
+#		catwif(verbosity > 1, "legendForVars:", legendForVars)
+#		varIndexInVars<-match(legendForVars, rownames(fit$beta))
+#		catwif(verbosity > 1, "varIndexInVars:", varIndexInVars)
+		cols<-rep(1:6, length.out=nrow(fit$beta))
+		useColors<-cols[orderOfFirstAppearance]
+		catwif(verbosity > 1, "useColors:")
+		printif(verbosity > 1, useColors)
+		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
+		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
+	}
+	invisible()
 }
 
 addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...)

@@ -8,7 +8,7 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plot2.cv.glmnet(cvobj, xvar = c("norm", "lambda", "dev"), numTicks = 5, ...)
+plot2.cv.glmnet(cvobj, xvar = c("norm", "lambda", "dev"), numTicks = 5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, ..., verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,8 +23,30 @@ deviance explained. See \code{plot.glmnet}
   \item{numTicks}{
 How many ticks should be presented on the righthand axis for the crossvalidation value.
 }
+  \item{lamIndexAxisCol}{
+if non-\code{NULL}, an extra axis is added to the bottom in this color: see \code{\link{addLamIndexAxis}} for its meaning
+}
+  \item{lamIndexAxisPos}{
+If \code{lamIndexAxisCol != NULL}, the extra axis is added at this y-position.
+If \code{NULL} (the default), the lowest value on the y-axis is used.
+}
+  \item{legendPos}{
+Position in text format (see \code{\link{legend}}) where the legend will appear.
+If \code{NULL}, no legend appears. Default is "topright".
+}
+  \item{legendCex}{
+If \code{legendPos != NULL}, the size of the legend text etc is multiplied by
+this factor wrt the normal size. Default is \code{0.5}
+}
+  \item{legendOf}{
+If \code{legendPos != NULL}, this number says for how many (in order of
+appearance) variables the legend must be presented. Default is \code{20}.
+}
   \item{\dots}{
 Extra parameters passed on to \code{plot.glmnet}
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
 }
 }
 \value{
