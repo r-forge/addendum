@@ -23,6 +23,7 @@
 \alias{[[.numdfr.rep}
 \alias{$.numdfr.rep}
 \alias{factorsToDummyVariables.numdfr.rep}
+\alias{originalDataset}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Functions for \code{numdfr.rep} objects
@@ -54,7 +55,8 @@ is.numdfr.rep(x)
 \method{allLevels}{numdfr.rep}(x, onlyNonEmpty=FALSE)
 \method{[[}{numdfr.rep}(x, ..., exact=TRUE)
 \method{$}{numdfr.rep}(x, name)
-\method{factorsToDummyVariables}{numdfr.rep}(dfr)
+\method{factorsToDummyVariables}{numdfr.rep}(dfr, ...)
+originalDataset(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -76,6 +78,9 @@ see equally named method for \code{\link{numdfr}}
 	Current implementation needs work (optimization, special case handling,...)
 	
 	As of today, the assignments have as their only implementation to fail!
+	
+	\code{originalDataset} stands out somewhat as it is not some S3 implementation,
+	but simply returns the underlying 'original' dataset (\code{\link{numdfr}}).
 }
 \value{
 see equally named method for \code{\link{numdfr}}

@@ -495,6 +495,8 @@ as.numdfr.rep.numdfr<-function(object, orgdfr, ...)
 	return(.torepsperrow(mappart))
 }
 
+originalDataset<-function(x) .getOrgData.rep(x)
+
 #for now: very unefficient implementation of these!
 "[.numdfr.rep"<-function (x, i, j, returnAsMatrix = drop, drop = FALSE)
 {
@@ -809,7 +811,7 @@ allLevels.numdfr.rep<-function(x, onlyNonEmpty=FALSE)
 	return("[[.numdfr.rep"(x, name, exact=TRUE))
 }
 
-factorsToDummyVariables.numdfr.rep<-function(dfr)
+factorsToDummyVariables.numdfr.rep<-function(dfr, ...)
 {
-	factorsToDummyVariables(as.numdfr(dfr))
+	factorsToDummyVariables(as.numdfr(dfr), ...)
 }
