@@ -1012,9 +1012,9 @@ if(FALSE)
 
 
 #note: quite a few assumptions are made on the uniformity of the GLoMos passed in!!
-combineGLoMos<-function(..., verbosity=0)
+combineGLoMos<-function(..., listOfGLoMos=NULL, verbosity=0)
 {
-	allGLoMos<-list(...)
+	allGLoMos<-c(list(...), listOfGLoMos)
 	N<-length(allGLoMos)
 	catwif(verbosity > 0, "length of allGLoMos: ", N)
 	numUidsPerGLoMo<-sapply(allGLoMos, function(curGLoMo){length(curGLoMo$uid)})

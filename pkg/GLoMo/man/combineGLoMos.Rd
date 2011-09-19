@@ -10,12 +10,15 @@ matching the same form of dataset, each of equal size or at least very similar.
 This is a method that combines them reasonably into 1 GLoMo model object.
 }
 \usage{
-combineGLoMos(..., verbosity=0)
+combineGLoMos(..., listOfGLoMos=NULL, verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{
 several \code{\link{GLoMo}} objects from similar datasets
+}
+  \item{listOfGLoMos}{
+if you have the parameters already in a list, this is the easier way of passing them.
 }
   \item{verbosity}{
 The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
