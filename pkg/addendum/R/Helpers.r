@@ -2546,3 +2546,114 @@ unreduce.data.frame.rep<-function(object, ...)
 		})
 	combineSimilarDfrList(parts)
 }
+
+do.parallel<-function(i, functionname, paramname, logdir, savedir=logdir,
+	logorsavename= paste(functionname, "parallel", sep="_"), postprocessname=NULL,
+	verbosity)#no default for verbosity!! Otherwise missing may not work
+{
+	param<-mget(paramname, as.environment(-1), ifnotfound=list(result=NULL), inherits=TRUE)[[1]]
+	if(is.null(param))
+	{
+		return(paste("An error occurred: object '", paramname, "' could not be found."))
+	}
+	if(missing(verbosity))
+	{
+		#often occurring situation: the verbosity is really in the param
+		#note, if used from run.parallel, this should never occur
+		if(!is.null(param$verbosity))
+		{
+			verbosity<-param$verbosity
+		}
+		else
+		{
+			verbosity=0
+		}
+	}
+#	if(verbosity > 0){} #try to send a message to the main out ?
+
+	logorsavename<-paste(logorsavename, i, sep="_")
+	if((verbosity>0) & (!is.null(logdir)))
+	{
+		setExtraPrefix(" ")
+		sink(paste(logdir, logorsavename, ".txt", sep=""))
+		on.exit(sink()) #restore normal logging at the end of the function
+	}
+	catwif(verbosity > 0, "Getting current parameter set.")
+	curparam<-param[i] # see e.g. "[.EMLasso.1l.lognet.cv.param"
+	catwif(verbosity > 3, "It resulted in this object (str):")
+	if(verbosity > 3)
+	{
+		str(curparam, max.level=1)
+	}
+	catwif(verbosity > 0, "Will now actually perform the call for '", functionname, "'.")
+	retval<-try(do.call(functionname, as.list(curparam)))
+	catwif(verbosity > 0, "Call for '", functionname, "' finished.")
+	if(verbosity > 0)
+	{
+		if(inherits(retval, "try-error"))
+		{
+			catw("Unfortunately, there was an error in the call - this will be returned")
+			print(retval)
+			traceback() #don't know if this will work, but it's worth a try
+		}
+	}
+	if((verbosity>0) & (!is.null(savedir)))
+	{
+		catwif(verbosity > 0, "Saving current result.")
+		assign(logorsavename, retval)
+		save(list=logorsavename, file=paste(savedir, logorsavename, ".saved", sep=""))
+	}
+	#idea here: avoid returning big object: perhaps it's faster to just save it
+	#and then later get it back (?)
+
+	if(! is.null(postprocessname))
+	{
+		postprocess<-mget(postprocessname, as.environment(-1), ifnotfound=list(result=NULL), inherits=TRUE)[[1]]
+		if(is.null(postprocess))
+		{
+			catw("postprocessname '", postprocessname, "' was passed along but could not be found. No postprocessing occurs.")
+		}
+		else
+		{
+			retval<-tryRet(postprocess(retval, curparam, i, verbosity-1), errRet=retval)
+		}
+		#retval<-reduce.cv.1l.emlasso(retval, param, orgdfr, ..., verbosity=verbosity-2)
+	}
+
+	return(retval)
+}
+
+run.parallel<-function(..., paramcreationname, functionname, paramname, logdir,
+	savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"),
+	postprocessname=NULL)
+{
+	require(snowfall)
+  if(!sfIsRunning())
+  {
+    stop("run.parallel can only be used when a snowfall cluster is running.")
+  }
+	parlist<-list(...)
+	if(!is.null(parlist$verbosity))
+	{
+		verbosity<-parlist$verbosity
+	}
+	else
+	{
+		verbosity<-0
+	}
+
+	catwif(verbosity > 0, "Converting parameters.")
+	params<-do.call(paramcreationname, parlist)
+	catwif(verbosity>0, "Assigning and exporting to all processors.")
+	assign(paramname, params)
+	sfExport(list=paramname)
+	ivalues<-seq(length(params)) #see e.g. length.EMLasso.1l.lognet.cv.param
+	catwif(verbosity > 0, "need to process a total of", length(ivalues), "items in parallel.")
+	catwif(verbosity > 0, "Actual processing.")
+	parts<-sfLapply(ivalues, do.parallel, functionname=functionname,
+		paramname=paramname, logdir=logdir, savedir=savedir,
+		logorsavename=logorsavename, postprocessname=postprocessname,
+		verbosity=verbosity)
+	catwif(verbosity > 0, "Actual processing finished.")
+	return(parts)
+}

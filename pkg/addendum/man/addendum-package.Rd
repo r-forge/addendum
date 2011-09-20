@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.3\cr
-Date: \tab 2011-08-24\cr
+Version: \tab 1.4\cr
+Date: \tab 2011-09-20\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -140,6 +140,10 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{categoricalUniqueIdentifiers}}
 		\item \code{\link{findCatColNums}}
 		\item \code{\link{findRepsPerRow}}
+	}
+	\item Parallel execution \enumerate{
+		\item \code{\link{run.parallel}}
+		\item \code{\link{do.parallel}}
 	}
 	\item Internal \enumerate{
 		\item \code{\link{demoCodeWorkSpace}}

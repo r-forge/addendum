@@ -1,11 +1,11 @@
 Package: addendum
 Type: Package
 Title: Things that R needs for day to day use
-Version: 1.3
-Date: 2011-08-24
+Version: 1.4
+Date: 2011-09-20
 Author: Nick Sabbe
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: In essence this is a recap of things I've created over the last three years and found reusable to some extent.
 License: GPL (>= 2)
 LazyLoad: yes
-Depends: glmnet, rgl, Matrix, mgcv
+Depends: glmnet, rgl, Matrix, mgcv, snowfall
