@@ -1825,7 +1825,7 @@ simpleplot.cv.glmnet<-function(object,..., verbosity=0) plot(object$glmnet.fit, 
 plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
 	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
-	centercolor="red", fillsidecolor="#0000ff22"..., verbosity=0)
+	centercolor="red", fillsidecolor="#0000ff22", ..., verbosity=0)
 {
 	catwif(verbosity>0, "simple glmnet plot")
 	simpleplot(cvobj, xvar, ...)

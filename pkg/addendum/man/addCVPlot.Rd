@@ -52,6 +52,9 @@ with this color. Advised to ensure that it is transparent (low alpha value)
 The higher this value, the more levels of progress and debug information is
 displayed (note: in R for Windows, turn off buffered output)
 }
+  \item{object}{
+object for which the beta must be obtained
+}
 }
 \details{
 Available for customization, but in general probably easier used as part of \code{\link{plotex}}
@@ -70,7 +73,7 @@ Nick Sabbe (nick.sabbe@ugent.be)
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{plot2.cv.glmnet}}
+\code{\link{plotex}}
 }
 \examples{
 require(glmnet)

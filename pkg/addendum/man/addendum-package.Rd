@@ -25,7 +25,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{factorsToDummyVariables}}
 		\item \code{\link{originalColumnNamesFromDummyVars}}
 		\item \code{\link{makeFactorsAndSetFrontal}}
-		\item \code{\link{plot2.cv.glmnet}}
+		\item \code{\link{plotex}}
 		\item \code{\link{showNonZeroCoef}}
 	}
 	\item plotting \enumerate{
