@@ -3,6 +3,10 @@
 \alias{getXIndices}
 \alias{gn.error.bars}
 \alias{addLamIndexAxis}
+\alias{getBeta}
+\alias{getBeta.cv.glmnet}
+\alias{getBeta}
+\alias{getBeta}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Add crossvalidation plot to standard glmnet plot
@@ -13,7 +17,9 @@ optimization parameter \code{lambda}. It also provides a way to plot crossvalida
 results. This method adds the crossvalidation plot on top of the coefficient plot.
 }
 \usage{
-addCVPlot(cvobj, xvar = c("norm", "lambda", "dev"), numTicks)
+addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0)
+getXIndices(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
+\method{getBeta}{cv.glmnet}(object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,16 +34,34 @@ deviance explained. Should be identical as the one passed to \code{plot.glmnet}
   \item{numTicks}{
 How many ticks should be presented on the righthand axis for the crossvalidation value.
 }
+  \item{smoothed}{
+If \code{TRUE}, the error flags and CV values are not shown as error flags, but
+in a smoothed form.
+}
+  \item{errorbarcolor}{
+Color in which the error flags or upper limit (\code{smoothed}) are drawn
+}
+  \item{centercolor}{
+Color in which the CV values are drawn
+}
+  \item{fillsidecolor}{
+When \code{smoothed=TRUE} the region between the top and bottom value is filled
+with this color. Advised to ensure that it is transparent (low alpha value)
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
+}
 }
 \details{
-Available for customization, but in general probably easier used as part of \code{\link{plot2.cv.glmnet}}
+Available for customization, but in general probably easier used as part of \code{\link{plotex}}
 
 \code{getXIndices} is a helper function that recreates some code present in \code{plot.cv.glmnet}, and so is \code{gn.error.bars}.
 
 \code{addLamIndexAxis} can be used to add an extra axis (at the bottom) showing which of the (typically) 100 \code{lambda} values is shown.
 }
 \value{
-Nothing is returned
+Invisibly, a \code{\link{data.frame}} holding the smoothed/transformed plot values is returned.
 }
 \author{
 Nick Sabbe (nick.sabbe@ugent.be)

@@ -1,5 +1,8 @@
-\name{plot2.cv.glmnet}
-\alias{plot2.cv.glmnet}
+\name{plotex}
+\alias{plotex}
+\alias{simpleplot}
+\alias{simpleplot.default}
+\alias{simpleplot.cv.glmnet}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Plots both crossvalidation plot and coefficient plot from glmnet in one plot
@@ -8,7 +11,8 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plot2.cv.glmnet(cvobj, xvar = c("norm", "lambda", "dev"), numTicks = 5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, ..., verbosity=0)
+plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22"..., verbosity=0)
+\method{simpleplot}{cv.glmnet}(object,..., verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,12 +46,28 @@ this factor wrt the normal size. Default is \code{0.5}
 If \code{legendPos != NULL}, this number says for how many (in order of
 appearance) variables the legend must be presented. Default is \code{20}.
 }
+  \item{smoothCV}{
+If \code{TRUE}, the error flags and CV values are not shown as error flags, but
+in a smoothed form.
+}
+  \item{errorbarcolor, centercolor, fillsidecolor}{
+see \code{\link{addCVPlot}}
+}
   \item{\dots}{
 Extra parameters passed on to \code{plot.glmnet}
 }
   \item{verbosity}{
-The higher this value, the more levels of progress and debug information is displayed (note: in R for Windows, turn off buffered output)
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
 }
+  \item{object}{
+object for which 'simple' plot must be made (typically: the non-crossvalidation
+plot for the object)
+}
+}
+\details{
+\code{simpleplot} is really just a helper to allow extension to \code{\link{glmnet}}-
+like objects.
 }
 \value{
 Nothing is returned
@@ -75,7 +95,7 @@ px=exp(fx)
 px=px/(1+px)
 ly=rbinom(n=length(px),prob=px,size=1)
 cvob1=cv.glmnet(x,y)
-plot2.cv.glmnet(cvob1, xvar="lambda", numTicks=5)
+plotex(cvob1, xvar="lambda", numTicks=5)
 title("Gaussian Family",line=2.5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

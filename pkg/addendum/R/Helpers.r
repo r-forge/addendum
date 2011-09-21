@@ -1728,14 +1728,15 @@ gn.error.bars<-function (x, upper, lower, width = 0.02, ...)
 }
 
 #similar to the start of plot.cv.glmnet
-getXIndices<-function(cvobj, xvar=c("norm", "lambda", "dev"))
+getXIndices<-function(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
 {
 	require(glmnet)
 	xvar = match.arg(xvar)
   switch(xvar, norm = {
-	  whichNZ = nonzeroCoef(cvobj$glmnet.fit$beta)#it appears there is a
+		orgBeta<-getBeta(cvobj)
+	  whichNZ = nonzeroCoef(orgBeta)#it appears there is a
 			#	nonzeroCoef in glmnet!!!
-	  theBeta = as.matrix(cvobj$glmnet.fit$beta[whichNZ, ])
+	  theBeta = as.matrix(orgBeta[whichNZ, ])
 		index <- apply(abs(theBeta), 2, sum)
   }, lambda = {
 		index <- log(cvobj$lambda)
@@ -1745,84 +1746,117 @@ getXIndices<-function(cvobj, xvar=c("norm", "lambda", "dev"))
   return(index)
 }
 
+getBeta<-function(object) UseMethod("getBeta")
+getBeta.cv.glmnet<-function(object)
+{
+	object$glmnet.fit$beta
+}
+
 #add the crossvalidation plot to a recently created coefficient plot for glmnet
-addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks)
+addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
+	smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red",
+	fillsidecolor="#0000ff22", verbosity=0)
 {
 	require(glmnet)
  	x<-getXIndices(cvobj, xvar=xvar)
-	yrange<-range(coef(cvobj$glmnet.fit))
-	truerange<-range(c(cvobj$cvup, cvobj$cvlo))
+	#yrange<-range(coef(cvobj$glmnet.fit))
+	yrange<-par("yaxp")[1:2] #current outer limits of the axis
+	truerange<-range(c(cvobj$cvup, cvobj$cvlo)) #outer limits of the true value
 	scaleFact<-(yrange[2] - yrange[1])/(truerange[2] - truerange[1])
 	yvalue<-function(untrans){yrange[1] + (untrans - truerange[1]) * scaleFact  }
-  gn.error.bars(x, yvalue(cvobj$cvup), yvalue(cvobj$cvlo), width = 0.01,
-		col = "darkgrey")
-  points(x, yvalue(cvobj$cvm), pch = 20, col = "red")
+	
+	if(smoothed)
+	{
+		#let's first get the smoothed values.
+		tmpdata<-data.frame(x=x, y=cvobj$cvm, yt=cvobj$cvup, yl=cvobj$cvlo)
+		tmpwts<-1/((cvobj$cvsd)^2)
+		res.lo<-loess(y~x, data=tmpdata, weights=tmpwts)
+		tmpx<-seq(min(x), max(x), length.out=100)
+		tmpres<-predict(res.lo, data.frame(x=tmpx), se=TRUE)
+		tmpy<-yvalue(tmpres$fit)
+		tmptop<-yvalue(tmpres$fit+tmpres$se)
+		tmpse<-tmptop-tmpy
+		tmpbot<-tmpy-tmpse
+
+		#play extra safe: smooth the 'top' + add the se from the smoothing and
+		#similar to the bottom
+		tmptruetop<-predict(loess(yt~x, data=tmpdata), data.frame(x=tmpx), se=TRUE)#note: don't use the weights!
+		tmptruebot<-predict(loess(yl~x, data=tmpdata), data.frame(x=tmpx), se=TRUE)#note: don't use the weights!
+		tmptruetop<-tmptruetop$fit + tmptruetop$se
+		tmptruebot<-tmptruebot$fit - tmptruebot$se
+		struetop<-yvalue(tmptruetop)
+		struebot<-yvalue(tmptruebot)
+
+		scaledOut<-data.frame(x=tmpx, y=tmpres$fit, se=tmpres$se, scaledy=tmpy,
+			scaledtop=tmptop, scaledbot=tmpbot, truetop=tmptruetop, truebot=tmptruebot,
+			scaledtruetop=struetop, scaledtruebot=struebot)
+		lines(tmpx, tmpy, col=centercolor, lty="dashed")
+#		lines(tmpx, tmptop, col=errorbarcolor, lty="dashed")
+#		lines(tmpx, tmpbot, col=errorbarcolor, lty="dashed")
+		lines(tmpx, struetop, col=errorbarcolor, lty="dashed")
+		lines(tmpx, struebot, col=errorbarcolor, lty="dashed")
+#		polygon(c(tmpx, rev(tmpx)), c(struetop, rev(tmptop)), border=NA, col=fillsidecolor)
+#		polygon(c(tmpx, rev(tmpx)), c(tmpbot, rev(tmptop)), border=NA, col=fillcentercolor)
+#		polygon(c(tmpx, rev(tmpx)), c(struebot, rev(tmpbot)), border=NA, col=fillsidecolor)
+		polygon(c(tmpx, rev(tmpx)), c(struetop, rev(struebot)), border=NA, col=fillsidecolor)
+	}
+	else
+	{
+		scaledOut<-data.frame(cvup=yvalue(cvobj$cvup), cvlo=yvalue(cvobj$cvlo),
+			cvm=yvalue(cvobj$cvm))
+	  gn.error.bars(x, scaledOut$cvup, scaledOut$cvlo, width = 0.01,
+			col = errorbarcolor)
+	  points(x, scaledOut$cvm, pch = 20, col = centercolor)
+	}
   axis(side = 4, at = seq(yrange[1], yrange[2], length.out=numTicks),
 		labels = paste(round(seq(truerange[1], truerange[2], length.out=numTicks),
 			2)),
 		tick = TRUE, line = 0)
   abline(v = x[match(cvobj$lambda.min, cvobj$lambda)], lty = 3)
   abline(v = x[match(cvobj$lambda.1se, cvobj$lambda)], lty = 3)
-  invisible()
+  invisible(scaledOut)
 }
 
+simpleplot<-function(object,..., verbosity=0) UseMethod("simpleplot")
+simpleplot.default<-function(object,..., verbosity=0) plot(object, ...)
+simpleplot.cv.glmnet<-function(object,..., verbosity=0) plot(object$glmnet.fit, ...)
+
 #combine the glmnet plot with the crossvalidation plot
-plot2.cv.glmnet<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
+plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
-	legendCex=0.5, legendOf=20, ..., verbosity=0)
+	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
+	centercolor="red", fillsidecolor="#0000ff22"..., verbosity=0)
 {
 	catwif(verbosity>0, "simple glmnet plot")
-	plot(cvobj$glmnet.fit, xvar, ...)
+	simpleplot(cvobj, xvar, ...)
 	catwif(verbosity>0, "adding cross validation plot")
-	addCVPlot(cvobj, xvar=xvar, numTicks=numTicks)
+	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
+		errorbarcolor=errorbarcolor, centercolor=centercolor,
+		fillsidecolor=fillsidecolor, verbosity=verbosity-1)
 	if(! is.null(lamIndexAxisCol))
 	{
 		catwif(verbosity>0, "adding lambda index axis")
 		if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
-		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,pos=lamIndexAxisPos, col=lamIndexAxisCol)
+		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,
+			pos=lamIndexAxisPos, col=lamIndexAxisCol)
 	}
 
 	if(!is.null(legendPos))
 	{
-		#plot.glmnet calls plotCoef, which calls matplot with matrix t(beta).
-		#by default, I think matplot uses colors 1:6
-		#There still is something not right, but I'll let it like this for now.
 		fit<-cvobj$glmnet.fit
 		firstAppearance<-apply(fit$beta, 1, function(rw){match(TRUE, abs(rw) > 0)})
-#		catwif(verbosity > 1, "firstAppearance (org):")
-#		printif(verbosity > 1, firstAppearance)
 		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
-#		catwif(verbosity > 1, "firstAppearance (without NAs):")
-#		printif(verbosity > 1, firstAppearance)
 		orderOfFirstAppearance<-order(firstAppearance)[1:legendOf]
-#		catwif(verbosity > 1, "orderOfFirstAppearance:")
-#		printif(verbosity > 1, orderOfFirstAppearance)
 		whereAppearing<-firstAppearance[orderOfFirstAppearance]
-#		catwif(verbosity > 1, "whereAppearing:")
-#		printif(verbosity > 1, whereAppearing)
 		legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
-#		catwif(verbosity > 1, "legendForVars:")
-#		printif(verbosity > 1, legendForVars)
-#
-#		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
-#		catwif(verbosity > 1, "firstAppearance:", firstAppearance)
-#		orderedAppearance<-sort(firstAppearance)
-#		catwif(verbosity > 1, "orderedAppearance:", orderedAppearance)
-#		whereAppearing<-orderedAppearance[1:legendOf]
-#		catwif(verbosity > 1, "whereAppearing:", whereAppearing)
-#		#firstCoef<-fit$lambda[whereAppearing]
-#		legendForVars<-names(whereAppearing)
-#		catwif(verbosity > 1, "legendForVars:", legendForVars)
-#		varIndexInVars<-match(legendForVars, rownames(fit$beta))
-#		catwif(verbosity > 1, "varIndexInVars:", varIndexInVars)
 		cols<-rep(1:6, length.out=nrow(fit$beta))
 		useColors<-cols[orderOfFirstAppearance]
-		catwif(verbosity > 1, "useColors:")
-		printif(verbosity > 1, useColors)
+#		catwif(verbosity > 1, "useColors:")
+#		printif(verbosity > 1, useColors)
 		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
 		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
 	}
-	invisible()
+	invisible(cvpsc)
 }
 
 addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...)
