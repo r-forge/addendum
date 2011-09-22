@@ -27,6 +27,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{makeFactorsAndSetFrontal}}
 		\item \code{\link{plotex}}
 		\item \code{\link{showNonZeroCoef}}
+		\item \code{\link{firstRepeatedAppearance}}
 	}
 	\item plotting \enumerate{
 		\item \code{\link{getColorRange}}

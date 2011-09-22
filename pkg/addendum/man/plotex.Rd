@@ -3,6 +3,7 @@
 \alias{simpleplot}
 \alias{simpleplot.default}
 \alias{simpleplot.cv.glmnet}
+\alias{firstRepeatedAppearance}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Plots both crossvalidation plot and coefficient plot from glmnet in one plot
@@ -11,8 +12,9 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", ..., verbosity=0)
+plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, ..., verbosity=0)
 \method{simpleplot}{cv.glmnet}(object,..., verbosity=0)
+firstRepeatedAppearance(cvobj, repsNeeded)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -53,6 +55,11 @@ in a smoothed form.
   \item{errorbarcolor, centercolor, fillsidecolor}{
 see \code{\link{addCVPlot}}
 }
+  \item{repsNeededForFirstOccurrence}{
+for finding the first occurrence: how many times does the coefficient of a
+variable have to be repeatedly nonzero before we call it the actual first
+occurrence?
+}
   \item{\dots}{
 Extra parameters passed on to \code{plot.glmnet}
 }
@@ -64,13 +71,18 @@ displayed (note: in R for Windows, turn off buffered output)
 object for which 'simple' plot must be made (typically: the non-crossvalidation
 plot for the object)
 }
+  \item{repsNeeded}{
+for finding the first occurrence: how many times does the coefficient of a
+variable have to be repeatedly nonzero before we call it the actual first
+occurrence?
+}
 }
 \details{
 \code{simpleplot} is really just a helper to allow extension to \code{\link{glmnet}}-
 like objects.
 }
 \value{
-Nothing is returned
+The result of the \code{\link{addCVPlot}} call is returned invisibly.
 }
 \author{
 Nick Sabbe

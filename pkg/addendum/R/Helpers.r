@@ -1751,6 +1751,10 @@ getBeta.cv.glmnet<-function(object)
 {
 	object$glmnet.fit$beta
 }
+getBeta.glmnet<-function(object)
+{
+	object$beta
+}
 
 #add the crossvalidation plot to a recently created coefficient plot for glmnet
 addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
@@ -1821,11 +1825,25 @@ simpleplot<-function(object,..., verbosity=0) UseMethod("simpleplot")
 simpleplot.default<-function(object,..., verbosity=0) plot(object, ...)
 simpleplot.cv.glmnet<-function(object,..., verbosity=0) plot(object$glmnet.fit, ...)
 
+firstRepeatedAppearance<-function(cvobj, repsNeeded)
+{
+	if(repsNeeded < 1) repsNeeded<-1
+	exNeeded<-repsNeeded-1
+	theBeta<-getBeta(cvobj)
+	firstAppearance<-apply(theBeta, 1, function(rw){
+			occurring<-c(abs(rw) > 0, rep(TRUE,exNeeded))
+			match(TRUE, sapply(seq(ncol(theBeta)), function(i){all(occurring[(i):(i+exNeeded)])}))
+		})
+	firstAppearance<-firstAppearance[!is.na(firstAppearance)]
+	return(firstAppearance)
+}
+
 #combine the glmnet plot with the crossvalidation plot
 plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
 	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
-	centercolor="red", fillsidecolor="#0000ff22", ..., verbosity=0)
+	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3,
+	..., verbosity=0)
 {
 	catwif(verbosity>0, "simple glmnet plot")
 	simpleplot(cvobj, xvar, ...)
@@ -1843,13 +1861,13 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 
 	if(!is.null(legendPos))
 	{
-		fit<-cvobj$glmnet.fit
-		firstAppearance<-apply(fit$beta, 1, function(rw){match(TRUE, abs(rw) > 0)})
-		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
+		firstAppearance<-firstRepeatedAppearance(cvobj, repsNeededForFirstOccurrence)
+#		apply(theBeta, 1, function(rw){match(TRUE, abs(rw) > 0)})
+#		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
 		orderOfFirstAppearance<-order(firstAppearance)[1:legendOf]
 		whereAppearing<-firstAppearance[orderOfFirstAppearance]
 		legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
-		cols<-rep(1:6, length.out=nrow(fit$beta))
+		cols<-rep(1:6, length.out=nrow(getBeta(cvobj)))
 		useColors<-cols[orderOfFirstAppearance]
 #		catwif(verbosity > 1, "useColors:")
 #		printif(verbosity > 1, useColors)
