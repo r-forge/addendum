@@ -1846,7 +1846,7 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	..., verbosity=0)
 {
 	catwif(verbosity>0, "simple glmnet plot")
-	simpleplot(cvobj, xvar, ...)
+	simpleplot(cvobj, xvar, ..., verbosity=verbosity-1)
 	catwif(verbosity>0, "adding cross validation plot")
 	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 		errorbarcolor=errorbarcolor, centercolor=centercolor,
@@ -1867,10 +1867,14 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 		orderOfFirstAppearance<-order(firstAppearance)[1:legendOf]
 		whereAppearing<-firstAppearance[orderOfFirstAppearance]
 		legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
-		cols<-rep(1:6, length.out=nrow(getBeta(cvobj)))
-		useColors<-cols[orderOfFirstAppearance]
+		namesAsInPlotCoef<-getBeta(cvobj)
+		namesAsInPlotCoef<-rownames(namesAsInPlotCoef)[nonzeroCoef(namesAsInPlotCoef)]
+		whereAsInPlotCoef<-match(legendForVars, namesAsInPlotCoef)
+		cols<-rep(1:6, length.out=max(orderOfFirstAppearance))
+#    catw("first 21 'column' items for legend:\n\t", names(firstAppearance)[1:21])
+		useColors<-cols[whereAsInPlotCoef]
 #		catwif(verbosity > 1, "useColors:")
-#		printif(verbosity > 1, useColors)
+#		printif(verbosity > 1, data.frame(varname=legendForVars, itemnr=orderOfFirstAppearance, color=useColors))
 		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
 		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
 	}
