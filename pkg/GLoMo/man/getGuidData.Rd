@@ -8,7 +8,7 @@ Unique identifiers for all rows of dfr and their matches in glomo
 Unique identifiers for all rows of dfr and their matches in glomo
 }
 \usage{
-getGuidData(glomo, dfr, guidPerObservation = NULL)
+getGuidData(glomo, dfr, guidPerObservation = NULL, whichHaveMissingCat, verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +20,15 @@ GLoMo object (result of \code{\link{GLoMo}} call with a 'matching' dfr)
 }
   \item{guidPerObservation}{
 if some of the information is already present (e.g. the uids of the rows, you can pass them here)
+}
+  \item{whichHaveMissingCat}{
+to avoid expensive \code{\link{grep}} calls, you can pass in which of the rows
+of \code{dfr} have missing categorical columns. If not passed, this is found
+by \code{\link{grepl}}ing for "\\\\d+"
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
 }
 }
 \details{

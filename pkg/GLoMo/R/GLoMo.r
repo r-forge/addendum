@@ -354,6 +354,7 @@ GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 	catwif(verbosity > 0, "Getting centralized covariances")
 	omegahat<-cov.wt(contDataAsMat, wt=weights, method="ML")$cov
 	dimnames(omegahat)<-list(rowvar=contnames, colvar=contnames)
+	catwif(verbosity > 0, "Got centralized covariances")
 
 	#the conversion to data.frame is perhaps unnecessary and may be a performance
 	#hog in the case of numdfr... -> check to improve on this
@@ -367,21 +368,31 @@ GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 	return(retval)
 }
 
-getGuidData<-function(glomo, dfr, guidPerObservation=NULL)
+getGuidData<-function(glomo, dfr, guidPerObservation=NULL, whichHaveMissingCat,
+	verbosity=0)
 {
 	if(is.null(guidPerObservation))
 	{
+		catwif(verbosity>0, "guidPerObservation was not passed along")
 		require(addendum)
 		guidPerObservation<-categoricalUniqueIdentifiers(dfr, 
-			separator=glomo$guidSeparator, na.becomes="\\d+")
+			separator=glomo$guidSeparator, na.becomes="\\d+", verbosity=verbosity-1)
 	}
 	else
 	{
 		stopifnot(length(guidPerObservation)==nrow(dfr))
 	}
-	possibleGlomoGuidPerObs<-lapply(guidPerObservation, function(curfindmid){
-		grep(curfindmid, glomo$uid)
-	})
+	#we expect match to be a lot faster + avoid lapply
+	if(missing(whichHaveMissingCat)) whichHaveMissingCat<-grepl("\\d+", guidPerObservation, fixed=TRUE)
+
+	orgWithMissing<-lapply(guidPerObservation[whichHaveMissingCat], grep, glomo$uid)
+	orgWithoutMissing<-as.list(match(guidPerObservation[! whichHaveMissingCat], glomo$uid))
+	possibleGlomoGuidPerObs<-list(length(guidPerObservation))
+	#not certain if the below assignments will work...
+	possibleGlomoGuidPerObs[whichHaveMissingCat]<-orgWithMissing
+	possibleGlomoGuidPerObs[!whichHaveMissingCat]<-orgWithoutMissing
+	names(possibleGlomoGuidPerObs)<-names(guidPerObservation)
+
 	retval<-list(guidPerObservation=guidPerObservation,
 		possibleGlomoGuidPerObs=possibleGlomoGuidPerObs,
 		separator=glomo$guidSeparator)
@@ -956,6 +967,8 @@ predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr,
 			"guiddata were not (completely) provided so recalculating.")
 		guiddata<-getGuidData(glomo, dfr, guidPerObservation=guiddata)
 	}
+	#note: overhead in this lapply call takes 2 seconds!!
+	#that means: tim spent outside of the predict.conditional.GLoMo !!
 	predPerRow<-lapply(seq_along(forrows), function(currowi){
 			predict.conditional.GLoMo(object=glomo, nobs=nobs[currowi],
 				dfr=dfr, forrow=forrows[currowi], validateFunction=validateFunction, 
