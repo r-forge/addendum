@@ -235,7 +235,6 @@ as.matrix.numdfr<-function(x, ...)
 	return(.getMatrix(x))
 }
 
-allLevels<-function(x, onlyNonEmpty=FALSE) UseMethod("allLevels")
 allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	.debugtxt()
 	lvls<-.getLevels(x)
@@ -248,19 +247,6 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 		keep<-sapply(lvls, length) > 0
 		return(lvls[keep])
 	}
-}
-allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
-	retval<-lapply(x, function(curcol){
-			tmp<-levels(curcol)
-			if(is.null(tmp)) tmp<-character(0)
-			return(tmp)
-		})
-	if(onlyNonEmpty)
-	{
-		keep<-sapply(retval, length) > 0
-		retval<-retval[keep]
-	}
-	return(retval)
 }
 
 .findIndexOfColumnName<-function(x, name, exact=TRUE)
@@ -347,7 +333,152 @@ setDebugmodeNumDfr<-function(doDebug=TRUE){
 }
 
 
-factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "",...)
+#therow<-runif(300)
+#nrofrows<-500
+#
+#> system.time(replicate(1000, {matrix(rep(therow, each=nrofrows), ncol=length(therow));1}))
+#   user  system elapsed
+#   4.08    1.62    5.85
+#
+#> system.time(replicate(1000, {t(matrix(rep(therow, nrofrows), nrow=length(therow)));1}))
+#   user  system elapsed
+#   5.72    1.92    7.83
+#
+#> system.time(replicate(1000, {matrix(rep(therow, nrofrows), ncol=length(therow), byrow=TRUE);1}))
+#   user  system elapsed
+#   4.80    1.69    6.64
+#> system.time(replicate(1000, {matrix(rep.int(therow,nrofrows),nrofrows,byrow=TRUE);1}))
+#   user  system elapsed
+#   2.73    1.02    3.78
+
+#note:
+#tmp<-matrix(rep.int(therow,nrofrows),nrofrows,byrow=TRUE)
+#
+#system.time(replicate(1000, {tmp<-t(tmp);1}))
+
+#.factorsToDummyVariables.simpleloop.numdfr<-function(dfr, betweenColAndLevel = "",...)
+#{#19 secs
+#	.debugtxt()
+#	mat<-.getMatrix(dfr)
+#	lvls<-.getLevels(dfr)
+#	nc<-dim(mat)[2]
+#	nr<-dim(mat)[1]
+#	reps<-sapply(lvls, length)-1
+#	reps[reps<1]<-1
+#
+#	repcols<-rep(seq_along(reps), reps)
+#	retval<-mat[, repcols, drop=FALSE] #already the right size!
+#	#note: this retained the original column names!!
+#
+#	curnewcol<-1
+#	newcolnames<-colnames(retval)
+#	for(i in seq_along(reps))
+#	{
+#		curlvls<-lvls[[i]]
+#		l<-length(curlvls)
+#		if(l > 1)
+#		{
+#			for(j in seq(2,l))
+#			{
+#				newcolnames[curnewcol]<-paste(newcolnames[curnewcol], curlvls[j], sep=betweenColAndLevel)
+#				retval[,curnewcol]<-as.integer(retval[,curnewcol]==j)
+#				curnewcol<-curnewcol+1
+#			}
+#		}
+#		else
+#		{
+#			curnewcol<-curnewcol+1
+#		}
+#	}
+#
+#	colnames(retval)<-newcolnames
+#	return(retval)
+#}
+
+#note: this is now exactly the same as factorsToDummyVariables.default
+#apart from the .debugtxt() and some comments
+factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0,...)
+{
+	.debugtxt()
+	if(missing(dfrConvData))
+	{
+		catwif(verbosity>0, "Need to recalculate dfrConvData: avoid!")
+		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel)
+	}
+	
+	mat<-colsAsNumericMatrix(dfr)
+	nr<-dim(mat)[1]
+	retval<-mat[, dfrConvData$newformdata$repcols, drop=FALSE] #already the right size!
+	facts<-dfrConvData$newformdata$isfact
+	if(sum(facts) > 0)
+	{
+		catwif(verbosity > 0, "Categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[facts])
+		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[facts],nr),nr,byrow=TRUE)
+#		catwif(verbosity > 0, "tocomp dim: ", dim(tocomp))
+#		catwif(verbosity > 0, "topleft part: ")
+#		printif(verbosity > 0, tocomp[1:3,1:3])
+#		catwif(verbosity > 0, "retval dim: ", dim(retval))
+#		catwif(verbosity > 0, "facts length: ", length(facts))
+		retval[,facts]<-as.integer(retval[,facts]==tocomp)
+	}
+	colnames(retval)<-dfrConvData$newformdata$newcoln
+	return(retval)
+}
+#
+#	orgfactcols<-which(reps>1)
+#	startoforgcolinnewmat<-cumsum(c(1, reps))[seq_along(reps)]
+#	mustmatchforfactcols<-do.call(c, lapply(reps[orgfactcols], seq))+1
+#	newcolsfromfact<-rep(startoforgcolinnewmat[orgfactcols], reps[orgfactcols]) + mustmatchforfactcols -2
+#
+#	#tocomp<-matrix(rep(mustmatchforfactcols, each=nr), ncol=length(mustmatchforfactcols))
+#	tocomp<-matrix(rep.int(mustmatchforfactcols,nr),nr,byrow=TRUE)
+#	retval[,newcolsfromfact]<-ifelse(retval[,newcolsfromfact]==tocomp, 1, 0)
+#
+#	colexs<-do.call(c, lapply(lvls[orgfactcols], function(curlvls){if(length(curlvls) > 1) curlvls[-1] else ""}))
+#	coln<-rep(colnames(mat), reps)
+#	coln[newcolsfromfact]<-paste(coln[newcolsfromfact], colexs, sep=betweenColAndLevel)
+#	colnames(retval)<-coln
+#	return(retval)
+#}
+
+#	nendcols<-ncol(retval)
+#
+#	lcoln<-character(nendcols)
+#	lcolex<-character(nendcols)
+#	lvlmustbe<-integer(nendcols)
+#	posinend<-1
+#	for(i in seq_along(reps)) #i is index of original column name
+#	{
+#
+#	}
+#	extcoln<-lapply(lvls, function(curlvls){})
+#	retval<-do.call(cbind, lapply(seq(nc), function(ci){
+#			clvls<-lvls[[ci]]
+#			if(length(clvls)>0)
+#			{
+#				clvls<-clvls[-1]
+#				stretchedcols<-mat[,rep(ci, length(clvls))]
+#				comparelvls<-matrix(rep(seq_along(clvls)+1, each=nr), nrow=nr)
+#				stretchedcols<-stretchedcols==comparelvls
+#				mode(stretchedcols)<-"integer"
+#				if(!is.matrix(stretchedcols)){
+#					warning("In factorsToDummyVariables.numdfr: stretchedcols was not a matrix?")
+#					stretchedcols<-matrix(stretchedcols, nrow=1)}
+#				colnames(stretchedcols)<-paste(coln[ci], clvls, sep=betweenColAndLevel)
+#				return(stretchedcols)
+#			}
+#			else
+#			{
+#				curcol<-mat[,ci, drop=FALSE]
+#				return(curcol)
+#			}
+#		}))
+#	rownames(retval)<-rownames(mat)
+#	return(retval)
+#}
+
+
+.factorsToDummyVariables_old.numdfr<-function(dfr, betweenColAndLevel = "",...)
 {
 	.debugtxt()
 	mat<-.getMatrix(dfr)
@@ -379,7 +510,6 @@ factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "",...)
 	rownames(retval)<-rownames(mat)
 	return(retval)
 }
-
 
 
 

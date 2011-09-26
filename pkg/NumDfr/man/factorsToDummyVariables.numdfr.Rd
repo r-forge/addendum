@@ -8,7 +8,7 @@ Quickly create design matrix for simple cases
 \code{\link{numdfr}} specific version of this function from \code{\link{addendum}}.
 }
 \usage{
-\method{factorsToDummyVariables}{numdfr}(dfr, betweenColAndLevel = "", ...)
+\method{factorsToDummyVariables}{numdfr}(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,14 @@ Quickly create design matrix for simple cases
 }
   \item{betweenColAndLevel}{
 If factors are present, what character should be between the original name and the value name?
+}
+  \item{dfrConvData}{
+Prepared conversion info (return value of \code{dfrConversionProbs}). Can be
+used (and is preferred) to avoid repeating calculations.
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
 }
   \item{\dots}{
 Ignored in standard implementations

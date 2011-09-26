@@ -1,7 +1,5 @@
-\name{allLevels}
-\alias{allLevels}
+\name{allLevels.numdfr}
 \alias{allLevels.numdfr}
-\alias{allLevels.data.frame}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 return a list holding all levels for all columns
