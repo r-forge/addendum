@@ -19,8 +19,8 @@ For debugging purposes: allows to cat only when the condition in the first param
 catif(cond = TRUE, ...)
 catt(..., file = "", sep = " ", fill = FALSE, labels = NULL, append = FALSE)
 cattif(cond=TRUE, ...)
-catw(..., prefix=0)
-catwif(cond=TRUE, ..., prefix=0)
+catw(..., prefix=0, showCS=FALSE)
+catwif(cond=TRUE, ..., prefix=0, showCS=FALSE)
 printif(cond=TRUE, ...)
 curfntester()
 curfnfinder(skipframes=0, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
@@ -53,6 +53,11 @@ See \code{cat}
 Text to be prefixed before the cat. If it is an integer, the function name of the
 function at that position in the call stack is used, followed by a ":"
 }
+  \item{showCS}{
+If \code{TRUE} and \code{prefix} is numeric, the full call stack is used as
+prefix. Can  e.g.be used in development to avoid functions being called as much 
+as possible.
+}
   \item{skipframes}{
 From the frame within \code{curfnfinder}, do not look at the first \code{skipframes}
 frames to find named function calls
@@ -67,7 +72,9 @@ What does \code{curfnfinder} return if no (unskipped) named functions were found
 if \code{TRUE}, all named functions on the stack are returned, separated by "|". Default is \code{FALSE}
 }
   \item{extraPrefPerLevel}{
-if \code{retStack=FALSE}, for every named function in the stack except the 'lowest' one, this text is added to the front of the prefix.
+if \code{retStack=FALSE}, for every named function in the stack except the
+'lowest' one, this text is added to the front of the prefix. Otherwise, this is
+used as a separator between the functions on the stack.
 }
 	\item{xp}{
 prefix for each nondisplayed level of the call stack. Set to "" to not indent.

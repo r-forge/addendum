@@ -9,7 +9,7 @@ Generate a character string per observation (row in \code{dfr}), by combining
 the numerical values of the factor levels for all factor columns
 }
 \usage{
-categoricalUniqueIdentifiers(dfr, separator=",", na.becomes="\\\\d+")
+categoricalUniqueIdentifiers(dfr, separator=",", na.becomes="\\\\d+", verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,6 +22,10 @@ character(s) between the values of different factor columns. Defaults to ",".
   \item{na.becomes}{
 If \code{NA}, nothing special is done to \code{NA}s. Otherwise replaced by this string.
 Defaults to \code{"\\d+"}, which is good for \code{\link{grep}}.
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
 }
 }
 \value{

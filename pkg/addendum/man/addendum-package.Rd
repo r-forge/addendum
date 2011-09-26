@@ -141,6 +141,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{categoricalUniqueIdentifiers}}
 		\item \code{\link{findCatColNums}}
 		\item \code{\link{findRepsPerRow}}
+		\item \code{\link{allLevels}}
 	}
 	\item Parallel execution \enumerate{
 		\item \code{\link{run.parallel}}

@@ -800,43 +800,119 @@ qrmvnorm<-function (n, mean, sigma)
   retval
 }
 
-factorsToDummyVariables<-function(dfr, betweenColAndLevel = "",...)  UseMethod("factorsToDummyVariables")
+allLevels<-function(x, onlyNonEmpty=FALSE) UseMethod("allLevels")
+allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
+	retval<-lapply(x, function(curcol){
+			tmp<-levels(curcol)
+			if(is.null(tmp)) tmp<-character(0)
+			return(tmp)
+		})
+	if(onlyNonEmpty)
+	{
+		keep<-sapply(retval, length) > 0
+		retval<-retval[keep]
+	}
+	return(retval)
+}
+
+dfrConversionProbs<-function(dfr, betweenColAndLevel)
+{
+#	allcurfn<-curfnfinder(skipframes=0, retStack=TRUE, extraPrefPerLevel="|")
+#	catw(allcurfn, ": start. Avoid calling this is much as possible: reuse its result!")
+	lvls<-allLevels(dfr)
+	nc<-length(lvls)
+
+	reps<-sapply(lvls, length)-1
+	reps[reps<1]<-1
+
+	repcols<-rep(seq_along(reps), reps)
+	newlvls<-do.call(c, lapply(reps, function(currep){if(currep==1) 1 else (seq(currep)+1)}))
+
+	orgfactcols<-which(reps>1)
+
+	startoforgcolinnewmat<-cumsum(c(1, reps))[seq_along(reps)]
+	mustmatchforfactcols<-do.call(c, lapply(reps[orgfactcols], seq))+1
+	newcolsfromfact<-rep(startoforgcolinnewmat[orgfactcols], reps[orgfactcols]) + mustmatchforfactcols -2
+	colexs<-do.call(c, lapply(lvls[orgfactcols], function(curlvls){if(length(curlvls) > 1) curlvls[-1] else ""}))
+	coln<-rep(colnames(dfr), reps)
+	newcoln<-coln
+	newcoln[newcolsfromfact]<-paste(newcoln[newcolsfromfact], colexs, sep=betweenColAndLevel)
+
+	retval<-list(
+		lvls=lvls,
+		reps=reps,
+		orgfactcols=orgfactcols,
+		startoforgcolinnewmat=startoforgcolinnewmat,
+		betweenColAndLevel=betweenColAndLevel,
+		newformdata=data.frame(
+			repcols=repcols, #which original column number does the new row point to
+			newlvls=newlvls, #which level(number) does the new row point to (1 for continuous)
+			coln=coln, #what was the original column name
+			newcoln=newcoln, #what is the extended column name
+			isfact=(coln!=newcoln),
+			stringsAsFactors=FALSE
+		)
+	)
+	class(retval)<-"dfrConversionProbs"
+	return(retval)
+}
+
+factorsToDummyVariables<-function(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0,...)  UseMethod("factorsToDummyVariables")
 #Typical use: for glmnet. Convert a dataframe to a matrix, where factor
 #   columns are split into dummy variables (first level = reference)
 #betweenColAndLevel: in the name of the dummy columns, what comes between the
 #   original column name and the column level
-factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="",...)
+factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvData, verbosity=0,...)
 {
 	#note this version seems a lot faster than
 	#dfrTmp<-model.frame(dfrPredictors, na.action=na.pass)
 	#return(as.matrix(model.matrix(as.formula(form), data=dfrTmp))[,-1])
-	nc<-dim(dfr)[2]
-	firstRow<-dfr[1,]
-	coln<-colnames(dfr)
-	retval<-do.call(cbind, lapply(seq(nc), function(ci){
-			if(is.factor(firstRow[,ci]))
-			{
-				lvls<-levels(firstRow[,ci])[-1]
-				stretchedcols<-sapply(lvls, function(lvl){
-						rv<-dfr[,ci]==lvl
-						mode(rv)<-"integer"
-						return(rv)
-					})
-				if(!is.matrix(stretchedcols)){
-					stretchedcols<-matrix(stretchedcols, nrow=1)}
-				colnames(stretchedcols)<-paste(coln[ci], lvls, sep=betweenColAndLevel)
-				return(stretchedcols)
-			}
-			else
-			{
-				curcol<-matrix(dfr[,ci], ncol=1)
-				colnames(curcol)<-coln[ci]
-				return(curcol)
-			}
-		}))
-	rownames(retval)<-rownames(dfr)
+	if(missing(dfrConvData))
+	{
+		catwif(verbosity>0, "Need to recalculate dfrConvData: avoid!")
+		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel)
+	}
+
+	mat<-colsAsNumericMatrix(dfr)
+	nr<-dim(mat)[1]
+	retval<-mat[, dfrConvData$newformdata$repcols, drop=FALSE] #already the right size!
+	facts<-dfrConvData$newformdata$isfact
+	if(sum(facts) > 0)
+	{
+		catwif(verbosity > 0, "Categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[facts])
+		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[facts],nr),nr,byrow=TRUE)
+		retval[,facts]<-as.integer(retval[,facts]==tocomp)
+	}
+	colnames(retval)<-dfrConvData$newformdata$newcoln
 	return(retval)
 }
+#	nc<-dim(dfr)[2]
+#	firstRow<-dfr[1,]
+#	coln<-colnames(dfr)
+#	retval<-do.call(cbind, lapply(seq(nc), function(ci){
+#			if(is.factor(firstRow[,ci]))
+#			{
+#				lvls<-levels(firstRow[,ci])[-1]
+#				stretchedcols<-sapply(lvls, function(lvl){
+#						rv<-dfr[,ci]==lvl
+#						mode(rv)<-"integer"
+#						return(rv)
+#					})
+#				if(!is.matrix(stretchedcols)){
+#					stretchedcols<-matrix(stretchedcols, nrow=1)}
+#				colnames(stretchedcols)<-paste(coln[ci], lvls, sep=betweenColAndLevel)
+#				return(stretchedcols)
+#			}
+#			else
+#			{
+#				curcol<-matrix(dfr[,ci], ncol=1)
+#				colnames(curcol)<-coln[ci]
+#				return(curcol)
+#			}
+#		}))
+#	rownames(retval)<-rownames(dfr)
+#	return(retval)
+#}
 
 #given a set of dummy column names (see factorsToDummyVariables), try to find
 #   the column from which it originates
@@ -854,11 +930,11 @@ originalColumnNamesFromDummyVars<-function(dummyVarNames, dfr,
 			{
 				lvls<-levels(firstRow[,ci])[-1]
 				return(data.frame(org=coln[ci], new=paste(coln[ci], lvls,
-					sep=betweenColAndLevel)))
+					sep=betweenColAndLevel), stringsAsFactors=FALSE))
 			}
 			else
 			{
-				return(data.frame(org=coln[ci], new=coln[ci]))
+				return(data.frame(org=coln[ci], new=coln[ci], stringsAsFactors=FALSE))
 			}
 		}))
 #	#mapping$new==dummyVarNames
@@ -887,7 +963,7 @@ originalColumnNamesFromDummyVars<-function(dummyVarNames, dfr,
 	if(length(unfoundDummies) > 0)
 	{
 		mapping<-rbind(mapping, data.frame(org=rep(NA, length(unfoundDummies)),
-			new=unfoundDummies))
+			new=unfoundDummies, stringsAsFactors=FALSE))
 	}
 	colnames(mapping)<-c("orgname", "dummyname") #backwards compatibility
 	mapping$orgname<-as.character(mapping$orgname)
@@ -1185,7 +1261,7 @@ curfnfinder<-function(skipframes=0, cils=typicalCleanItemList(),
 	}
 	else if(retStack)
 	{
-		return(paste(rev(ccs), collapse = "|"))
+		return(paste(ccs, collapse = extraPrefPerLevel))
 	}
 	else
 	{
@@ -1242,11 +1318,18 @@ catt<-function(..., file = "", sep = " ", fill = FALSE, labels = NULL,
 		sep = sep, fill = fill, labels = labels, append = append)
 }
 
-catw<-function(..., prefix=0)
+catw<-function(..., prefix=0, showCS=FALSE)
 {
 	if(is.numeric(prefix))
 	{
-		prefix<-curfnfinder(skipframes=prefix+1, extraPrefPerLevel=.extraprefix()) #note: the +1 is there to avoid returning catw
+		if(showCS)
+		{
+			prefix<-curfnfinder(skipframes=prefix+1, retStack=TRUE, extraPrefPerLevel="|") #note: the +1 is there to avoid returning catw
+		}
+		else
+		{
+			prefix<-curfnfinder(skipframes=prefix+1, extraPrefPerLevel=.extraprefix()) #note: the +1 is there to avoid returning catw
+		}
 		prefix<-paste(prefix, ":", sep="")
 	}
 	catt(prefix, ...)
@@ -1270,11 +1353,11 @@ cattif<-function(cond=TRUE, ...)
 	}
 }
 
-catwif<-function(cond=TRUE, ..., prefix=0)
+catwif<-function(cond=TRUE, ..., prefix=0, showCS=FALSE)
 {
 	if(cond)
 	{
-		catw(..., prefix=prefix+1)
+		catw(..., prefix=prefix+1, showCS=showCS)
 	}
 }
 
@@ -2269,12 +2352,14 @@ randomStrings<-function(n, maxLength=100, minLength=1, alphabet=c(letters, LETTE
 
 #note: if you do not expect there to be NA's in the data, pass na.becomes=NA, this
 #   should be faster
-categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+")
+categoricalUniqueIdentifiers<-function(dfr, separator=",", na.becomes="\\d+", verbosity=0)
 {
+	catwif(verbosity>0, "working for dfr of dimension:", dim(dfr))
 	forCols<-findCatColNums(dfr)
 	dfr<-colsAsNumericMatrix(dfr[,forCols])
 	if(! is.na(na.becomes)) dfr[is.na(dfr)]<-na.becomes #this works!!
-	apply(dfr, 1, paste, collapse=separator)
+	rv<-apply(dfr, 1, paste, collapse=separator)
+	return(rv)
 }
 
 #x: vector of characters containing identifiers, and may contain duplicates

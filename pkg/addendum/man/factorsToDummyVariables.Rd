@@ -1,6 +1,7 @@
 \name{factorsToDummyVariables}
 \alias{factorsToDummyVariables}
 \alias{factorsToDummyVariables.default}
+\alias{dfrConversionProbs}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Quickly create design matrix for simple cases
@@ -10,7 +11,8 @@ Quickly create design matrix for simple cases
 is a lot more swift, but only works for formulas with all main effects.
 }
 \usage{
-\method{factorsToDummyVariables}{default}(dfr, betweenColAndLevel = "", \dots)
+\method{factorsToDummyVariables}{default}(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0, \dots)
+dfrConversionProbs(dfr, betweenColAndLevel)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,6 +21,14 @@ Dataframe for which the design matrix must be made
 }
   \item{betweenColAndLevel}{
 If factors are present, what character should be between the original name and the value name?
+}
+  \item{dfrConvData}{
+Prepared conversion info (return value of \code{dfrConversionProbs}). Can be
+used (and is preferred) to avoid repeating calculations.
+}
+  \item{verbosity}{
+The higher this value, the more levels of progress and debug information is
+displayed (note: in R for Windows, turn off buffered output)
 }
   \item{\dots}{
 Ignored in standard implementations
