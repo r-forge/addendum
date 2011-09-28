@@ -127,6 +127,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{quickFactor}}
 		\item \code{\link{postfixToMakeUnique}}
 		\item \code{\link{reduce}}
+		\item \code{\link{scaleNonFactors}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}

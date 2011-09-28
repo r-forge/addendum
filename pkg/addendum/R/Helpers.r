@@ -2495,7 +2495,8 @@ display<-function(dfr) UseMethod("display")
 
 display.default<-function(dfr)
 {
-	invisible(edit(dfr))
+	#invisible(edit(dfr))
+	View(dfr)
 }
 
 dfr2mat<-function(dfr)
@@ -2798,3 +2799,54 @@ run.parallel<-function(..., paramcreationname, functionname, paramname, logdir,
 	catwif(verbosity > 0, "Actual processing finished.")
 	return(parts)
 }
+
+scaleNonFactors<-function(dfr, colgroups=NULL, checkunique=FALSE, returnAttributes=FALSE)
+{
+	colns<-colnames(dfr)
+	allcolnsingroups<-do.call(c, as.list(colgroups))
+	if(checkunique)
+	{
+		if(length(unique(allcolnsingroups)) != length(allcolnsingroups))
+		{
+			stop("Some column(s) are in more than one group in scaleNonFactors")
+		}
+	}
+	restcolns<-setdiff(colns, allcolnsingroups)
+	if(length(restcolns) > 0)
+	{
+		#add the other columns as individual groups
+		colgroups<-c(colgroups, as.list(restcolns))
+	}
+	for(i in seq_along(colgroups))
+	{
+		actualcols<-colgroups[[i]][!sapply(dfr[, colgroups[[i]], drop=FALSE], is.factor)]
+		if(length(actualcols) > 1)
+		{
+			curdata<-do.call(c, dfr[, actualcols, drop=FALSE])
+			curdata<-scale(curdata)
+			curcenter<-attr(curdata, "scaled:center")
+			curscale<-attr(curdata, "scaled:scale")
+			curdata<-as.data.frame(matrix(curdata, nrow=nrow(dfr)))
+			dfr[,actualcols]<-curdata
+			for(curcol in actualcols)
+			{
+				attr(dfr[[curcol]], "scaled:center")<-curcenter
+				attr(dfr[[curcol]], "scaled:scale")<-curscale
+			}
+		}
+		else if(length(actualcols) == 1)
+		{
+			dfr[[actualcols]]<-scale(dfr[[actualcols]])
+		}
+	}
+	if(! returnAttributes) return(dfr)
+	scaleattributes<-sapply(dfr, function(curcol){
+			rv<-c(center=attr(curcol, "scaled:center"), scale=attr(curcol, "scaled:scale") )
+			if(is.null(rv)) rv<-c(center=0, scale=1 )
+			return(rv)
+		})
+	return(list(dfr=dfr, scaleattributes=scaleattributes))
+}
+
+
+
