@@ -363,7 +363,7 @@ GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 	#note: keep in sync with combineGLoMos
 	retval<-list(uid=uids, pihat=pihat, omegahat=omegahat, orgdatadim=dim(dfr),
 		uniqueFactorCombinationsAndContinuousMeans=uniqueFactorCombinationsAndContinuousMeans,
-		factorCols=factorCols, guidSeparator=separator)
+		factorCols=factorCols, guidSeparator=separator, invomega=invertSymmetric(omegahat, careful=FALSE))
 	class(retval)<-"GLoMo"
 	return(retval)
 }
@@ -446,7 +446,9 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 	numCat<-length(catcols)
 	cntcols<-seq(ncol(dfr))[-catcols]
 	numCont<-length(cntcols)
-	perrow<-lapply(forrows, function(currowi){
+	
+	perrow<-lapply(seq_along(forrows), function(i){
+			currowi<-forrows[i]
 			#note: improvement possible: if no missing values in a row then these
 			#calculations are not needed, just return an empty list
 			if((length(forrows) > 1) & (verbosity > 1))
@@ -465,7 +467,15 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 
 				#note in the 1,2 notation, 1 refers to missing data (NA), while 2 refers
 				#to present data (notNA)
-				invSig22<-invertSymmetric(omega, careful=FALSE)
+				if((length(whichCntColNA) == numCont) & (exists("invomega", glomo)))
+				{
+					invSig22<-glomo$invomega
+				}
+				else
+				{
+					invSig22<-invertSymmetric(omega, careful=FALSE)
+				}
+				
 				aanwezigeXs<-matrix(currow[, presentCntColsInDfr, drop=TRUE], nrow=1)
 				if(length(whichCntColNA) != numCont)
 				{
@@ -1062,7 +1072,7 @@ combineGLoMos<-function(..., listOfGLoMos=NULL, verbosity=0)
 	retval<-list(uid=uniqueUids, pihat=newPihat, omegahat=newOmegahat, 
 		orgdatadim=newOrgdims,
 		uniqueFactorCombinationsAndContinuousMeans=newUniqueFactorCombinationsAndContinuousMeans,
-		factorCols=newFactorCols, guidSeparator=newGuidSeparator)
+		factorCols=newFactorCols, guidSeparator=newGuidSeparator, invomega=invertSymmetric(newOmegahat, careful=FALSE))
 	class(retval)<-"GLoMo"
 	return(retval)
 }

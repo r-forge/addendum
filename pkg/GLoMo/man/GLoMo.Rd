@@ -49,6 +49,7 @@ List of class "GLoMo", consisting of the following items:
   \item{uniqueFactorCombinationsAndContinuousMeans }{object of the same class and column structure as \code{dfr}. Holds the means in the continuous columns.}
   \item{factorCols }{named vector of the column indexes of categorical columns}
   \item{guidSeparator }{character that was used as separator for the uids}
+  \item{invomega }{inverse of omegahat --- often used for prediction}
 }
 \references{
 "Statistical Analysis with Missing Values"
