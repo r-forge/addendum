@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.4\cr
-Date: \tab 2011-09-20\cr
+Version: \tab 1.5\cr
+Date: \tab 2011-10-04\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -128,6 +128,9 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{postfixToMakeUnique}}
 		\item \code{\link{reduce}}
 		\item \code{\link{scaleNonFactors}}
+		\item \code{\link{logit}}
+		\item \code{\link{expit}}
+		\item \code{\link{invwhich}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}

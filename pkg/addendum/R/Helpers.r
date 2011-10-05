@@ -1852,6 +1852,10 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	scaleFact<-(yrange[2] - yrange[1])/(truerange[2] - truerange[1])
 	yvalue<-function(untrans){yrange[1] + (untrans - truerange[1]) * scaleFact  }
 	
+	ioflambda.min<-match(cvobj$lambda.min, cvobj$lambda)
+	ioflambda.1se<-match(cvobj$lambda.1se, cvobj$lambda)
+	isofinterest<-sort(unique(ioflambda.min, ioflambda.1se))
+	
 	if(smoothed)
 	{
 		#let's first get the smoothed values.
@@ -1878,14 +1882,10 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 			scaledtop=tmptop, scaledbot=tmpbot, truetop=tmptruetop, truebot=tmptruebot,
 			scaledtruetop=struetop, scaledtruebot=struebot)
 		lines(tmpx, tmpy, col=centercolor, lty="dashed")
-#		lines(tmpx, tmptop, col=errorbarcolor, lty="dashed")
-#		lines(tmpx, tmpbot, col=errorbarcolor, lty="dashed")
 		lines(tmpx, struetop, col=errorbarcolor, lty="dashed")
 		lines(tmpx, struebot, col=errorbarcolor, lty="dashed")
-#		polygon(c(tmpx, rev(tmpx)), c(struetop, rev(tmptop)), border=NA, col=fillsidecolor)
-#		polygon(c(tmpx, rev(tmpx)), c(tmpbot, rev(tmptop)), border=NA, col=fillcentercolor)
-#		polygon(c(tmpx, rev(tmpx)), c(struebot, rev(tmpbot)), border=NA, col=fillsidecolor)
 		polygon(c(tmpx, rev(tmpx)), c(struetop, rev(struebot)), border=NA, col=fillsidecolor)
+		points(x[isofinterest], yvalue(cvobj$cvm[isofinterest]), pch = 20, col = centercolor)
 	}
 	else
 	{
@@ -1899,8 +1899,10 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 		labels = paste(round(seq(truerange[1], truerange[2], length.out=numTicks),
 			2)),
 		tick = TRUE, line = 0)
-  abline(v = x[match(cvobj$lambda.min, cvobj$lambda)], lty = 3)
-  abline(v = x[match(cvobj$lambda.1se, cvobj$lambda)], lty = 3)
+  abline(v = x[ioflambda.min], lty = 3)
+  abline(v = x[ioflambda.1se], lty = 3)
+	
+	abline(h = scaledOut$cvlo[ioflambda.min], lty = 3)
   invisible(scaledOut)
 }
 
@@ -1966,10 +1968,24 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 
 addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...)
 {
+	ioflambda.min<-match(cvobj$lambda.min, cvobj$lambda)
+	ioflambda.1se<-match(cvobj$lambda.1se, cvobj$lambda)
+	isofinterest<-sort(c(ioflambda.min, ioflambda.1se))
+	catw("Enforcing added indices", ioflambda.min, "and", ioflambda.1se)
  	x<-getXIndices(cvobj, xvar=xvar)
+#   atdf = sort(unique(c(pretty(x), x[c(ioflambda.min, ioflambda.1se)])))
+#   prettydf = trunc(approx(x = x, y = cvobj$df, xout = atdf, rule = 2)$y)
+#   axis(3, at = atdf, label = prettydf, tcl = NA)
+	
+	useXforDF<-x[isofinterest]
+	useDF<-trunc(approx(x = x, y = cvobj$glmnet.fit$df, xout = useXforDF, rule = 2)$y)
+	#useDF<-cvobj$df[isofinterest]
+	axis(3, at = useXforDF, label = useDF, tcl = NA)
+	
  	useIndex<-as.integer(seq(from=1, to=length(x), length.out=numTicks))
+	useIndex<-sort(unique(c(useIndex, ioflambda.min, ioflambda.1se)))
  	useX<-x[useIndex]
-  axis(at = useX, labels = paste(useIndex), ...)
+  axis(4, at = useX, labels = paste(useIndex), ...)
 }
 
 colsOfType<-function(dfr, type=c("factor", "char"))
@@ -2850,3 +2866,31 @@ scaleNonFactors<-function(dfr, colgroups=NULL, checkunique=FALSE, returnAttribut
 
 
 
+logit<-function(p, adjust)
+{
+	if(sum((p==0)|(p==1))>0)
+	{
+		if((missing(adjust)) || (adjust < 0) || (adjust > 1)) adjust<-0.025
+		adjust<-abs(adjust)
+		p[p==0]<-adjust
+		p[p==1]<-1-adjust
+	}
+	log(p/(1-p))
+}
+
+expit<-function(x)
+{
+	tmp<-exp(x)
+	tmp/(1+tmp)
+}
+
+invwhich<-function(indices, outlength, useNames = TRUE)
+{
+	rv<-rep(FALSE, outlength)
+	if(length(indices) > 0)
+	{
+		rv[indices]<-TRUE
+		if(useNames) names(rv)[indices]<-names(indices)
+	}
+	return(rv)
+}
