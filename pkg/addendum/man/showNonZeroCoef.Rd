@@ -65,6 +65,9 @@ or \code{-1.23 (pm 0.06) + 8.79 (pm 0.65) Petal.Length}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
+\seealso{
+\code{\link{showInterestingCoef}}
+}
 \examples{
 dat<-matrix(rnorm(1000), ncol=20)
 y1<-rnorm(50)

@@ -28,6 +28,9 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{plotex}}
 		\item \code{\link{showNonZeroCoef}}
 		\item \code{\link{firstRepeatedAppearance}}
+		\item \code{\link{showInterestingCoef}}
+		\item \code{\link{internalMissClassificationPerLambdaLognet}}
+		\item \code{\link{smallestInternallyPerfectLognet}}
 	}
 	\item plotting \enumerate{
 		\item \code{\link{getColorRange}}

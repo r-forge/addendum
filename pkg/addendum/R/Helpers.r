@@ -2894,3 +2894,118 @@ invwhich<-function(indices, outlength, useNames = TRUE)
 	}
 	return(rv)
 }
+
+showInterestingCoef<-function(object,...) UseMethod("showInterestingCoef")
+showInterestingCoef.list<-function(object, atLeast=1,...)
+{
+	resperel<-lapply(object, function(curobj){names(showInterestingCoef(curobj, ...))})
+	allnames<-do.call(c, resperel)
+	return(table(allnames))
+}
+
+showInterestingCoef.cv.glmnet<-function(object, whichLambda="lambda.1se", ...)
+{
+	if(is.null(whichLambda)) object<-object$glmnet.fit
+	cof<-coef(object,s=whichLambda)
+# 	cofn<-rownames(cof)
+# 	cof<-as.vector(cof)
+# 	names(cof)<-cofn
+	showInterestingCoef(cof, ...)
+}
+
+showInterestingCoef.glmnet<-function(object, whichLambda=object$lambda[1], ...)
+{
+	cof<-coef(object,s=whichLambda)
+# 	cofn<-rownames(cof)
+# 	cof<-as.vector(cof)
+# 	names(cof)<-cofn
+	showInterestingCoef(cof, ...)
+}
+
+showInterestingCoef.default<-function(object, ...)
+{
+	showWhich<-(abs(object)>0.00001)
+	object[showWhich]	
+}
+
+showInterestingCoef.Matrix<-function(object, whichCol, ...)
+{
+	if((missing(whichCol)) || (is.null(whichCol)) || (is.na(whichCol)))
+	{
+		if(ncol(object) == 1) 
+		{
+			whichCol<-1
+		}
+		else
+		{
+			collist<-lapply(seq(ncol(object)), function(i){object[,i, drop=FALSE]})
+			return(showInterestingCoef.list(collist))
+		}
+	}
+	nms<-rownames(object)
+	object<-as.vector(object[,whichCol])
+	names(object)<-nms
+	showInterestingCoef.default(object,...)	
+}
+
+showInterestingCoef.matrix<-function(object, whichCol, ...)
+{
+	showInterestingCoef.Matrix(object, whichCol, ...)	
+}
+
+# showInterestingCoefs<-function(coefs)
+# {
+# 	showWhich<-as.vector(abs(as.vector(coefs[,1])))>0.00001
+# 	coefs[showWhich,]
+# }
+# 
+# showInterestingCoef<-function(glmnetcv, whichLambda="lambda.1se")
+# {
+# 	showInterestingCoefs(coef(glmnetcv,s=whichLambda))
+# }
+# 
+# showInterestingCoef2<-function(coeflist, atLeast=1)
+# {
+# 	colNms<-(rownames(coeflist[[1]]))
+# 	nietNul<-rowSums(sapply(coeflist, function(currep){as.vector(abs(as.vector(currep[,1])))>0.00001}))
+# 	names(nietNul)<-colNms
+# 	keepCols<-which(nietNul >= atLeast)
+# 	nietNul[keepCols]
+# }
+
+#note the parameter family will be ignored. It is simply there to avoid it being present in ...
+smallestInternallyPerfectLognet<-function(x, y, family="binomial", probthres=0.5, ...) 
+{
+	lgnet<-glmnet(x, y, family="binomial", ...)
+	yislevel2<-(as.integer(y)==2)
+	predprob<-predict(lgnet, newx=x, type="response")
+	isperfect<-apply(predprob>=probthres, 2, function(curcol){all(curcol==yislevel2)})
+	#note lambdas are sorted big to small, so we want the one most to the left
+	useLambdaIndex<-match(TRUE, isperfect)
+	useLambda<-NA
+	useCoefs<-NA
+	if(!is.na(useLambdaIndex))
+	{
+		useLambda<-lgnet$lambda[useLambdaIndex]
+		useCoefs<-showInterestingCoef(lgnet, whichLambda=useLambda)
+	}
+	return(list(lambdaIndex=useLambdaIndex, lambda=useLambda,
+							coefs=useCoefs, lgnet=lgnet))
+}
+
+#note the parameter family will be ignored. It is simply there to avoid it being present in ...
+internalMissClassificationPerLambdaLognet<-function(x, y, family="binomial", probthres=0.5, ...) 
+{
+	lgnet<-glmnet(x, y, family="binomial", ...)
+	yislevel2<-(as.integer(y)==2)
+	predprob<-predict(lgnet, newx=x, type="response")
+	mcls<-apply(predprob>=probthres, 2, function(curcol){
+		falsepos<-sum(curcol & (!yislevel2))
+		falseneg<-sum((!curcol) & yislevel2)
+		missclass<-falsepos+falseneg
+		c(falsepos=falsepos, falseneg=falseneg, missclass=missclass)
+	})
+	return(list(lambda=lgnet$lambda, mcls=mcls,numpos=sum(yislevel2), numneg=sum(!yislevel2)))
+}
+
+
