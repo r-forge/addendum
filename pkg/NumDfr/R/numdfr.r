@@ -945,3 +945,62 @@ factorsToDummyVariables.numdfr.rep<-function(dfr, ...)
 {
 	factorsToDummyVariables(as.numdfr(dfr), ...)
 }
+
+as.nummatrix<-function(object) UseMethod("as.nummatrix")
+as.nummatrix.NumDfr<-function(object) .getMatrix(object)
+as.nummatrix.matrix<-function(object) object
+as.nummatrix.default<-function(object) as.matrix(object)
+as.nummatrix.data.frame<-function(object){
+	retval<-matrix(unlist(object), ncol=ncol(object))
+	dimnames(retval)<-dimnames(object)
+	return(retval)
+}
+
+#catCols holds the integer indices of the columns that are really factors
+#levelList holds (in order) an item with the levels of each factor column
+#colnms holds _all_ the column names
+.mat2dfr<-function(mat, catCols, levelList, colnms=NULL, verbosity=0)
+{
+	result<-as.data.frame(mat)
+	catwif(verbosity>0, "resetting factors")
+	for(i in seq_along(catCols)) {
+		catwif(verbosity>1, "resetting factor", i, "/", length(catCols))
+	  lev <- levelList[[i]]
+	  cl<-catCols[i]
+	  curfact<-quickFactor(result[[cl]], labels=lev)#really fast
+	  result[[cl]] <- curfact #this takes a while -> room for improvement?
+#	  cat(ttxt(system.time(curfact<-quickFactor(result[[cl]], labels=lev))), "\n")
+#				->typically:user: 0.00, system: 0.00, elapsed: 0.00
+#	  cat(ttxt(system.time(result[[cl]] <- curfact)), "\n")
+#				->typically:user: 0.16, system: 0.06, elapsed: 0.22 !!!
+#note: I tried the alternative of running the quickFactor code immediately, but
+#that was even more slow.
+	}
+	if(!is.null(colnms)) colnames(result)<-colnms
+	return(result)
+}
+
+matBack2OrgClass<-function(objWithClass, mat, catCols, levelList, colnms=NULL,
+	verbosity=0) UseMethod("matBack2OrgClass")
+	
+matBack2OrgClass.data.frame<-function(objWithClass, mat, catCols, levelList,
+	colnms=NULL, verbosity=0)
+{
+	.mat2dfr(mat=mat, catCols=catCols, levelList=levelList, colnms=colnms,
+		verbosity=verbosity)
+}
+
+matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList,
+	colnms=NULL, verbosity=0)
+{
+	posInCatCols<-match(seq(ncol(mat)), catCols, nomatch=0)
+	allLevels<-lapply(posInCatCols, function(ccn){
+			if(ccn > 0) return(levelList[[ccn]]) else return(character(0))
+		})
+	if(is.null(colnms)) colnms<-colnames(mat)
+	colnames(mat)<-colnms
+	names(allLevels)<-colnms
+	retval<-list(mat=mat, lvls=allLevels)
+	class(retval)<-"numdfr"
+	return(retval)
+}

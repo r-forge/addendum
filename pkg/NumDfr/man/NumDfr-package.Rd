@@ -31,6 +31,9 @@ Add list of functions here later on (similar to addendum)
 		\item \code{\link{as.double.numdfr}}
 		\item \code{\link{as.list.numdfr}}
 		\item \code{\link{is.na.numdfr}}
+		\item \code{\link{as.matrix.numdfr}}
+		\item \code{\link{as.nummatrix}}
+		\item \code{\link{matBack2OrgClass}}
 	}
 	\item Properties/utility \enumerate{
 		\item \code{\link{dim.numdfr}}
