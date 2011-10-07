@@ -19,6 +19,7 @@ Date: \tab 2011-09-20\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
+Main class: \code{\link{GLoMo-class}}
 \enumerate{
 	\item Helpers \enumerate{
 		\item \code{\link{getGuidData}}

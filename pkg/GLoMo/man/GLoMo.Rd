@@ -75,7 +75,7 @@ also in \code{uniqueFactorCombinationsAndContinuousMeans}.
 }
 
 \seealso{
-\code{\link{GLoMo-package}}, \code{\link{NumDfr}}, \code{\link{predict}}
+\code{\link{GLoMo-package}}, \code{\link{NumDfr}}, \code{\link{predict}}, \code{\link{GLoMo-class}}
 }
 \examples{
 iris.md<-randomNA(iris, 0.1)

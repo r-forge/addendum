@@ -22,74 +22,51 @@
 #SECTION: non-exported helper functions
 
 
-#catCols holds the integer indices of the columns that are really factors
-#levelList holds (in order) an item with the levels of each factor column
-#colnms holds _all_ the column names
-.mat2dfr<-function(mat, catCols, levelList, colnms=NULL, verbosity=0)
-{
-	result<-as.data.frame(mat)
-	catwif(verbosity>0, "resetting factors")
-	for(i in seq_along(catCols)) {
-		catwif(verbosity>1, "resetting factor", i, "/", length(catCols))
-	  lev <- levelList[[i]]
-	  cl<-catCols[i]
-	  curfact<-quickFactor(result[[cl]], labels=lev)#really fast
-	  result[[cl]] <- curfact #this takes a while -> room for improvement?
-#	  cat(ttxt(system.time(curfact<-quickFactor(result[[cl]], labels=lev))), "\n")
-#				->typically:user: 0.00, system: 0.00, elapsed: 0.00
-#	  cat(ttxt(system.time(result[[cl]] <- curfact)), "\n")
-#				->typically:user: 0.16, system: 0.06, elapsed: 0.22 !!!
-#note: I tried the alternative of running the quickFactor code immediately, but
-#that was even more slow.
-	}
-	if(!is.null(colnms)) colnames(result)<-colnms
-	return(result)
-}
 
 
-.quickNumMatrix<-function(dfr) UseMethod(".quickNumMatrix")
-#need to check whether this is still any different from as.matrix.data.frame
-#in practice
-.quickNumMatrix.data.frame<-function(dfr){
-	retval<-matrix(unlist(dfr), ncol=ncol(dfr))
-	dimnames(retval)<-dimnames(dfr)
-	return(retval)
-}
-.quickNumMatrix.numdfr<-function(dfr){return(as.matrix(dfr))}
+# .quickNumMatrix<-function(dfr) UseMethod(".quickNumMatrix")
+# #need to check whether this is still any different from as.matrix.data.frame
+# #in practice
+# .quickNumMatrix.data.frame<-function(dfr){
+# 	retval<-matrix(unlist(dfr), ncol=ncol(dfr))
+# 	dimnames(retval)<-dimnames(dfr)
+# 	return(retval)
+# }
+# .quickNumMatrix.numdfr<-function(dfr){return(as.matrix(dfr))}
+# .quickNumMatrix.default<-function(dfr){return(as.matrix(dfr))}
 
-.matBack2OrgClass<-function(objWithClass, mat, catCols, levelList, colnms=NULL,
-	verbosity=0) UseMethod(".matBack2OrgClass")
-	
-.matBack2OrgClass.data.frame<-function(objWithClass, mat, catCols, levelList,
-	colnms=NULL, verbosity=0)
-{
-	.mat2dfr(mat=mat, catCols=catCols, levelList=levelList, colnms=colnms,
-		verbosity=verbosity)
-}
-
-.matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList,
-	colnms=NULL, verbosity=0)
-{
-	posInCatCols<-match(seq(ncol(mat)), catCols, nomatch=0)
-	allLevels<-lapply(posInCatCols, function(ccn){
-			if(ccn > 0) return(levelList[[ccn]]) else return(character(0))
-		})
-	colnames(mat)<-colnms
-	names(allLevels)<-colnms
-	retval<-list(mat=mat, lvls=allLevels)
-	class(retval)<-"numdfr"
-	return(retval)
-}
+# .matBack2OrgClass<-function(objWithClass, mat, catCols, levelList, colnms=NULL,
+# 	verbosity=0) UseMethod(".matBack2OrgClass")
+# 	
+# .matBack2OrgClass.data.frame<-function(objWithClass, mat, catCols, levelList,
+# 	colnms=NULL, verbosity=0)
+# {
+# 	.mat2dfr(mat=mat, catCols=catCols, levelList=levelList, colnms=colnms,
+# 		verbosity=verbosity)
+# }
+# 
+# .matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList,
+# 	colnms=NULL, verbosity=0)
+# {
+# 	posInCatCols<-match(seq(ncol(mat)), catCols, nomatch=0)
+# 	allLevels<-lapply(posInCatCols, function(ccn){
+# 			if(ccn > 0) return(levelList[[ccn]]) else return(character(0))
+# 		})
+# 	colnames(mat)<-colnms
+# 	names(allLevels)<-colnms
+# 	retval<-list(mat=mat, lvls=allLevels)
+# 	class(retval)<-"numdfr"
+# 	return(retval)
+# }
 
 .hasNA<-function(dfr)
 {
 	return(any(is.na(dfr)))
 }
 
-#This is very close to addendum:findCatColNums
 .contDataAsMat<-function(dfr){
 	catcols<-findCatColNums(dfr)
-	return(.quickNumMatrix(dfr[,-catcols]))
+	return(as.nummatrix(dfr[,-catcols]))
 }
 
 
@@ -129,7 +106,7 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	}
 
 	naLevels<-allLevels(dfrl)
-	dfr<-.quickNumMatrix(dfr)
+	dfr<-as.nummatrix(dfr)
 	catwif(verbosity>0, "dfr is now a matrix of dimension:", dim(dfr), "and class",
 		class(dfr))
 	catwif(verbosity>0, "while dfrl now has class", class(dfrl), "and dimension:",
@@ -232,7 +209,7 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	resmat<-do.call(rbind, newrows)
 	
 	catwif(verbosity>1, "turn resulting matrix into ", class(dfrl), " again")
-	result<-.matBack2OrgClass(dfrl, mat=resmat, catCols=catCols, 
+	result<-matBack2OrgClass(dfrl, mat=resmat, catCols=catCols, 
 		levelList=naLevels, colnms=c(orgnames, toAddCols), verbosity=verbosity-1)
 	return(result)
 }
