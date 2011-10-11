@@ -4,6 +4,7 @@
 \alias{as.nummatrix.matrix}
 \alias{as.nummatrix.default}
 \alias{as.nummatrix.data.frame}
+\alias{as.nummatrix.numdfr.rep}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Convert \code{object} to \code{numeric matrix}
@@ -13,6 +14,7 @@ Functions to coerce object to \code{numericmatrix}.
 }
 \usage{
 \method{as.nummatrix}{numdfr}(object)
+\method{as.nummatrix}{numdfr.rep}(object)
 \method{as.nummatrix}{matrix}(object)
 \method{as.nummatrix}{data.frame}(object)
 }

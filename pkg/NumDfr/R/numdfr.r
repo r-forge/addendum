@@ -947,7 +947,8 @@ factorsToDummyVariables.numdfr.rep<-function(dfr, ...)
 }
 
 as.nummatrix<-function(object) UseMethod("as.nummatrix")
-as.nummatrix.NumDfr<-function(object) .getMatrix(object)
+as.nummatrix.numdfr<-function(object) .getMatrix(object)
+as.nummatrix.numdfr.rep<-function(object) as.matrix(object)
 as.nummatrix.matrix<-function(object) object
 as.nummatrix.default<-function(object) as.matrix(object)
 as.nummatrix.data.frame<-function(object){
