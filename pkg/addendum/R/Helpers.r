@@ -3008,4 +3008,20 @@ internalMissClassificationPerLambdaLognet<-function(x, y, family="binomial", pro
 	return(list(lambda=lgnet$lambda, mcls=mcls,numpos=sum(yislevel2), numneg=sum(!yislevel2)))
 }
 
+getAsFunction<-function(fnameOrFunction, returnIfNotFound=NULL, verbosity=0)
+{
+	if(! is.function(fnameOrFunction))
+	{
+		catwif(verbosity > 0, "Getting function from passed in name (?):", fnameOrFunction)
+		#silently try to get the fnameOrFunction from its name
+		fnameOrFunction<-mget(fnameOrFunction, as.environment(-1), ifnotfound=list(result=NULL), inherits=TRUE)[[1]]
+		if(is.null(fnameOrFunction))
+		{
+			catwif(verbosity > 0, "**No valid fnameOrFunction found. Returning default.")
+			fnameOrFunction<-returnIfNotFound
+		}
+	}
+	return(fnameOrFunction)
+}
+
 

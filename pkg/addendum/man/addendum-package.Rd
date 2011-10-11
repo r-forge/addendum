@@ -55,6 +55,9 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{print.checkSig}}
 		\item \code{\link{HB}}
 	}
+	\item Meta coding \enumerate{
+		\item \code{\link{getAsFunction}}
+	}
 	\item Profiling \enumerate{
 		\item Text \enumerate{
 			\item \code{\link{catif}}
