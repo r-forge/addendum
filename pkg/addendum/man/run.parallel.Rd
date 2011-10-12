@@ -12,7 +12,7 @@ divided over processors (or even computers). Results of every subtask are saved
 a separate file.
 }
 \usage{
-run.parallel(..., paramcreationname, functionname, paramname, logdir,	savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"),	postprocessname=NULL)
+run.parallel(..., paramcreationname, functionname, paramname, logdir,	savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"),	postprocessname=NULL, loadLibsIfSfNotRunning=c("Matrix", "glmnet", "addendum"))
 do.parallel(i, functionname, paramname, logdir, savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"), postprocessname=NULL, verbosity)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -48,6 +48,11 @@ and then, respectively ".txt" and ".saved".
 name of function that is applied to the result after saving it (useful for saving
 a big result but returning a smaller version of it). If it is \code{NULL} (the
 default) or the function is not found, the original result is returned.
+}
+  \item{loadLibsIfSfNotRunning}{
+If there wasn't a snowfall cluster running up front, a single CPU one will be 
+started. After that, each of the libraries in this character vector will be
+\code{\link{sfLibrary}}d. A warning is issued, as this is not the intended use.
 }
   \item{i}{
 subtask number - see details.

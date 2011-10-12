@@ -2783,12 +2783,16 @@ do.parallel<-function(i, functionname, paramname, logdir, savedir=logdir,
 
 run.parallel<-function(..., paramcreationname, functionname, paramname, logdir,
 	savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"),
-	postprocessname=NULL)
+	postprocessname=NULL, loadLibsIfSfNotRunning=c("Matrix", "glmnet", "addendum"))
 {
 	require(snowfall)
   if(!sfIsRunning())
   {
-    stop("run.parallel can only be used when a snowfall cluster is running.")
+  	warning("There was no snowfall cluster running at the start of run.parallel!!! Will start a single CPU now.")
+		sfInit(parallel = FALSE, cpus = 1)
+  	for(curlib in loadLibsIfSfNotRunning) sfLibrary(curlib, character.only=TRUE)
+  	on.exit(sfStop())
+    #stop("run.parallel can only be used when a snowfall cluster is running.")
   }
 	parlist<-list(...)
 	if(!is.null(parlist$verbosity))
