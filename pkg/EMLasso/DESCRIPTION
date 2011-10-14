@@ -1,0 +1,52 @@
+Package: EMLasso
+Type: Package
+Title: Fit (logistic) LASSO when there is missing data in
+    the predictors
+Version: 1.0
+Date: 2011-10-07
+Author: Nick Sabbe <nick.sabbe@ugent.be>
+Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
+Description: Fit (logistic) LASSO when there is missing
+    data in the predictors
+License: GPL (>= 2)
+LazyLoad: yes
+LazyData: yes
+Depends:
+    Matrix,
+    glmnet,
+    snowfall,
+    addendum,
+    NumDfr,
+    GLoMo
+Collate:
+    'cv.1l.emlasso-class.R'
+    'cv.1l.emlasso.reduced-class.R'
+    'cv.emlasso-class.R'
+    'EMLasso-package.R'
+    'calculateCriteria.EMLasso.1l.lognet.R'
+    'checkConvergence.lognet.R'
+    'coef.cv.1l.emlasso.R'
+    'coef.cvpart.emlasso.R'
+    'EMLasso.1l.lognet.cv.param.R'
+    'EMLasso.1l.lognet.cv.R'
+    'EMLasso.1l.lognet.onefold.R'
+    'EMLasso.1l.lognet.R'
+    'EMLasso.lognet.cv.R'
+    'findReasonableLambdaHelper.R'
+    'fit.lognet.R'
+    'fit.logreg.R'
+    'getBeta.cv.emlasso.R'
+    'getSortedReducedResultList.R'
+    'lognetProbWrapper.R'
+    'LognetValidationData.R'
+    'mimic_cv_lognet.R'
+    'postprocess.reduce.1l.emlasso.R'
+    'predictProb.R'
+    'reduce.cv.1l.emlasso.R'
+    'reduce.EMLasso.lognet.cv.R'
+    'refreshCriteria.R'
+    'setDebugmodeEMLasso.R'
+    'simpleplot.cv.emlasso.R'
+    'sortReducedResultList.R'
+    'validateFunction.lognet.R'
+    'validationOutAndPredProb.R'
