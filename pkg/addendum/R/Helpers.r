@@ -831,6 +831,7 @@ dfrConversionProbs<-function(dfr, betweenColAndLevel)
 	orgfactcols<-which(reps>1)
 
 	startoforgcolinnewmat<-cumsum(c(1, reps))[seq_along(reps)]
+	names(startoforgcolinnewmat)<-names(reps) #otherwise the names are confusing
 	mustmatchforfactcols<-do.call(c, lapply(reps[orgfactcols], seq))+1
 	newcolsfromfact<-rep(startoforgcolinnewmat[orgfactcols], reps[orgfactcols]) + mustmatchforfactcols -2
 	colexs<-do.call(c, lapply(lvls[orgfactcols], function(curlvls){if(length(curlvls) > 1) curlvls[-1] else ""}))
@@ -2690,8 +2691,8 @@ reduce.data.frame<-function(object, orgdfr, repsperrow=NULL, keeponlyusedrows=FA
 unreduce.data.frame.rep<-function(object, ...)
 {
 	.debugtxt()
-	repdata<-object$repdata
-	orgdata<-object$orgdata
+	repdata<-.getRepData.rep(object)
+	orgdata<-.getOrgData.rep(object)
 	parts<-lapply(repdata, function(currepdata){
 			reporgrows<-rep(currepdata$orgrow,length(currepdata$names))
 			rv<-orgdata[reporgrows,]
@@ -3029,3 +3030,383 @@ getAsFunction<-function(fnameOrFunction, returnIfNotFound=NULL, verbosity=0)
 }
 
 
+
+
+
+#data.frame.rep
+.getRepData.rep<-function(x)
+{
+	return(.subset2(x, "repdata", exact=TRUE))
+}
+.getOrgData.rep<-function(x, long=FALSE)
+{
+	orgdata<-.subset2(x, "orgdata", exact=TRUE)
+	if(long)
+	{
+		mp<-.getMap.rep(x)
+		orgdata<-orgdata[mp, ]
+	}
+	return(orgdata)
+}
+.getKeptOnlyUsedRows.rep<-function(x)
+{
+	return(.subset2(x, "keptonlyusedrows", exact=TRUE))
+}
+.getMap.rep<-function(x)
+{
+	return(.subset2(x, "map", exact=TRUE))
+}
+
+.getLevels.rep<-function(x)
+{
+	dfr<-.getOrgData.rep(x)
+	return(allLevels(dfr))
+}
+
+.torepsperrow<-function(vals)
+{
+	matchespernewrow<-rle(vals)
+	repsperrow<-matchespernewrow$lengths
+	names(repsperrow)<-matchespernewrow$values
+	return(repsperrow)
+}
+
+.translateRowIndices<-function(x, i)
+{
+	#should never be called with missing i
+	mappart<-.getMap.rep(x)[i]
+	return(.torepsperrow(mappart))
+}
+
+as.data.frame.data.frame.rep<-function(x, row.names = NULL, optional = FALSE, ...) unreduce.data.frame.rep(x, ...)
+
+originalDataset<-function(x) UseMethod("originalDataset")
+
+originalDataset.default<-function(x) return(x)
+originalDataset.data.frame.rep<-function(x) .getOrgData.rep(x)
+
+#for now: very unefficient implementation of these!
+"[.data.frame.rep"<-function (x, i, j, returnAsMatrix = drop, drop = FALSE)
+{
+	.debugtxt()
+	orgdata<-.getOrgData.rep(x)
+	kept<-.getKeptOnlyUsedRows.rep(x)
+	rv<-as.data.frame(x)[i, j, returnAsMatrix, drop]
+	#catw("structure of rv so far:")
+	#str(rv)
+	trri<-.translateRowIndices(x,i)
+	#catw("trri:", trri)
+	return(reduce(rv, orgdata, trri, kept))
+}
+
+"[<-.data.frame.rep"<-function (x, i, j, value) stop("Assignment in data.frame.rep not allowed yet")
+
+length.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	return(ncol(.getOrgData.rep(x)))
+}
+dimnames.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	dn<-dimnames(.getOrgData.rep(x))
+	dn[[1]]<-do.call(c, lapply(.getRepData.rep(x), "[[", "names"))
+	return(dn)
+}
+"dimnames<-.data.frame.rep"<-function(x, value) stop("Assignment in data.frame.rep not allowed yet")
+dim.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	c(length(.getMap.rep(x)), length.data.frame.rep(x))
+}
+names.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	names(.getOrgData.rep(x))
+}
+
+"names<-.data.frame.rep"<-function(x, value) stop("Assignment in data.frame.rep not allowed yet")
+is.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	inherits(x, "data.frame.rep")
+}
+
+as.double.data.frame.rep<-function(x,...)
+{
+	.debugtxt()
+	object<-as.data.frame(x)
+	retval<-matrix(unlist(object), ncol=ncol(object))
+	dimnames(retval)<-dimnames(object)
+	return(retval)
+}
+
+is.na.data.frame.rep<-function(x)
+{
+	.debugtxt()
+	rv<-is.na.data.frame(.getOrgData.rep(x, long=TRUE))
+
+	rd<-.getRepData.rep(x)
+	curspos<-1
+	for(i in seq_along(rd))
+	{
+		currd<-rd[[i]]
+		nr<-length(currd$names)
+		if(nr > 0)
+		{
+			curepos<-curspos + nr - 1
+			nc<-length(currd$nacols)
+			if(nc > 0)
+			{
+				rv[seq(curspos, curepos),currd$nacols]<-is.na(currd$repdata)
+			}
+			curspos<-curepos+1
+		}
+	}
+	return(rv)
+}
+
+str.data.frame.rep<-function(object,...)
+{
+	cat("data.frame.rep object with dimensions:", dim(object), "\n")
+	cat("->Repetitions of interior rows:\n\t")
+	reprle<-rle(.getMap.rep(object))
+	repres<-paste(reprle$values, " (", reprle$lengths, ")", sep="")
+	cat(repres, "\n", fill=TRUE)
+	cat("->Rownames: ", rownames(object), "\n", fill=TRUE)
+	cat("->Colnames: ", colnames(object), "\n", fill=TRUE)
+	cat("\nThe following variables are factor-like:\n")
+	lvls<-.getLevels.rep(object)
+	ccns<-findCatColNums.data.frame.rep(object)
+	lvltxts<-sapply(ccns, function(ccn){paste(lvls[[ccn]], collapse=" ")})
+	ccoltxt<-paste("\t", names(lvls)[ccns], ":", lvltxts)
+	cat(ccoltxt, "\n", fill=TRUE)
+	invisible()
+}
+
+as.list.data.frame.rep<-function(x, returnFactors=TRUE,...)
+{
+	.debugtxt()
+	as.list.data.frame(as.data.frame(x), returnFactors, ...)
+}
+
+#see above for implementation
+# as.data.frame.data.frame.rep<-function(x, row.names = NULL, optional = FALSE, ...)
+# {
+# 	.debugtxt()
+# 	as.data.frame.numdfr(as.numdfr(x), row.names, optional, ...)
+# }
+
+findCatColNums.data.frame.rep<-function(dfr)
+{
+	.debugtxt()
+	which(sapply(.getLevels.rep(dfr), length) > 0)
+}
+
+#note: assumes (original) rows with the same rowname are also exactly the same!
+rbind.data.frame.rep<-function(..., original.data, ensure.unique.rownames=FALSE, separator=".", postfixcol=NULL, allowemptypostfix=TRUE, deparse.level = 1)
+{
+	#this is the hardest one!!
+	.debugtxt()
+	allparams<-list(...)
+	allrnames<-lapply(allparams, function(curdataframerep){
+			curorgdata<-.getOrgData.rep(curdataframerep)
+			rownames(curorgdata)
+		})
+	#We act like we build a big dataset of all the orgdatas rbound
+	rnameposindex<-vapply(allrnames, length, 0)
+	#rnameposindex now holds how many original rows there are in each item of ...
+	
+	rnamesubindex<-do.call(c, lapply(rnameposindex, seq))
+	#rnamesubindex now holds the rowindex of each row in the 'big dataset', in the
+	#orgdata that it comes from
+	
+	rnameposindex<-rep(seq_along(rnameposindex), rnameposindex)
+	#rnameposindex now holds for each row in the 'big dataset' the number of the
+	#item in allparams (or ...) it originates from
+	allrnames<-do.call(c, allrnames)
+	#allrnames now contains the rownames in the 'big dataset'
+	
+	#next, we consider a 'reduced dataset' (based on rowname) where every rowname
+	#is supposed to occur only once
+	
+	if(missing(original.data))
+	{
+		#for now: always 'reduce' the set of original data
+		uniqueorgnames<-unique(allrnames)
+		rnameindexinbig<-match(uniqueorgnames, allrnames)
+		#for each row in the 'reduced dataset', find the first rowindex in the
+		#'big dataset' that matches it -> stored in rnameindexinbig
+		rnamenewindex<-match(allrnames, uniqueorgnames)
+		#for each row in the 'big dataset', find the rowindex in the
+		#'reduced dataset' that matches it -> stored in rnamenewindex
+		tmpretlst<-lapply(rnameindexinbig, function(riio){
+				whichlistitem<-rnameposindex[riio] #the how manieth item in ...
+				curorgdata<-.getOrgData.rep(allparams[[whichlistitem]]) #get its orgdata
+				whichrowinlistitem<-rnamesubindex[riio] #which row in that item's orgdata does it match
+				curorgdata[whichrowinlistitem,] #get that row
+			})
+		#catw("Got list of original data(s):")
+		#print(tmpretlst)
+		neworgdata<-combineSimilarDfrList(tmpretlst)
+		#catw("Combined them.")
+	}
+	else
+	{
+		neworgdata<-original.data
+		uniqueorgnames<-rownames(neworgdata)
+		rnameindexinbig<-match(uniqueorgnames, allrnames)
+		rnamenewindex<-match(allrnames, uniqueorgnames)
+	}
+	#debugtmp<<-data.frame(allrnames=allrnames, rnameposindex=rnameposindex,
+	#	rnamesubindex=rnamesubindex, rnamenewindex=rnamenewindex)
+	newrepdata<-do.call(c, lapply(seq_along(allparams), function(i){
+			#catw("Getting newrepdata", i, "/", length(allparams))
+			curdataframerep<-allparams[[i]]
+			currepdata<-.getRepData.rep(curdataframerep)
+			for(j in seq_along(currepdata))
+			{
+				#catw("->current subitem i:", i, ", j:", j, "\n")
+				curorgrow<-currepdata[[j]]$orgrow #what row in its original orgdata does it refer to
+				#catw("->curorgrow: ", curorgrow, "\n")
+				posofthisrowinindex<-which((rnameposindex==i) & (rnamesubindex==curorgrow))
+				#catw("->posofthisrowinindex: ", posofthisrowinindex, "\n")
+				if(length(posofthisrowinindex) != 1) stop("Something went terribly wrong!")
+				neworgrow<-rnamenewindex[posofthisrowinindex]
+				#catw("->Original row index", curorgrow, "got translated to new row index", neworgrow)
+				currepdata[[j]]$orgrow<-neworgrow
+			}
+			return(currepdata)
+		}))
+	if(missing(original.data))
+	{
+		newcurkept=FALSE
+	}
+	else
+	{
+		#as soon as 1 is keptonlyusedrows, you can never be certain that the total is
+		newcurkept<-any(vapply(allparams, .getKeptOnlyUsedRows.rep, TRUE))
+	}
+	newmap<-do.call(c, lapply(seq_along(allparams), function(i){
+			curdataframerep<-allparams[[i]]
+			curmap<-.getMap.rep(curdataframerep)
+			currnamesubindex<-rnamesubindex[rnameposindex==i]
+			currnamenewindex<-rnamenewindex[rnameposindex==i]
+			curpos<-match(curmap, currnamesubindex)
+			curmap<-currnamenewindex[curpos]
+			return(curmap)
+		}))
+	rv<-list(repdata=newrepdata, orgdata=neworgdata, keptonlyusedrows=newcurkept,
+		map=newmap)
+	class(rv)<-"data.frame.rep"
+	return(rv)
+}
+
+print.data.frame.rep<-function(x, ..., digits = NULL, quote = FALSE, right = TRUE,
+    row.names = TRUE)
+{
+	print(as.data.frame(x), ..., digits = digits, quote = quote, right = right,
+    row.names = row.names)
+}
+
+display.data.frame.rep<-function(dfr)
+{
+	.debugtxt()
+	display(as.data.frame.data.frame.rep(dfr))
+}
+as.matrix.data.frame.rep<-function(x, ...)
+{
+	.debugtxt()
+	as.matrix.data.frame(as.data.frame.data.frame.rep(x), ...)
+}
+
+allLevels.data.frame.rep<-function(x, onlyNonEmpty=FALSE)
+{
+	.debugtxt()
+	lvls<-.getLevels.rep(x)
+	if(! onlyNonEmpty)
+	{
+		return(lvls)
+	}
+	else
+	{
+		keep<-sapply(lvls, length) > 0
+		return(lvls[keep])
+	}
+}
+
+"[[.data.frame.rep"<-function(x, ..., exact=TRUE)
+{
+	.debugtxt()
+	thecol<-unlist(as.list(...))
+	if(length(thecol) != 1) stop("Unsupported operation: passing more than one parameter to [[.numdfr.rep")
+	
+	mp<-.getMap.rep(x)
+	orgdata<-.getOrgData.rep(x)
+	if(is.character(thecol)) colindex<-.findIndexOfColumnName(orgdata, thecol, exact=exact)
+	if(is.na(thecol)) stop(paste("Column '", thecol, "' could not be found.", sep=""))
+	thecol<-orgdata[[colindex, exact=exact]]
+
+	rd<-.getRepData.rep(x)
+	curspos<-1
+	for(i in seq_along(rd))
+	{
+		currd<-rd[[i]]
+		nr<-length(currd$names)
+		if(nr > 0)
+		{
+			curepos<-curspos + nr - 1
+			nc<-length(currd$nacols)
+			if(nc > 0)
+			{
+				subcoli<-match(colindex, currd$nacols)
+				if(!is.na(subcoli))
+				{
+					thecol[seq(curspos, curepos)]<-currd$repdata[,subcoli, drop=TRUE]
+				}
+			}
+			curspos<-curepos+1
+		}
+	}
+
+	thelvls<-.getLevels.rep(x)[[colindex]]
+	if(length(thelvls) > 0)
+	{
+		return(quickFactor(thecol, labels=thelvls))
+	}
+	return(thecol)
+}
+
+"$.data.frame.rep"<-function(x, name)
+{
+	.debugtxt()
+	return("[[.data.frame.rep"(x, name, exact=TRUE))
+}
+
+factorsToDummyVariables.data.frame.rep<-function(dfr, ...)
+{
+	factorsToDummyVariables(as.data.frame(dfr), ...)
+}
+
+.findIndexOfColumnName<-function(x, name, exact=TRUE)
+{
+	.debugtxt()
+	if(exact)
+	{
+		match(name, colnames(x))
+	}
+	else
+	{
+		pmatch(name, colnames(x), duplicates.ok=TRUE)
+	}
+}
+
+loadSingleObjectFromFile<-function(fname, verbosity = 0)
+{
+	tmpenv <- new.env()
+	ldd <- load(fname, envir = tmpenv)
+	catwif(verbosity > 0, "loaded object:'", ldd, "'")
+	object <- get(ldd, envir = tmpenv, inherits = FALSE)
+	rm(tmpenv)
+	return(object)
+}

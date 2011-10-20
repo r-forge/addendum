@@ -132,11 +132,15 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{colsAsNumericMatrix}}
 		\item \code{\link{quickFactor}}
 		\item \code{\link{postfixToMakeUnique}}
-		\item \code{\link{reduce}}
 		\item \code{\link{scaleNonFactors}}
 		\item \code{\link{logit}}
 		\item \code{\link{expit}}
 		\item \code{\link{invwhich}}
+	}
+	\item Repeated data \enumerate{
+		\item \code{\link{reduce}}
+		\item \code{\link{originalDataset}}
+		\item \code{\link{data.frame.rep}}
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
