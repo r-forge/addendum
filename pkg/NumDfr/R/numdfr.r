@@ -571,6 +571,11 @@ as.numdfr.numdfr.rep<-function(object, ...)
 	.debugtxt()
 	unreduce.numdfr.rep(object, ...)
 }
+as.numdfr.data.frame.rep<-function(object, ...)
+{
+	.debugtxt()
+	numdfr(unreduce(object), ...)
+}
 
 as.numdfr.rep<-function(object, orgdfr, ...) UseMethod("as.numdfr.rep")
 as.numdfr.rep.default<-function(object, orgdfr, ...) stop("as.numdfr.rep not provided for this class of object")
@@ -625,7 +630,7 @@ as.numdfr.rep.numdfr<-function(object, orgdfr, ...)
 	return(.torepsperrow(mappart))
 }
 
-originalDataset<-function(x) .getOrgData.rep(x)
+originalDataset.numdfr.rep<-function(x) .getOrgData.rep(x)
 
 #for now: very unefficient implementation of these!
 "[.numdfr.rep"<-function (x, i, j, returnAsMatrix = drop, drop = FALSE)

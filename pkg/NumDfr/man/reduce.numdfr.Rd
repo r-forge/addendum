@@ -4,6 +4,7 @@
 \alias{as.numdfr}
 \alias{as.numdfr.default}
 \alias{as.numdfr.data.frame}
+\alias{as.numdfr.data.frame.rep}
 \alias{as.numdfr.numdfr}
 \alias{as.numdfr.numdfr.rep}
 \alias{as.numdfr.rep}
@@ -23,6 +24,7 @@ easily manipulated.
 \method{reduce}{numdfr}(object, orgdfr, repsperrow=NULL, keeponlyusedrows=FALSE, ...)
 \method{unreduce}{numdfr.rep}(object, ...)
 \method{as.numdfr}{data.frame}(object, ...)
+\method{as.numdfr}{data.frame.rep}(object, ...)
 \method{as.numdfr}{numdfr}(object, ...)
 \method{as.numdfr}{numdfr.rep}(object, ...)
 \method{as.numdfr.rep}{numdfr}(object, orgdfr, ...)

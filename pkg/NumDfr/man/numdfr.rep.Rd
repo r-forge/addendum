@@ -23,7 +23,7 @@
 \alias{[[.numdfr.rep}
 \alias{$.numdfr.rep}
 \alias{factorsToDummyVariables.numdfr.rep}
-\alias{originalDataset}
+\alias{originalDataset.numdfr.rep}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Functions for \code{numdfr.rep} objects
@@ -56,7 +56,7 @@ is.numdfr.rep(x)
 \method{[[}{numdfr.rep}(x, ..., exact=TRUE)
 \method{$}{numdfr.rep}(x, name)
 \method{factorsToDummyVariables}{numdfr.rep}(dfr, ...)
-originalDataset(x)
+\method{originalDataset}{numdfr.rep}(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -79,8 +79,7 @@ see equally named method for \code{\link{numdfr}}
 	
 	As of today, the assignments have as their only implementation to fail!
 	
-	\code{originalDataset} stands out somewhat as it is not some S3 implementation,
-	but simply returns the underlying 'original' dataset (\code{\link{numdfr}}).
+	\code{originalDataset} simply returns the underlying 'original', repeated dataset (\code{\link{numdfr}}).
 }
 \value{
 see equally named method for \code{\link{numdfr}}
