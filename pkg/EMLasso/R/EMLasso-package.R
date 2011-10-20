@@ -51,25 +51,33 @@
 #'	}
 #'}
 #' Most important part of the call stack:
-#' EMLasso.lognet.cv ("EMLasso.lognet.cv")
-#'   EMLasso.1l.lognet.cv.param
-#'   run.parallel
-#'     do.parallel
-#'       EMLasso.1l.lognet.cv ("cv.1l.emlasso")
-#'         EMLasso.1l.lognet.onefold ("cvpart.emlasso")
-#'           EMLasso.1l.lognet ("EMLasso.1l.lognet") ->fitinfo
-#'             rCatsAndCntInDfr
-#'             fit.lognet ("cv.glmnet")
-#'             GLoMo ("GLoMo")
-#'             predict.conditional.allrows.GLoMo
-#'             checkConvergence.lognet
-#'             fit.logreg ("cv.glmnet")
-#'           predict.GLoMo
-#'         mimic_cv_lognet
-#'       postprocess.reduce.1l.emlasso
-#'         reduce.cv.1l.emlasso ("cv.1l.emlasso.reduced")
-#' reduce.EMLasso.lognet.cv ("cv.emlasso", "cv.glmnet")
-#' 
+#' \enumerate{
+#' \item \code{\link{EMLasso.lognet.cv}} ("EMLasso.lognet.cv")\enumerate{
+#'   \item \code{\link{EMLasso.1l.lognet.cv.param}}
+#'   \item \code{\link{run.parallel}}\enumerate{
+#'     \item \code{\link{do.parallel}}\enumerate{
+#'       \item \code{\link{EMLasso.1l.lognet.cv}} ("\code{\link{cv.1l.emlasso}}")\enumerate{
+#'         \item \code{\link{EMLasso.1l.lognet.onefold}} ("cvpart.emlasso")\enumerate{
+#'           \item \code{\link{EMLasso.1l.lognet}} ("EMLasso.1l.lognet") ->fitinfo\enumerate{
+#'             \item \code{\link{rCatsAndCntInDfr}}
+#'             \item \code{\link{fit.lognet}} ("\code{\link{cv.glmnet}}")
+#'             \item \code{\link{GLoMo}} ("\code{\link{GLoMo}}")
+#'             \item \code{\link{predict.conditional.allrows.GLoMo}}
+#'             \item \code{\link{checkConvergence.lognet}}
+#'             \item \code{\link{fit.logreg}} ("\code{\link{cv.glmnet}}")
+#'             }
+#'           \item \code{\link{predict.GLoMo}}
+#'           }
+#'         \item \code{\link{mimic_cv_lognet}}
+#'         }
+#'       \item \code{\link{postprocess.reduce.1l.emlasso}}\enumerate{
+#'         \item \code{\link{reduce.cv.1l.emlasso}} ("\code{\link{cv.1l.emlasso.reduced}}")
+#'         }
+#'       }
+#'     }
+#'   }
+#' \item \code{\link{reduce.EMLasso.lognet.cv}} ("\code{\link{cv.emlasso}}", "\code{\link{cv.glmnet}}")
+#' }
 #' @name EMLasso-package
 #' @aliases EMLasso-package EMLasso
 #' @docType package

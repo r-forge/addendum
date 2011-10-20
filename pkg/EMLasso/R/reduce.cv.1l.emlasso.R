@@ -22,11 +22,12 @@ reduce.cv.1l.emlasso<-function(object, orgdfr, ..., verbosity=0)
 	if(is.character(object))
 	{
 		catwif(verbosity>0, "loading cv.1l.emlasso object from file '", object, "'")
-		tmpenv<-new.env()
-		ldd<-load(object, envir=tmpenv)
-		catwif(verbosity>0, "loaded object:'", ldd, "'")
-		object<-get(ldd, envir=tmpenv, inherits=FALSE)#[[ldd]]
-		rm(tmpenv)
+# 		tmpenv<-new.env()
+# 		ldd<-load(object, envir=tmpenv)
+# 		catwif(verbosity>0, "loaded object:'", ldd, "'")
+# 		object<-get(ldd, envir=tmpenv, inherits=FALSE)#[[ldd]]
+# 		rm(tmpenv)
+		object<-loadSingleObjectFromFile(object, verbosity=verbosity)
 	}
 	if(missing(orgdfr))
 	{
@@ -54,9 +55,31 @@ reduce.cv.1l.emlasso<-function(object, orgdfr, ..., verbosity=0)
 	numCols<-ncol(orgdfr)
 	orgRowsPerFold<-lapply(object$actualfits, function(curfit){seq(numRows)[-curfit$fitinfo$rowsToUseForFit]})
 	#Validation Sample
+	if(verbosity > 5)
+	{
+		for(i in seq_along(object$actualfits))
+		{
+			curpred<-object$actualfits[[i]]$valsample$predicted
+			catw("dimensions of", i, "th element of object$actualfits's predicted set:", dim(curpred))
+			catw("\tIts class is: ", class(curpred))
+		}
+	}
 	catwif(verbosity>0, "Validation data")
 	predicted<-lapply(object$actualfits, function(curfit){reduce(curfit$valsample$predicted, orgdfr)})
+	if(verbosity > 5)
+	{
+		for(i in seq_along(predicted))
+		{
+			curpred<-predicted[[i]]
+			catw("dimensions of", i, "th element of predicted:", dim(curpred))
+			catw("\tIts class is: ", class(curpred))
+		}
+	}
 	predicted<-combineSimilarDfrList(predicted)
+	if(verbosity > 5)
+	{
+		catw("dimensions of resulting predicted:", dim(predicted))
+	}
 	numRepPerRow<-do.call(c, lapply(object$actualfits, function(curfit){curfit$valsample$numRepPerRow}))
 	resp<-do.call(c, lapply(object$actualfits, function(curfit){curfit$valsample$resp}))
 	predProb<-do.call(c, lapply(object$actualfits, function(curfit){curfit$criteria$predProb}))
@@ -71,7 +94,8 @@ reduce.cv.1l.emlasso<-function(object, orgdfr, ..., verbosity=0)
 		verbosity=verbosity-1, dfrConvData=dfrConvData)
 	#reduced glomo
 	catwif(verbosity>0, "Combine GLoMo")
-	glomo<-do.call(combineGLoMos, c(lapply(object$actualfits, function(curfit){curfit$fitinfo$glomo}), verbosity=verbosity-1))
+	#glomo<-do.call(combineGLoMos, c(lapply(object$actualfits, function(curfit){curfit$fitinfo$glomo}), verbosity=verbosity-1))
+	glomo<-combineGLoMos(listOfGLoMos=lapply(object$actualfits, function(curfit){curfit$fitinfo$glomo}), verbosity=verbosity-1)
 	#crossvalidation results and the rest into retval
 	catwif(verbosity>0, "Store results")
 	retval<-list(lambda=object$lambda, cvm=object$cvm, cvsd=object$cvsd,

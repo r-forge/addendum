@@ -34,11 +34,11 @@ reduce.EMLasso.lognet.cv<-function(object, orgdfr, orgresp,
 		catwif(verbosity > 0, "getSortedReducedResultList")
 		if(missing(orgdfr)) #missing doesn't work in nested functions
 		{
-			reducedResultList<-getSortedReducedResultList(object, ..., verbosity=verbosity-1)
+			reducedResultList<-getSortedReducedResultList(object, ..., verbosity=verbosity-1, splitPatternLastPart=splitPatternLastPart)
 		}
 		else
 		{
-			reducedResultList<-getSortedReducedResultList(object, orgdfr, ..., verbosity=verbosity-1)
+			reducedResultList<-getSortedReducedResultList(object, orgdfr, ..., verbosity=verbosity-1, splitPatternLastPart=splitPatternLastPart)
 		}
 	}
 	obj<-list()

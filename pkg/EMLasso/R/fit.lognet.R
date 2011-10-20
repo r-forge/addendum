@@ -32,6 +32,7 @@ fit.lognet<-function(dfr, resp, lambda, weights=(rep(1, dim(dfr)[1])),
 		catwif(verbosity > 0, "dfrConvData was missing??")
 		dfrConvData<-dfrConversionProbs(dfr, "")
 	}
+	catwif(verbosity > 0, "Dimension of passed in dfr:", dim(dfr))
 	dfr.mat<-factorsToDummyVariables(dfr, betweenColAndLevel="", dfrConvData=dfrConvData, verbosity=verbosity-1)
 	catwif(verbosity > 0, "Resulting dimension:", dim(dfr.mat))
 	catwif(verbosity > 0, "Actually fit glmnet")

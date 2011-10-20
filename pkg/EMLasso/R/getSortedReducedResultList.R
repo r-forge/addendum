@@ -60,11 +60,11 @@ getSortedReducedResultList<-function(object, orgdfr, ..., verbosity=0, splitPatt
 				}
 				if(missingOrgDfr) #missing doesn't work in nested functions!!
 				{
-					reduce(object[[i]], ..., verbosity=verbosity-2)
+					reduce.cv.1l.emlasso(object[[i]], ..., verbosity=verbosity-2)
 				}
 				else
 				{
-					reduce(object[[i]], orgdfr, ..., verbosity=verbosity-2)
+					reduce.cv.1l.emlasso(object[[i]], orgdfr, ..., verbosity=verbosity-2)
 				}
 			}
 			else
