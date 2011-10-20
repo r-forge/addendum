@@ -10,6 +10,7 @@
 #' @param type.measure see \code{\link{cv.glmnet}}
 #' @param repsNeededForFirstOccurrence How many times (i.e. for how many lambda values)
 #' must a coefficient be consecutively nonzero before we count it as "occurring"
+#' @param \dots passed on to \code{\link{plotex}} (if relevant)
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
 #' @return list of class "LambdaHelper":
@@ -27,7 +28,7 @@
 #' rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
 #' @export
 findReasonableLambdaHelper<-function(ds, out, showFirst=20, showPlot=TRUE,
-	type.measure="auc", repsNeededForFirstOccurrence=3, verbosity=0)
+	type.measure="auc", repsNeededForFirstOccurrence=3, ..., verbosity=0)
 {
 	cv<-fit.lognet(dfr=ds, resp=out, lambda=NULL, verbosity=verbosity-1,
 		type.measure=type.measure)
@@ -35,7 +36,7 @@ findReasonableLambdaHelper<-function(ds, out, showFirst=20, showPlot=TRUE,
 	if(showPlot)
 	{
 		plotex(cv, xvar="lambda", numTicks=10, label=TRUE,
-			legendOf=showFirst, verbosity=verbosity-1)
+			legendOf=showFirst,..., verbosity=verbosity-1)
 	}
 	#kolommen van beta zijn lambdas, van groot (s0) naar klein (s99)
 	firstAppearance<-firstRepeatedAppearance(cv, repsNeededForFirstOccurrence)

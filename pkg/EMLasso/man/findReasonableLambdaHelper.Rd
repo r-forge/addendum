@@ -6,7 +6,7 @@
 \usage{
   findReasonableLambdaHelper(ds, out, showFirst = 20,
   showPlot = TRUE, type.measure = "auc",
-  repsNeededForFirstOccurrence = 3, verbosity = 0)
+  repsNeededForFirstOccurrence = 3, ..., verbosity = 0)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
 }
@@ -26,6 +26,9 @@
   \item{repsNeededForFirstOccurrence}{How many times (i.e.
   for how many lambda values) must a coefficient be
   consecutively nonzero before we count it as "occurring"}
+
+  \item{\dots}{passed on to \code{\link{plotex}} (if
+  relevant)}
 
   \item{verbosity}{The higher this value, the more levels
   of progress and debug information is displayed (note: in
