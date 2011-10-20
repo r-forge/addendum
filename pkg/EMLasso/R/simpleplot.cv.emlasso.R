@@ -3,6 +3,7 @@
 #' \code{\link{simpleplot}} implementation for class \code{\link{cv.emlasso}}
 #' 
 #' @param object \code{\link{cv.emlasso}} object
+#' @param beta.type see \code{type} parameter of \code{\link{getBeta}}
 #' @param xvar see \code{\link{simpleplot}}
 #' @param label see \code{\link{simpleplot}}
 #' @param \dots see \code{\link{simpleplot}}
@@ -19,11 +20,11 @@
 #' emlcvfitred<-reduce(emlcvfit)
 #' simpleplot(emlcvfitred)
 #' @export
-simpleplot.cv.emlasso<-function(object, xvar = c("norm", "lambda", "dev"), label=FALSE,..., verbosity=0)
+simpleplot.cv.emlasso<-function(object, beta.type=NULL, xvar = c("norm", "lambda", "dev"), label=FALSE,..., verbosity=0)
 {
 		x<-object$glmnet.fit
     xvar = match.arg(xvar)
-    theBeta<-getBeta(object)
+    theBeta<-getBeta(object, type=beta.type)
     plotCoef(theBeta, lambda = x$lambda, df = x$df, dev = x$dev.ratio,
         label = label, xvar = xvar, ...)
 }

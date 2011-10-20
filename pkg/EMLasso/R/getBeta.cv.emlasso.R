@@ -3,6 +3,7 @@
 #' \code{\link{getBeta}} implementation for class \code{\link{cv.emlasso}}
 #' 
 #' @param object \code{\link{cv.emlasso}} object
+#' @param type if equal to "final", then the beta from the final \code{\link{glmnet}} fit are used
 #' @return see \code{\link{getBeta}}
 #' @method getBeta cv.emlasso
 #' @note needed to make \code{\link{plotex}} etc. work seemlessly
@@ -14,7 +15,14 @@
 #' emlcvfitred<-reduce(emlcvfit)
 #' getBeta(emlcvfitred)
 #' @export
-getBeta.cv.emlasso<-function(object)
+getBeta.cv.emlasso<-function(object, type=NULL)
 {
-	object$orgcoef
+	if((! is.null(type)) && (type=="final"))
+	{
+		getBeta.cv.glmnet(object, type=NULL)
+	}
+	else
+	{
+		object$orgcoef
+	}
 }

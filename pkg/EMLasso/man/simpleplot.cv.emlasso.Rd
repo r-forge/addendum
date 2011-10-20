@@ -2,11 +2,15 @@
 \alias{simpleplot.cv.emlasso}
 \title{simpleplot implementation for class cv.emlasso}
 \usage{
-  \method{simpleplot}{cv.emlasso} (object, xvar = c("norm",
-  "lambda", "dev"), label = FALSE, ..., verbosity = 0)
+  \method{simpleplot}{cv.emlasso} (object, beta.type =
+  NULL, xvar = c("norm", "lambda", "dev"), label = FALSE,
+  ..., verbosity = 0)
 }
 \arguments{
   \item{object}{\code{\link{cv.emlasso}} object}
+
+  \item{beta.type}{see \code{type} parameter of
+  \code{\link{getBeta}}}
 
   \item{xvar}{see \code{\link{simpleplot}}}
 

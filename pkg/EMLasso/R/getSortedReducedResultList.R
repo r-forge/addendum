@@ -57,6 +57,11 @@ getSortedReducedResultList<-function(object, orgdfr, ..., verbosity=0, splitPatt
 				if(! inherits(object[[i]], "cv.1l.emlasso"))
 				{
 					catwif(verbosity>1, "Needed cv.1l.emlasso, got: ", class(object[[i]]))
+					if(inherits(object[[i]], "try-error"))
+					{
+						warning("In getSortedReducedResultList, the ", i, "th object was an error. You may need to check this.")
+						return(NULL)
+					}
 				}
 				if(missingOrgDfr) #missing doesn't work in nested functions!!
 				{
@@ -73,5 +78,7 @@ getSortedReducedResultList<-function(object, orgdfr, ..., verbosity=0, splitPatt
 				object[[i]]
 			}
 		})
+	nulls<-sapply(reducedResultList, is.null)
+	reducedResultList<-reducedResultList[which(!nulls)]
 	return(sortReducedResultList(reducedResultList))
 }

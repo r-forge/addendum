@@ -2,10 +2,13 @@
 \alias{getBeta.cv.emlasso}
 \title{getBeta implementation for class cv.emlasso}
 \usage{
-  \method{getBeta}{cv.emlasso} (object)
+  \method{getBeta}{cv.emlasso} (object, type = NULL)
 }
 \arguments{
   \item{object}{\code{\link{cv.emlasso}} object}
+
+  \item{type}{if equal to "final", then the beta from the
+  final \code{\link{glmnet}} fit are used}
 }
 \value{
   see \code{\link{getBeta}}
