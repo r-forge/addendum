@@ -438,22 +438,33 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 			whichCntColNA<-(1:numCont)[-whichCntColNotNA]
 			presentCntColsInDfr<-cntcols[whichCntColNotNA]
 			missingCntColsInDfr<-cntcols[whichCntColNA]
+			if(verbosity > 5)
+			{
+				catw("currowi:", currowi)
+				catw("glomorowsforcurrow:", glomorowsforcurrow)
+				catw("whichCntColNotNA:", whichCntColNotNA)
+				catw("whichCntColNA:", whichCntColNA)
+				catw("presentCntColsInDfr:", presentCntColsInDfr)
+				catw("missingCntColsInDfr:", missingCntColsInDfr)
+			}
 			if(length(whichCntColNotNA) > 0)
 			{
 				omega<-glomo$omegahat[whichCntColNotNA,whichCntColNotNA, drop=FALSE]
 
 				#note in the 1,2 notation, 1 refers to missing data (NA), while 2 refers
 				#to present data (notNA)
-				if((length(whichCntColNA) == numCont) & (exists("invomega", glomo)))
+				if((length(whichCntColNotNA) == numCont) & (exists("invomega", glomo)))
 				{
 					invSig22<-glomo$invomega
+					catwif(verbosity > 1, "Using glomo$invomega of dimension", dim(invSig22))
 				}
 				else
 				{
 					invSig22<-invertSymmetric(omega, careful=FALSE)
+					catwif(verbosity > 1, "Inverted omega of dimension", dim(invSig22))
 				}
 				
-				aanwezigeXs<-matrix(currow[, presentCntColsInDfr, drop=TRUE], nrow=1)
+				presentXs<-matrix(unlist(currow[, presentCntColsInDfr, drop=TRUE]), nrow=1)
 				if(length(whichCntColNA) != numCont)
 				{
 					sig11<-glomo$omegahat[whichCntColNA,whichCntColNA, drop=FALSE]
@@ -481,10 +492,19 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 				{
 					deltas<-sapply(glomorowsforcurrow, function(curcatrow){
 							pi.c<-glomo$pihat[curcatrow]
-							relvMus<-matrix(glomo$uniqueFactorCombinationsAndContinuousMeans[
-								curcatrow,presentCntColsInDfr,drop=TRUE], ncol=1)
+							relvMus<-matrix(unlist(glomo$uniqueFactorCombinationsAndContinuousMeans[
+								curcatrow,presentCntColsInDfr,drop=TRUE]), ncol=1)
+# 							if(verbosity > 5)
+# 							{
+# 								catw("dimension and class of invSig22:", dim(invSig22), "->", class(invSig22))
+# 								catw("dimension and class of relvMus:", dim(relvMus), "->", class(relvMus))
+# 								catw("dimension and class of presentXs:", dim(presentXs), "->", class(presentXs))
+# # 								.debug.tmp$invSig22<<-invSig22
+# # 								.debug.tmp$relvMus<<-relvMus
+# # 								.debug.tmp$presentXs<<-presentXs
+# 							}
 							partr<-invSig22 %*% relvMus         #notation refers to near page
-							part1<-aanwezigeXs %*% partr        #349 in Analysis of Incomplete
+							part1<-presentXs %*% partr        #349 in Analysis of Incomplete
 							part2<- -1/2*t(relvMus) %*% partr   #Multivariate Data
 							delta.c<-part1+part2+log(pi.c)
 							return(delta.c)
@@ -1032,11 +1052,14 @@ combineGLoMos<-function(..., listOfGLoMos=NULL, verbosity=0)
 		function(curMatchRow){
 			nonNas<-!is.na(curMatchRow)
 			usedRowList<-mapply(
-				function(ri, glomo){glomo$uniqueFactorCombinationsAndContinuousMeans[ri]},
-				curMatchRow[nonNas], allGLoMos[nonNas])
+				function(ri, glomo){
+					rv<-glomo$uniqueFactorCombinationsAndContinuousMeans[ri,,drop=FALSE]
+					return(rv)
+					},
+				curMatchRow[nonNas], allGLoMos[nonNas], SIMPLIFY=FALSE)
 			retrow<-usedRowList[[1]]
 			cntmat<-sapply(usedRowList,
-				function(curnumdfr){return(curnumdfr[1, cntcls, drop=TRUE])})
+				function(curnumdfr){return(unlist(curnumdfr[1, cntcls, drop=TRUE]))})
 			#cntmat now holds a matrix with 1 row per cnt var and one col per 'used row'
 			retrow[1,cntcls]<-rowMeans(cntmat)
 			return(retrow)
