@@ -6,7 +6,6 @@
 \alias{getBeta}
 \alias{getBeta.cv.glmnet}
 \alias{getBeta.glmnet}
-\alias{getBeta}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Add crossvalidation plot to standard glmnet plot
@@ -19,8 +18,8 @@ results. This method adds the crossvalidation plot on top of the coefficient plo
 \usage{
 addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0)
 getXIndices(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
-\method{getBeta}{cv.glmnet}(object)
-\method{getBeta}{glmnet}(object)
+\method{getBeta}{cv.glmnet}(object, type=NULL)
+\method{getBeta}{glmnet}(object, type=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,6 +54,9 @@ displayed (note: in R for Windows, turn off buffered output)
 }
   \item{object}{
 object for which the beta must be obtained
+}
+  \item{type}{
+used to be able to return various types of beta for some objects.
 }
 }
 \details{

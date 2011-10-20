@@ -1830,12 +1830,12 @@ getXIndices<-function(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
   return(index)
 }
 
-getBeta<-function(object) UseMethod("getBeta")
-getBeta.cv.glmnet<-function(object)
+getBeta<-function(object, type=NULL) UseMethod("getBeta")
+getBeta.cv.glmnet<-function(object, type=NULL)
 {
 	object$glmnet.fit$beta
 }
-getBeta.glmnet<-function(object)
+getBeta.glmnet<-function(object, type=NULL)
 {
 	object$beta
 }
@@ -1907,9 +1907,9 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
   invisible(scaledOut)
 }
 
-simpleplot<-function(object,..., verbosity=0) UseMethod("simpleplot")
-simpleplot.default<-function(object,..., verbosity=0) plot(object, ...)
-simpleplot.cv.glmnet<-function(object,..., verbosity=0) plot(object$glmnet.fit, ...)
+simpleplot<-function(object,beta.type=NULL,..., verbosity=0) UseMethod("simpleplot")
+simpleplot.default<-function(object, beta.type=NULL,..., verbosity=0) plot(object, ...)
+simpleplot.cv.glmnet<-function(object, beta.type=NULL,..., verbosity=0) plot(object$glmnet.fit, ...)
 
 firstRepeatedAppearance<-function(cvobj, repsNeeded)
 {
@@ -1929,10 +1929,10 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
 	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
 	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3,
-	..., verbosity=0)
+	beta.type=NULL, ..., verbosity=0)
 {
 	catwif(verbosity>0, "simple glmnet plot")
-	simpleplot(cvobj, xvar, ..., verbosity=verbosity-1)
+	simpleplot(cvobj, xvar, beta.type=beta.type, ..., verbosity=verbosity-1)
 	catwif(verbosity>0, "adding cross validation plot")
 	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 		errorbarcolor=errorbarcolor, centercolor=centercolor,
@@ -3086,12 +3086,12 @@ originalDataset.default<-function(x) return(x)
 originalDataset.data.frame.rep<-function(x) .getOrgData.rep(x)
 
 #for now: very unefficient implementation of these!
-"[.data.frame.rep"<-function (x, i, j, returnAsMatrix = drop, drop = FALSE)
+"[.data.frame.rep"<-function (x, i, j, drop = FALSE)
 {
 	.debugtxt()
 	orgdata<-.getOrgData.rep(x)
 	kept<-.getKeptOnlyUsedRows.rep(x)
-	rv<-as.data.frame(x)[i, j, returnAsMatrix, drop]
+	rv<-as.data.frame(x)[i, j, drop]
 	#catw("structure of rv so far:")
 	#str(rv)
 	trri<-.translateRowIndices(x,i)

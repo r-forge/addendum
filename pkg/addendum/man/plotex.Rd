@@ -12,8 +12,8 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, ..., verbosity=0)
-\method{simpleplot}{cv.glmnet}(object,..., verbosity=0)
+plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0)
+\method{simpleplot}{cv.glmnet}(object, beta.type=NULL,..., verbosity=0)
 firstRepeatedAppearance(cvobj, repsNeeded)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -59,6 +59,9 @@ see \code{\link{addCVPlot}}
 for finding the first occurrence: how many times does the coefficient of a
 variable have to be repeatedly nonzero before we call it the actual first
 occurrence?
+}
+  \item{beta.type}{
+see parameter \code{type} of \code{\link{getBeta}}
 }
   \item{\dots}{
 Extra parameters passed on to \code{plot.glmnet}
