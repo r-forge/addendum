@@ -305,14 +305,27 @@ GLoMo<-function(dfr, weights=rep(1,dim(dfr)[1]), uniqueIdentifiersPerRow=NULL,
 #	factuid<-dfr[firstOccurrenceOfEachUMidInDfr, factorCols]
 #holds the factor variables for each unique mid
 #	colnames(factuid)<-colnames(dfr)[factorCols]
+	
+	#note:
+	#uniqueIdentifiersPerRow holds the unique identifiers for every row in the dfr
+	#uids holds the unique values!
 
 	catwif(verbosity > 0, "Find the pihat + means")
 	#2011/07/14: changed to matrix operations!
 	#2011/08/10: changed to sparse matrix operations!
-	matw<-sparseMatrix(i=match(uniqueIdentifiersPerRow, uids),
-		j=seq_along(uniqueIdentifiersPerRow), x=weights)
+	rowinds<-match(uniqueIdentifiersPerRow, uids)
+	colinds<-seq_along(uniqueIdentifiersPerRow)
+	matw<-sparseMatrix(i=rowinds,
+		j=colinds, x=weights) #note: we are certain all uniqueIdentifiersPerRow and all uids are in the data, so no need to specify dims
 	contDataAsMat<-.contDataAsMat(dfr)
 	pihat<-rowSums(matw)
+	#2011/10/25 for the below to work, we must use _re_weighted per UID, i.e. per row!!
+	urs<-unique(rowinds)
+	weightsums<-sapply(urs, function(curr){sum(weights[rowinds==curr])})
+	mapri2u<-match(rowinds, urs)
+	rweights<-weights/weightsums[mapri2u]
+	matw<-sparseMatrix(i=rowinds,
+		j=colinds, x=rweights) #note: we are certain all uniqueIdentifiersPerRow and all uids are in the data, so no need to specify dims
 	themeans<-as.matrix(matw %*% contDataAsMat)
 	
 	contCols<-seq(ncol(dfr))[-factorCols]

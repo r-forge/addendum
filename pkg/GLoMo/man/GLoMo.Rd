@@ -1,5 +1,6 @@
 \name{GLoMo}
 \alias{GLoMo}
+\alias{GLoMo-class}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Fit naive General Location Model
@@ -41,15 +42,17 @@ cell for all continuous variables, and a covariance matrix (which is typically
 pooled, although theoretically it should be unpooled)
 }
 \value{
-List of class "GLoMo", consisting of the following items:
-  \item{uid }{unique identifiers of each cell (vector of characters)}
-  \item{pihat }{probability of each cell (numerical vector)}
-  \item{omegahat }{covariance matrix (named) of the continuous variables}
-  \item{orgdatadim }{dimensions of the \code{dfr} that was passed to the GLoMo call}
-  \item{uniqueFactorCombinationsAndContinuousMeans }{object of the same class and column structure as \code{dfr}. Holds the means in the continuous columns.}
-  \item{factorCols }{named vector of the column indexes of categorical columns}
-  \item{guidSeparator }{character that was used as separator for the uids}
-  \item{invomega }{inverse of omegahat --- often used for prediction}
+List of class "GLoMo".
+(NOTE: where I write dataset, this could either be a \code{\link{data.frame}} or \code{\link{numdfr}} object):
+	\item{\code{uid} }{character vector: each item is a unique identifier of a cell. These get longer with more factor columns in the dataset}
+	\item{\code{pihat} }{probability of each cell (numerical vector)}
+	\item{\code{omegahat} }{matrix (named) of the continuous columns within cells (note: homoscedastic)}
+	\item{\code{orgdatadim} }{dimensions of the dataset used to create this}
+	\item{\code{uniqueFactorCombinationsAndContinuousMeans} }{for each uid, the matching factor levels + the means in that cell for the continuous columns. Note: the column and row order is the same as the
+column order in the original dataset}
+	\item{\code{factorCols} }{named vector of column indices of the factor columns}
+	\item{\code{guidSeparator} }{character used as separator in creating the uids.}
+  \item{\code{invomega} }{inverse of omegahat --- often used for prediction}
 }
 \references{
 "Statistical Analysis with Missing Values"
