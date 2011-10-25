@@ -9,9 +9,9 @@
 #' LazyLoad: \tab yes\cr Depends: Matrix, glmnet, snowfall, addendum, NumDfr, GLoMo\cr} 
 #' \enumerate{
 #'	\item Important classes \enumerate{
-#'		\item \code{\link{cv.1l.emlasso-class}}
-#'		\item \code{\link{cv.1l.emlasso.reduced-class}}
-#'		\item \code{\link{cv.emlasso-class}}
+#'		\item \code{\link{cv.1l.emlasso}}
+#'		\item \code{\link{cv.1l.emlasso.reduced}}
+#'		\item \code{\link{cv.emlasso}}
 #'	}
 #'	\item Helpers \enumerate{
 #'		\item \code{\link{calculateCriteria.EMLasso.1l.lognet}}
@@ -40,6 +40,7 @@
 #'		\item \code{\link{validationOutAndPredProb.cv.1l.emlasso}}
 #'		\item \code{\link{validationOutAndPredProb.cvpart.emlasso}}
 #'		\item \code{\link{validationOutAndPredProb}}
+#'		\item \code{\link{getMinMaxPosLikeGlmnet}}
 #'	}
 #'	\item Fitting / use \enumerate{
 #'		\item \code{\link{coef.cv.1l.emlasso}}
@@ -49,17 +50,18 @@
 #'		\item \code{\link{EMLasso.lognet.cv}}
 #'		\item \code{\link{reduce.cv.1l.emlasso}}
 #'		\item \code{\link{reduce.EMLasso.lognet.cv}}
+#'		\item \code{\link{fullDataEMLassoAndGLoMo}}
 #'	}
 #'}
 #' Most important part of the call stack:
-#' \enumerate{
-#' \item \code{\link{EMLasso.lognet.cv}} ("EMLasso.lognet.cv")\enumerate{
+#' \itemize{
+#' \item \code{\link{EMLasso.lognet.cv}} ("EMLasso.lognet.cv")\itemize{
 #'   \item \code{\link{EMLasso.1l.lognet.cv.param}}
-#'   \item \code{\link{run.parallel}}\enumerate{
-#'     \item \code{\link{do.parallel}}\enumerate{
-#'       \item \code{\link{EMLasso.1l.lognet.cv}} ("\code{\link{cv.1l.emlasso}}")\enumerate{
-#'         \item \code{\link{EMLasso.1l.lognet.onefold}} ("cvpart.emlasso")\enumerate{
-#'           \item \code{\link{EMLasso.1l.lognet}} ("EMLasso.1l.lognet") ->fitinfo\enumerate{
+#'   \item \code{\link{run.parallel}}\itemize{
+#'     \item \code{\link{do.parallel}}\itemize{
+#'       \item \code{\link{EMLasso.1l.lognet.cv}} ("\code{\link{cv.1l.emlasso}}")\itemize{
+#'         \item \code{\link{EMLasso.1l.lognet.onefold}} ("cvpart.emlasso")\itemize{
+#'           \item \code{\link{EMLasso.1l.lognet}} ("EMLasso.1l.lognet") ->fitinfo\itemize{
 #'             \item \code{\link{rCatsAndCntInDfr}}
 #'             \item \code{\link{fit.lognet}} ("\code{\link{cv.glmnet}}")
 #'             \item \code{\link{GLoMo}} ("\code{\link{GLoMo}}")
@@ -71,7 +73,7 @@
 #'           }
 #'         \item \code{\link{mimic_cv_lognet}}
 #'         }
-#'       \item \code{\link{postprocess.reduce.1l.emlasso}}\enumerate{
+#'       \item \code{\link{postprocess.reduce.1l.emlasso}}\itemize{
 #'         \item \code{\link{reduce.cv.1l.emlasso}} ("\code{\link{cv.1l.emlasso.reduced}}")
 #'         }
 #'       }

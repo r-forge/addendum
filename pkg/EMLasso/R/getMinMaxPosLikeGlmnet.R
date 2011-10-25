@@ -2,7 +2,7 @@
 #' 
 #' Find a region of interest in a set of lambdas given criteria and their SE
 #' 
-#' @param object (main) object to get the region information from
+#' @param object (main) object to get the region information from (for \code{default}: vector of lambda values)
 #' @param \dots for flexibility in 'derived' implementation
 #' @return list of class "lambdaregion":
 #' \item{pos.optimum }{position of the optimum criterion in the set of lambdas}
@@ -17,11 +17,9 @@ getMinMaxPosLikeGlmnet<-function(object,...) UseMethod("getMinMaxPosLikeGlmnet")
 
 #' @rdname getMinMaxPosLikeGlmnet
 #' 
-#' @param object vector of lambdas
 #' @param cvm criteria value (see \code{\link{cv.glmnet}})
 #' @param cvsd criteria value standard errors (see \code{\link{cv.glmnet}})
 #' @param type.measure see \code{\link{cv.glmnet}}. If this is "auc", the \code{cvm} are negated before continuing.
-#' @param \dots ignored for now
 #' @method getMinMaxPosLikeGlmnet default
 #' @usage \method{getMinMaxPosLikeGlmnet}{default}(object, cvm, cvsd, type.measure,...)
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}

@@ -19,9 +19,6 @@ Depends:
     NumDfr,
     GLoMo
 Collate:
-    'cv.1l.emlasso-class.R'
-    'cv.1l.emlasso.reduced-class.R'
-    'cv.emlasso-class.R'
     'EMLasso-package.R'
     'calculateCriteria.EMLasso.1l.lognet.R'
     'checkConvergence.lognet.R'

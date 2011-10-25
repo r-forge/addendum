@@ -35,6 +35,15 @@
   of progress and debug information is displayed (note: in
   R for Windows, turn off buffered output)}
 
+  \item{minNumHigher}{How many lambdas higher than the
+  optimum do you minimally want (if available)}
+
+  \item{minNumLower}{How many lambdas lower than the
+  optimum do you minimally want (if available)}
+
+  \item{maxNumLower}{How many lambdas lower than the
+  optimum do you maximally want}
+
   \item{object}{\code{LambdaHelper}}
 
   \item{i}{row index}

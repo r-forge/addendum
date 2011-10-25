@@ -17,6 +17,7 @@
 #' @return object of class "cv.emlasso" (and \code{\link{cv.glmnet}}, to be able to abuse some of \code{\link{glmnet}}'s code).
 #'  (where I write dataset, this could either be a \code{\link{data.frame}} or \code{\link{numdfr}} object)
 #' Very similarly shaped to \code{\link{cv.glmnet}} objects (in fact, all objects of this class are also \code{\link{cv.glmnet}})
+#' \enumerate{
 #' 	\item \code{lambda} : vector of lambda values
 #' 	\item \code{cvm}: mean criterion per lambda
 #' 	\item \code{cvsd}: sd of criterion per lambda
