@@ -30,6 +30,7 @@ fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLe
 	minNumLower = 20, maxNumLower = 30, ..., verbosity=0,
 	logdir="./", saveTempResults=TRUE)
 {
+	this.call = match.call()
 	if((missing(dsconvprobs)) || (is.null(dsconvprobs)))
 	{
 		catwif(verbosity > 0, "dsconvprobs was not passed along, so needed to recalculate it")
@@ -59,20 +60,42 @@ fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLe
 		catwif(verbosity > 0, "Needed to calculate the reasonable set of lambdas")
 		rl<-findReasonableLambdaHelper(ds=completedData, out=completedUseOut, showPlot=showPlot,
 			type.measure=type.measure, repsNeededForFirstOccurrence=repsNeededForFirstOccurrence, 
-			..., verbosity=verbosity-1, minNumHigher=minNumHigher, minNumLower=minNumLower, 
+			verbosity=verbosity-1, minNumHigher=minNumHigher, minNumLower=minNumLower, 
 			maxNumLower=maxNumLower)
 		lambdas<-rl$allLambda[do.call(seq, as.list(range(rl$regionDfr$idx)))]
 	}
 
+	catwif(verbosity > 0, "Collect parameters for actual run down lambdas.")
 	allrelevantparams<-c(list(dfr=ds, resp=out, lambda=lambdas, dfrconvprobs=dsconvprobs, verbosity=verbosity), list(...))
 	params<-do.call(EMLasso.1l.lognet.param, allrelevantparams) #in fact I should be able to get this from e1l_param
 	if(saveTempResults) savedir<-logdir else savedir<-NULL
-	result<-run.parallel(dfr=ds, resp=out, lambda=lambdas, dfrconvprobs=dsconvprobs, ..., 
-		paramcreationname="EMLasso.1l.lognet.param",
+	catwif(verbosity > 0, "Will now start parallel run..")
+	result<-run.parallel(dfr=ds, resp=out, lambda=lambdas, dfrconvprobs=dsconvprobs, verbosity=verbosity, 
+		..., paramcreationname="EMLasso.1l.lognet.param",
 		functionname="EMLasso.1l.lognet", paramname="e1l_param", logdir=logdir,
 		savedir=savedir, postprocessname=NULL, 
 		loadLibsIfSfNotRunning=c("Matrix", "glmnet", "addendum", "NumDfr", "GLoMo", "EMLasso"))
-	retval<-list(result=result, lambda=lambdas, params=params, logdir=logdir)
-	class(retval)<-"EMLasso.lognet"
+	catwif(verbosity > 0, "Done with parallel run, so collecting results and returning.")
+	#retval<-list(result=result, lambda=lambdas, params=params, logdir=logdir)
+	listOfLassoFits<-lapply(result, "[[", "lasso.fit")
+	useBeta<-try(do.call(cBind, lapply(listOfLassoFits, "[[", "beta")))
+	retval<-list(
+		call=this.call,
+		a0=try(sapply(listOfLassoFits, "[[", "a0")),
+		beta=useBeta,
+		lambda=lambdas,
+		dev.ratio=try(sapply(listOfLassoFits, "[[", "dev.ratio")),
+		nulldev=try(sapply(listOfLassoFits, "[[", "nulldev")),
+		df=try(sapply(listOfLassoFits, "[[", "df")),
+		dim=dim(useBeta),
+		nobs=listOfLassoFits[[1]]$nobs,
+		npasses=try(sum(sapply(listOfLassoFits, "[[", "npasses"))),
+		offset=listOfLassoFits[[1]]$offset,
+		jerr=try(sapply(listOfLassoFits, "[[", "jerr")), #this ends the glmnet items
+		result=result,
+		params=params, 
+		logdir=logdir
+	)
+	class(retval)<-c("EMLasso.lognet", class(result[[1]]$lasso.fit))
 	return(retval)
 }

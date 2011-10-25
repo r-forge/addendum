@@ -25,7 +25,7 @@
 #' @examples data(emlcvfit, package="EMLasso")
 #' emlcvparm<-EMLasso.1l.lognet.cv.param(aDfr.MD, y, lambda=0.05, nrOfSamplesPerMDRow=7, verbosity=10)
 #' @export
-EMLasso.1l.lognet.param<-function(dfr, resp, lambda, nrOfSamplesPerMDRow,
+EMLasso.1l.lognet.param<-function(dfr, resp, lambda, nrOfSamplesPerMDRow=10,
 	rowsToUseForFit=seq(nrow(dfr)), maxIt=20,
 	minIt=10, weightsName="weights", orgriName="orgri", precalcGuidData=FALSE,
 	dfrconvprobs,	verbosity=0, reuseDebugLevel=-1, betweenColAndLevel="")

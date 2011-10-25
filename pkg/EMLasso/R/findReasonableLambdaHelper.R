@@ -53,32 +53,44 @@ findReasonableLambdaHelper<-function(ds, out, showFirst=20, showPlot=TRUE,
 	forVars<-names(firstAppearance)[orderOfFirstAppearance]
 
 	regionOfInterestData<-getMinMaxPosLikeGlmnet(cv)
-	if((regionOfInterestData$pos.optimum - regionOfInterestData$pos.higherlambda) < minNumHigher)
+	ll<-length(regionOfInterestData$lambda)
+	sgn<-sign(regionOfInterestData$lambda[1] - regionOfInterestData$lambda[ll])
+	#if sgn is positive (+1), lambda[1] is bigger than the last one, so ordered from big to small
+	if(abs(regionOfInterestData$pos.optimum - regionOfInterestData$pos.higherlambda) < minNumHigher)
 	{
-		regionOfInterestData$pos.higherlambda<-regionOfInterestData$pos.optimum-minNumHigher
-		if(regionOfInterestData$pos.optimum<1)
+		regionOfInterestData$pos.higherlambda<-regionOfInterestData$pos.optimum-(sgn*minNumHigher)
+		if(regionOfInterestData$pos.higherlambda<1)
 		{
-			regionOfInterestData$pos.optimum<-1
+			regionOfInterestData$pos.higherlambda<-1
+		}
+		if(regionOfInterestData$pos.higherlambda>ll)
+		{
+			regionOfInterestData$pos.higherlambda<-ll
 		}
 	}
-	actualNumHigher<-regionOfInterestData$pos.higherlambda<-regionOfInterestData$pos.optimum
+	actualNumHigher<-abs(regionOfInterestData$pos.higherlambda-regionOfInterestData$pos.optimum)
+	catwif(verbosity > 0, "actualNumHigher: ", actualNumHigher, ", as opposed to minNumHigher:", minNumHigher)
 	if(actualNumHigher < minNumHigher)
 	{
 		#add this to the 'lower' side:
 		minNumLower <- minNumLower + (minNumHigher - actualNumHigher)
 		maxNumLower <- maxNumLower + (minNumHigher - actualNumHigher)
 	}
-	diff1<-regionOfInterestData$pos.lowerlambda1 - regionOfInterestData$pos.optimum
-	diff2<-regionOfInterestData$pos.lowerlambda2 - regionOfInterestData$pos.optimum
+	diff1<-abs(regionOfInterestData$pos.lowerlambda1 - regionOfInterestData$pos.optimum)
+	diff2<-abs(regionOfInterestData$pos.lowerlambda2 - regionOfInterestData$pos.optimum)
 	if(diff1 < minNumLower) diff1<-minNumLower
 	if(diff2 < minNumLower) diff2<-minNumLower
 	if(diff1 > maxNumLower) diff1<-maxNumLower
 	if(diff2 > maxNumLower) diff2<-maxNumLower
 	diff<-min(diff1, diff2)
-	regionOfInterestData$pos.lowerlambda<-regionOfInterestData$pos.optimum + diff
-	if(regionOfInterestData$pos.lowerlambda > length(regionOfInterestData$lambda))
+	regionOfInterestData$pos.lowerlambda<-regionOfInterestData$pos.optimum + (sgn*diff)
+	if(regionOfInterestData$pos.lowerlambda<1)
 	{
-		regionOfInterestData$pos.lowerlambda <- length(regionOfInterestData$lambda)
+		regionOfInterestData$pos.lowerlambda<-1
+	}
+	if(regionOfInterestData$pos.lowerlambda>ll)
+	{
+		regionOfInterestData$pos.lowerlambda<-ll
 	}
 	poss<-c(regionOfInterestData$pos.lowerlambda, regionOfInterestData$pos.optimum, regionOfInterestData$pos.higherlambda)
 	tmp<-regionOfInterestData$lambda[poss]
