@@ -50,3 +50,6 @@ Collate:
     'sortReducedResultList.R'
     'validateFunction.lognet.R'
     'validationOutAndPredProb.R'
+    'cv.logreg.R'
+    'fullDataEMLassoAndGLoMo.R'
+    'getMinMaxPosLikeGlmnet.R'

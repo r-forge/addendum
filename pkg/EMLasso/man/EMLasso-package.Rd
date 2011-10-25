@@ -23,7 +23,8 @@
   \code{\link{EMLasso.1l.lognet.cv.param}} \item
   \code{\link{findReasonableLambdaHelper}} \item
   \code{\link{fit.lognet}} \item \code{\link{fit.logreg}}
-  \item \code{\link{getBeta.cv.emlasso}} \item
+  \item \code{\link{cv.logreg}} \item
+  \code{\link{getBeta.cv.emlasso}} \item
   \code{\link{getSortedReducedResultList}} \item
   \code{\link{length.EMLasso.1l.lognet.cv.param}} \item
   \code{\link{lognetProbWrapper}} \item

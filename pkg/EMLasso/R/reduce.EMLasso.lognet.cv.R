@@ -2,6 +2,7 @@
 #' 
 #' Reduce memory footprint of a list of \code{\link{cv.1l.emlasso}} objects and recalculates some criteria
 #' 
+#' @aliases reduce.EMLasso.lognet.cv cv.emlasso-class cv.emlasso
 #' @param object list of \code{\link{cv.1l.emlasso}} objects or object of class "reducedResultList" 
 #' @param orgdfr original dataset used. If missing, the first one found is used
 #' @param orgresp original outcome vector used. If missing, the first one found is used
@@ -13,7 +14,26 @@
 #' @param splitPatternLastPart see \code{\link{getSortedReducedResultList}}
 #' @param keepReducedResultList if \code{TRUE}, the resulting "reducedResultList"
 #' object is kept as an item of the return value
-#' @return object of class \code{\link{cv.emlasso}} (and \code{\link{cv.glmnet}}, to be able to abuse some of their code)
+#' @return object of class "cv.emlasso" (and \code{\link{cv.glmnet}}, to be able to abuse some of \code{\link{glmnet}}'s code).
+#'  (where I write dataset, this could either be a \code{\link{data.frame}} or \code{\link{numdfr}} object)
+#' Very similarly shaped to \code{\link{cv.glmnet}} objects (in fact, all objects of this class are also \code{\link{cv.glmnet}})
+#' 	\item \code{lambda} : vector of lambda values
+#' 	\item \code{cvm}: mean criterion per lambda
+#' 	\item \code{cvsd}: sd of criterion per lambda
+#' 	\item \code{cvup}: upper limit of criterion per lambda
+#' 	\item \code{cvlo}: lower limit of criterion per lambda
+#' 	\item \code{cvlo}: number of nonzeroes per lambda
+#' 	\item \code{name}: name of criterion
+#' 	\item \code{glmnet.fit}: the actual final lasso fit
+#' 	\item \code{lambda.min}: optimum lambda
+#' 	\item \code{lambda.1se}: biggest lambda with criterion within 1 se of best criterion
+#' 	\item \code{orgdfr}: dataset originally used
+#' 	\item \code{orgresp}: outcome vector originally used
+#' 	\item \code{glomo}: \code{\link{GLoMo}} object at convergence
+#' 	\item \code{valsample}: dataset used for validating (=by applying prediction from \code{glomo} to \code{orgdfr})
+#' 	\item \code{orgcoef}: coefficients before refitting glmnet.fit
+#' 	\item \code{reducedResultList}: (may not be present): list that was used to create the results (see \code{\link{getSortedReducedResultList}})
+#' }
 #' @method reduce EMLasso.lognet.cv
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @seealso \code{\link{reduce}}

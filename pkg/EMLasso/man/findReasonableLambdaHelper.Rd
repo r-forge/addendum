@@ -6,7 +6,8 @@
 \usage{
   findReasonableLambdaHelper(ds, out, showFirst = 20,
   showPlot = TRUE, type.measure = "auc",
-  repsNeededForFirstOccurrence = 3, ..., verbosity = 0)
+  repsNeededForFirstOccurrence = 3, ..., verbosity = 0,
+  minNumHigher = 20, minNumLower = 20, maxNumLower = 30)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
 }
@@ -53,6 +54,11 @@
   bound of criterion), \code{critsd} (sd of criterion),
   \code{index} (at which lambda index does this variable
   first occur)} \item{allLambda }{vector of lambda values}
+  \item{regionDfr }{\code{data.frame} w 3 rows 3 columns:
+  \code{name} (values: "lower lambda", "optimum", and
+  "higher lambda"), \code{idx} and \code{lambda}}
+  \item{regionOfInterestData }{see
+  \code{\link{getMinMaxPosLikeGlmnet}}}
 
   depends on the parameters
 }

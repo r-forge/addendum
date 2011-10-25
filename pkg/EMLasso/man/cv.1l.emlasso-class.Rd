@@ -1,8 +1,10 @@
 \docType{S3class}
 \name{cv.1l.emlasso-class}
 \alias{"cv.1l.emlasso-class"}
+\alias{"cvpart.emlasso-class"}
 \alias{cv.1l.emlasso}
 \alias{cv.1l.emlasso-class}
+\alias{cvpart.emlasso}
 \title{Structure of cv.1l.emlasso object}
 \description{
   Structure of cv.1l.emlasso object
