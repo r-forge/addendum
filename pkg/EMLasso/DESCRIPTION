@@ -50,3 +50,4 @@ Collate:
     'cv.logreg.R'
     'fullDataEMLassoAndGLoMo.R'
     'getMinMaxPosLikeGlmnet.R'
+    'EMLasso.1l.lognet.param.R'
