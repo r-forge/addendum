@@ -1,4 +1,6 @@
 \name{fullDataEMLassoAndGLoMo}
+\alias{"EMLasso.lognet-class"}
+\alias{EMLasso.lognet}
 \alias{fullDataEMLassoAndGLoMo}
 \title{Fit EMLasso to a complete dataset, creating a GLoMo for each lambda}
 \usage{
@@ -58,7 +60,13 @@
   of each (parallelized)}
 }
 \value{
-  to be looked into
+  an object of class "EMLasso.lognet", "glmnet" and
+  "lognet". The items added to the \code{\link{glmnet}}
+  members are: \item{result }{list of
+  \code{\link{cv.1l.emlasso}} objects per lambda}
+  \item{params }{\code{\link{EMLasso.1l.lognet.param}}
+  parameters passed in} \item{logdir }{directory where
+  logging/saving occurred}
 }
 \description{
   Fit EMLasso to a complete dataset, creating a GLoMo for

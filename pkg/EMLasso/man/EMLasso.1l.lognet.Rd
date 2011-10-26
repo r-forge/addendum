@@ -1,4 +1,5 @@
 \name{EMLasso.1l.lognet}
+\alias{cv.1l.lognet}
 \alias{EMLasso.1l.lognet}
 \title{Fit EMLasso for 1 lambda}
 \usage{

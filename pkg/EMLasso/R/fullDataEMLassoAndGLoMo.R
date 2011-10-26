@@ -2,6 +2,7 @@
 #' 
 #' Fit EMLasso to a complete dataset, creating a GLoMo for each lambda
 #' 
+#' @aliases fullDataEMLassoAndGLoMo EMLasso.lognet-class EMLasso.lognet
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
 #' @param dsconvprobs see \code{\link{dfrConversionProbs}}
@@ -18,7 +19,11 @@
 #' information is displayed (note: in R for Windows, turn off buffered output)
 #' @param logdir path to folder where logfiles (and results) of each repeat are stored
 #' @param saveTempResults if \code{TRUE}, save the results of each (parallelized) 
-#' @return to be looked into
+#' @return an object of class "EMLasso.lognet", "glmnet" and "lognet". The items added to
+#' the \code{\link{glmnet}} members are:
+#' \item{result }{list of \code{\link{cv.1l.emlasso}} objects per lambda} 
+#' \item{params }{\code{\link{EMLasso.1l.lognet.param}} parameters passed in} 
+#' \item{logdir }{directory where logging/saving occurred} 
 #' @note If lambdas is not passed along or is \code{NULL}, a set of lambdas is used
 #' 	by utilizing \code{\link{findReasonableLambdaHelper}}
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}

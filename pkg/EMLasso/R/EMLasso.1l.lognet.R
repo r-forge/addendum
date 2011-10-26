@@ -2,6 +2,7 @@
 #' 
 #' Fit EMLasso for 1 lambda
 #' 
+#' @aliases EMLasso.1l.lognet cv.1l.lognet
 #' @param dfr dataset (\code{\link{numdfr}} or \code{\link{data.frame}}) to fit it to
 #' @param resp outcome vector
 #' @param lambda the single lambda
