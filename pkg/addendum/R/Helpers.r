@@ -1847,6 +1847,7 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 {
 	require(glmnet)
  	x<-getXIndices(cvobj, xvar=xvar)
+	catwif(verbosity > 0, "Using x indices of length ", length(x), ":", x)
 	#yrange<-range(coef(cvobj$glmnet.fit))
 	yrange<-par("yaxp")[1:2] #current outer limits of the axis
 	truerange<-range(c(cvobj$cvup, cvobj$cvlo)) #outer limits of the true value
@@ -1859,6 +1860,7 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	
 	if(smoothed)
 	{
+		catwif(verbosity > 0, "Smoothed CVPlot")
 		#let's first get the smoothed values.
 		tmpdata<-data.frame(x=x, y=cvobj$cvm, yt=cvobj$cvup, yl=cvobj$cvlo)
 		tmpwts<-1/((cvobj$cvsd)^2)
@@ -1882,6 +1884,8 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 		scaledOut<-data.frame(x=tmpx, y=tmpres$fit, se=tmpres$se, scaledy=tmpy,
 			scaledtop=tmptop, scaledbot=tmpbot, truetop=tmptruetop, truebot=tmptruebot,
 			scaledtruetop=struetop, scaledtruebot=struebot)
+		catwif(verbosity > 0, "scaledOut (", dim(scaledOut), "):")
+		printif(verbosity > 0, scaledOut)
 		lines(tmpx, tmpy, col=centercolor, lty="dashed")
 		lines(tmpx, struetop, col=errorbarcolor, lty="dashed")
 		lines(tmpx, struebot, col=errorbarcolor, lty="dashed")
@@ -1890,19 +1894,25 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	}
 	else
 	{
+		catwif(verbosity > 0, "Unsmoothed CVPlot")
 		scaledOut<-data.frame(cvup=yvalue(cvobj$cvup), cvlo=yvalue(cvobj$cvlo),
 			cvm=yvalue(cvobj$cvm))
+		catwif(verbosity > 0, "scaledOut (", dim(scaledOut), "):")
+		printif(verbosity > 0, scaledOut)
 	  gn.error.bars(x, scaledOut$cvup, scaledOut$cvlo, width = 0.01,
 			col = errorbarcolor)
 	  points(x, scaledOut$cvm, pch = 20, col = centercolor)
 	}
+	catwif(verbosity > 0, "Adding right axis")
   axis(side = 4, at = seq(yrange[1], yrange[2], length.out=numTicks),
 		labels = paste(round(seq(truerange[1], truerange[2], length.out=numTicks),
 			2)),
 		tick = TRUE, line = 0)
+	catwif(verbosity > 0, "Adding vertical lines at lambdas of interest")
   abline(v = x[ioflambda.min], lty = 3)
   abline(v = x[ioflambda.1se], lty = 3)
 	
+	catwif(verbosity > 0, "Adding horizontal line at lambda.1se limit")
 	abline(h = scaledOut$cvlo[ioflambda.min], lty = 3)
   invisible(scaledOut)
 }
@@ -1942,37 +1952,93 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 		catwif(verbosity>0, "adding lambda index axis")
 		if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
 		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,
-			pos=lamIndexAxisPos, col=lamIndexAxisCol)
+			pos=lamIndexAxisPos, col=lamIndexAxisCol, verbosity=verbosity-1)
 	}
 
 	if(!is.null(legendPos))
 	{
-		firstAppearance<-firstRepeatedAppearance(cvobj, repsNeededForFirstOccurrence)
-#		apply(theBeta, 1, function(rw){match(TRUE, abs(rw) > 0)})
-#		firstAppearance<-firstAppearance[!is.na(firstAppearance)]
-		orderOfFirstAppearance<-order(firstAppearance)[1:legendOf]
-		whereAppearing<-firstAppearance[orderOfFirstAppearance]
-		legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
-		namesAsInPlotCoef<-getBeta(cvobj)
-		namesAsInPlotCoef<-rownames(namesAsInPlotCoef)[nonzeroCoef(namesAsInPlotCoef)]
-		whereAsInPlotCoef<-match(legendForVars, namesAsInPlotCoef)
-		cols<-rep(1:6, length.out=max(orderOfFirstAppearance))
-#    catw("first 21 'column' items for legend:\n\t", names(firstAppearance)[1:21])
-		useColors<-cols[whereAsInPlotCoef]
-#		catwif(verbosity > 1, "useColors:")
-#		printif(verbosity > 1, data.frame(varname=legendForVars, itemnr=orderOfFirstAppearance, color=useColors))
-		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
+		appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=legendOf)
+		cols<-rep(1:6, length.out=max(appearData$orderOfFirstAppearance))
+		useColors<-cols[appearData$whereAsInPlotCoef]
+		legendForVars<-paste(appearData$legendForVars, " (", appearData$whereAppearing, ")", sep="")
 		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
 	}
 	invisible(cvpsc)
 }
 
-addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...)
+getOrderOfAppearance<-function(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
+{
+	firstAppearance<-firstRepeatedAppearance(cvobj, repsNeededForFirstOccurrence)
+	orderOfFirstAppearance<-order(firstAppearance)
+	if(! is.null(showTop)) orderOfFirstAppearance<-orderOfFirstAppearance[seq(showTop)]
+	whereAppearing<-firstAppearance[orderOfFirstAppearance]
+	legendForVars<-names(firstAppearance)[orderOfFirstAppearance]
+	namesAsInPlotCoef<-getBeta(cvobj)
+	namesAsInPlotCoef<-rownames(namesAsInPlotCoef)[nonzeroCoef(namesAsInPlotCoef)]
+	whereAsInPlotCoef<-match(legendForVars, namesAsInPlotCoef)
+	list(
+		legendForVars=legendForVars,
+		whereAppearing=whereAppearing,
+		whereAsInPlotCoef=whereAsInPlotCoef,
+		orderOfFirstAppearance=orderOfFirstAppearance
+	)
+}
+
+findUnivariateSignificancePVal<-function(dfr, outcomecol, betweenColAndLevel="", returnPValBelow=0.05, splitCats=TRUE)
+{
+	if(splitCats)
+	{
+		outcome<-dfr[[outcomecol]]
+		catw("length outcome:", length(outcome))
+		dfr[[outcomecol]]<-NULL
+		dfrConv<-dfrConversionProbs(dfr, betweenColAndLevel=betweenColAndLevel)
+		catw("dim before:", dim(dfr))
+		catw("colnames before:", colnames(dfr))
+		dfr<-as.data.frame(factorsToDummyVariables(dfr, dfrConvData=dfrConv))
+		catw("dim after:", dim(dfr))
+		dfr[[outcomecol]]<-outcome
+		checkcoln<-dfrConv$newformdata$newcoln
+		isfact<-dfrConv$newformdata$isfact
+	}
+	else
+	{
+		checkcoln<-colnames(dfr)
+		isfact<-sapply(dfr, is.factor)
+		occplace<-match(outcomecol, checkcoln)
+		if(! is.na(occplace))
+		{
+			isfact<-isfact[-occplace]
+			checkcoln<-checkcoln[-occplace]
+		}
+	}
+	pvalpercol<-sapply(seq_along(checkcoln), function(i){
+		curcoln<-checkcoln[i]
+		curisf<-isfact[i]
+		if(curisf)
+		{
+			tstres<-chisq.test(dfr[[outcomecol]], dfr[[curcoln]])
+			return(tstres$p.value)
+		}
+		else
+		{
+			curfrm<-paste(curcoln, outcomecol, sep=" ~ ")
+			tstres<-t.test(as.formula(curfrm), data=dfr)
+			return(tstres$p.value)
+		}
+		
+	})
+	names(pvalpercol)<-checkcoln
+	selectedCols<-checkcoln[pvalpercol<=returnPValBelow]
+	dfr<-dfr[,c(outcomecol, selectedCols)]
+	return(list(dfr=dfr, pvals=pvalpercol[selectedCols]))
+}
+
+addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,..., verbosity=0)
 {
 	ioflambda.min<-match(cvobj$lambda.min, cvobj$lambda)
 	ioflambda.1se<-match(cvobj$lambda.1se, cvobj$lambda)
 	isofinterest<-sort(c(ioflambda.min, ioflambda.1se))
-	catw("Enforcing added indices", ioflambda.min, "and", ioflambda.1se)
+	catwif(verbosity>0, "Enforcing added indices", ioflambda.min, "and", ioflambda.1se)
  	x<-getXIndices(cvobj, xvar=xvar)
 #   atdf = sort(unique(c(pretty(x), x[c(ioflambda.min, ioflambda.1se)])))
 #   prettydf = trunc(approx(x = x, y = cvobj$df, xout = atdf, rule = 2)$y)
@@ -1987,6 +2053,8 @@ addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...
 	useIndex<-sort(unique(c(useIndex, ioflambda.min, ioflambda.1se)))
  	useX<-x[useIndex]
   axis(4, at = useX, labels = paste(useIndex), ...)
+	ttl<-paste("best:", round(cvobj$cvm[ioflambda.min], 2), "(l=", round(cvobj$lambda.min, 4),"), corrected:", round(cvobj$cvm[ioflambda.1se], 2), "(l=", round(cvobj$lambda.1se, 4),")")
+	title(main=ttl)
 }
 
 colsOfType<-function(dfr, type=c("factor", "char"))

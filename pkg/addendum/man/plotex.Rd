@@ -4,6 +4,7 @@
 \alias{simpleplot.default}
 \alias{simpleplot.cv.glmnet}
 \alias{firstRepeatedAppearance}
+\alias{getOrderOfAppearance}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Plots both crossvalidation plot and coefficient plot from glmnet in one plot
@@ -15,6 +16,7 @@ Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one g
 plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0)
 \method{simpleplot}{cv.glmnet}(object, beta.type=NULL,..., verbosity=0)
 firstRepeatedAppearance(cvobj, repsNeeded)
+getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -79,6 +81,9 @@ for finding the first occurrence: how many times does the coefficient of a
 variable have to be repeatedly nonzero before we call it the actual first
 occurrence?
 }
+	\item{showTop}{
+if not \code{NULL} (the default), only the first \code{showTop} occurring variables are returned
+}
 }
 \details{
 \code{simpleplot} is really just a helper to allow extension to \code{\link{glmnet}}-
@@ -86,6 +91,12 @@ like objects.
 }
 \value{
 The result of the \code{\link{addCVPlot}} call is returned invisibly.
+
+\code{getOrderOfAppearance} returns a list with items \code{legendForVars} (variable names ordered
+by occurrence), \code{whereAppearing} (at which lambda index does this variable occur for the first 
+time), \code{whereAsInPlotCoef} (which variable indices as used in \code{\link{plotCoef}} --- note
+the variables that are always zero do not occur there), \code{orderOfFirstAppearance} (which 
+variable indices in the set of all indices)
 }
 \author{
 Nick Sabbe
