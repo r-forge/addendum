@@ -11,9 +11,8 @@
   crossValidate(model, ..., verbosity = 0)
 
   \method{crossValidate}{EMLasso.1l.lognet}(model,
-  ds=model$dfr, out=model$resp, wts=rep(1, nrow(ds)),
-  dsconvprobs, needPredict=0, betweenColAndLevel="",...,
-  verbosity=0)
+  ds=model$dfr, out=model$resp, wts, dsconvprobs,
+  needPredict=0, betweenColAndLevel="",..., verbosity=0)
 
   \method{crossValidate}{EMLasso.lognet}(model,
   ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
@@ -34,7 +33,8 @@
 
   \item{out}{vector (binary factor) of outcomes}
 
-  \item{wts}{vector of weights}
+  \item{wts}{vector of weights (defaults to equal weights
+  for all rows)}
 
   \item{dsconvprobs}{see \code{\link{dfrConversionProbs}}}
 

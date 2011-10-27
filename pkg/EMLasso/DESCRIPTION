@@ -52,3 +52,4 @@ Collate:
     'getMinMaxPosLikeGlmnet.R'
     'EMLasso.1l.lognet.param.R'
     'crossValidate.R'
+    'simplyValidate.R'
