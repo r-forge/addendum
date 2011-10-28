@@ -12,7 +12,7 @@ is a lot more swift, but only works for formulas with all main effects.
 }
 \usage{
 \method{factorsToDummyVariables}{default}(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0, \dots)
-dfrConversionProbs(dfr, betweenColAndLevel)
+dfrConversionProbs(dfr, betweenColAndLevel, includeBaseLevel=FALSE, verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,7 +31,11 @@ The higher this value, the more levels of progress and debug information is
 displayed (note: in R for Windows, turn off buffered output)
 }
   \item{\dots}{
-Ignored in standard implementations
+Passed on to \code{dfrConversionProbs} if needed (in most implementations). Otherwise ignored.
+}
+  \item{includeBaseLevel}{
+Prepared conversion info (return value of \code{dfrConversionProbs}). Can be
+used (and is preferred) to avoid repeating calculations.
 }
 }
 \details{

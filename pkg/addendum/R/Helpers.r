@@ -219,12 +219,15 @@ plotAllScatters<-function(comparingColName, dfr, ylab, markCols=c(),
           sunflowerplot(tt[,colnm],tt[,comparingColName], number=tt$Freq,
             xlim = c(0.5,length(levels(curcol)) + 0.5),
             ylim = c(0.5,length(levels(comparingCol)) + 0.5),
-            xlab = colnm, size=min(xsize,ysize)/2, main="")
+            xlab = colnm, size=min(xsize,ysize)/2, main="", xaxt="n", yaxt="n")
+          axis(1, at=seq_along(levels(curcol)), labels=levels(curcol))
+          axis(2, at=seq_along(levels(comparingCol)), labels=levels(comparingCol))
         }
         else
         {
           boxplot(comparingCol~curcol, xlab=colnm, ylab=ylab, col.lab=txtcol,
-						main="")
+						main="", yaxt="n")
+          axis(2, at=seq_along(levels(comparingCol))-1, labels=levels(comparingCol))
           if(length(indicateObs) > 0)
           {
             boxplot(comparingCol[indicateObs]~curcol[indicateObs], xlab="",
@@ -238,6 +241,7 @@ plotAllScatters<-function(comparingColName, dfr, ylab, markCols=c(),
         {
           boxplot(curcol~comparingCol, xlab=colnm, ylab=ylab, col.lab=txtcol,
 						main="",horizontal=TRUE)
+          axis(2, at=seq_along(levels(curcol))-1, labels=levels(curcol))
           if(length(indicateObs) > 0)
           {
             boxplot(curcol[indicateObs]~comparingCol[indicateObs], xlab="",
@@ -815,26 +819,37 @@ allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
 	return(retval)
 }
 
-dfrConversionProbs<-function(dfr, betweenColAndLevel)
+dfrConversionProbs<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, verbosity=0)
 {
 #	allcurfn<-curfnfinder(skipframes=0, retStack=TRUE, extraPrefPerLevel="|")
 #	catw(allcurfn, ": start. Avoid calling this is much as possible: reuse its result!")
 	lvls<-allLevels(dfr)
 	nc<-length(lvls)
 
-	reps<-sapply(lvls, length)-1
+	add<-ifelse(includeBaseLevel, 0, 1)
+		
+	reps<-sapply(lvls, length)-add
 	reps[reps<1]<-1
 
 	repcols<-rep(seq_along(reps), reps)
-	newlvls<-do.call(c, lapply(reps, function(currep){if(currep==1) 1 else (seq(currep)+1)}))
+	newlvls<-do.call(c, lapply(reps, function(currep){
+		if(currep==1) 1 else (seq(currep)+add)
+	}))
 
 	orgfactcols<-which(reps>1)
 
 	startoforgcolinnewmat<-cumsum(c(1, reps))[seq_along(reps)]
 	names(startoforgcolinnewmat)<-names(reps) #otherwise the names are confusing
-	mustmatchforfactcols<-do.call(c, lapply(reps[orgfactcols], seq))+1
-	newcolsfromfact<-rep(startoforgcolinnewmat[orgfactcols], reps[orgfactcols]) + mustmatchforfactcols -2
-	colexs<-do.call(c, lapply(lvls[orgfactcols], function(curlvls){if(length(curlvls) > 1) curlvls[-1] else ""}))
+	mustmatchforfactcols<-do.call(c, lapply(reps[orgfactcols], seq))+add
+	newcolsfromfact<-rep(startoforgcolinnewmat[orgfactcols], reps[orgfactcols]) + mustmatchforfactcols -1 - add
+	if(includeBaseLevel)
+	{
+		colexs<-do.call(c, lvls[orgfactcols])
+	}
+	else
+	{
+		colexs<-do.call(c, lapply(lvls[orgfactcols], function(curlvls){if(length(curlvls) > 1) curlvls[-1] else ""}))
+	}
 	coln<-rep(colnames(dfr), reps)
 	newcoln<-coln
 	newcoln[newcolsfromfact]<-paste(newcoln[newcolsfromfact], colexs, sep=betweenColAndLevel)
@@ -871,7 +886,7 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 	if(missing(dfrConvData))
 	{
 		catwif(verbosity>0, "Need to recalculate dfrConvData: avoid!")
-		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel)
+		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel,..., verbosity=verbosity-1)
 	}
 
 	mat<-colsAsNumericMatrix(dfr)
@@ -887,33 +902,6 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 	colnames(retval)<-dfrConvData$newformdata$newcoln
 	return(retval)
 }
-#	nc<-dim(dfr)[2]
-#	firstRow<-dfr[1,]
-#	coln<-colnames(dfr)
-#	retval<-do.call(cbind, lapply(seq(nc), function(ci){
-#			if(is.factor(firstRow[,ci]))
-#			{
-#				lvls<-levels(firstRow[,ci])[-1]
-#				stretchedcols<-sapply(lvls, function(lvl){
-#						rv<-dfr[,ci]==lvl
-#						mode(rv)<-"integer"
-#						return(rv)
-#					})
-#				if(!is.matrix(stretchedcols)){
-#					stretchedcols<-matrix(stretchedcols, nrow=1)}
-#				colnames(stretchedcols)<-paste(coln[ci], lvls, sep=betweenColAndLevel)
-#				return(stretchedcols)
-#			}
-#			else
-#			{
-#				curcol<-matrix(dfr[,ci], ncol=1)
-#				colnames(curcol)<-coln[ci]
-#				return(curcol)
-#			}
-#		}))
-#	rownames(retval)<-rownames(dfr)
-#	return(retval)
-#}
 
 #given a set of dummy column names (see factorsToDummyVariables), try to find
 #   the column from which it originates
@@ -1991,7 +1979,7 @@ findUnivariateSignificancePVal<-function(dfr, outcomecol, betweenColAndLevel="",
 		outcome<-dfr[[outcomecol]]
 		catw("length outcome:", length(outcome))
 		dfr[[outcomecol]]<-NULL
-		dfrConv<-dfrConversionProbs(dfr, betweenColAndLevel=betweenColAndLevel)
+		dfrConv<-dfrConversionProbs(dfr, betweenColAndLevel=betweenColAndLevel, includeBaseLevel=TRUE)
 		catw("dim before:", dim(dfr))
 		catw("colnames before:", colnames(dfr))
 		dfr<-as.data.frame(factorsToDummyVariables(dfr, dfrConvData=dfrConv))
