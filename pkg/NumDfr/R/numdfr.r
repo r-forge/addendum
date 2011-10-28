@@ -400,29 +400,7 @@ setDebugmodeNumDfr<-function(doDebug=TRUE){
 factorsToDummyVariables.numdfr<-function(dfr, betweenColAndLevel = "", dfrConvData, verbosity=0,...)
 {
 	.debugtxt()
-	if(missing(dfrConvData))
-	{
-		catwif(verbosity>0, "Need to recalculate dfrConvData: avoid!")
-		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel)
-	}
-	
-	mat<-colsAsNumericMatrix(dfr)
-	nr<-dim(mat)[1]
-	retval<-mat[, dfrConvData$newformdata$repcols, drop=FALSE] #already the right size!
-	facts<-dfrConvData$newformdata$isfact
-	if(sum(facts) > 0)
-	{
-		catwif(verbosity > 0, "Categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[facts])
-		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[facts],nr),nr,byrow=TRUE)
-#		catwif(verbosity > 0, "tocomp dim: ", dim(tocomp))
-#		catwif(verbosity > 0, "topleft part: ")
-#		printif(verbosity > 0, tocomp[1:3,1:3])
-#		catwif(verbosity > 0, "retval dim: ", dim(retval))
-#		catwif(verbosity > 0, "facts length: ", length(facts))
-		retval[,facts]<-as.integer(retval[,facts]==tocomp)
-	}
-	colnames(retval)<-dfrConvData$newformdata$newcoln
-	return(retval)
+	factorsToDummyVariables.default(dfr=dfr, betweenColAndLevel = betweenColAndLevel, dfrConvData = dfrConvData, verbosity=verbosity,...)
 }
 #
 #	orgfactcols<-which(reps>1)
