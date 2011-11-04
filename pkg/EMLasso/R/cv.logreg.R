@@ -13,6 +13,8 @@
 #' and dataset
 #' @param nfolds number of folds
 #' @param type.measure see \code{\link{cv.glmnet}}
+#' @param \dots passed on to \code{\link{cv.glmnet}} (note: not allowed are named parameters: "x",
+#' 	"y", "family", "weights", "lambda", "standardize", "nfolds", "type.measure")
 #' @return \code{\link{cv.glmnet}} object
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @keywords fit logistic regression
@@ -20,7 +22,7 @@
 #' cvlreg<-cv.logreg(iris, y, wts=runif(nrow(iris)), verbosity=1)
 #' @export
 cv.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
-	outName="out", dfrConvData, nfolds=10, type.measure="auc")
+	outName="out", dfrConvData, nfolds=10, type.measure="auc", ...)
 {
 	catwif(verbosity > 0, "dim dfr:", dim(dfr))
 	if(missing(dfrConvData))
@@ -79,7 +81,7 @@ cv.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
 		useLambda<-0
 	}
 	fit<-cv.glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=useLambda, 
-		standardize=FALSE, nfolds=nfolds, type.measure=type.measure)
+		standardize=FALSE, nfolds=nfolds, type.measure=type.measure, ...)
 	catwif(verbosity > 0, "glm fit succeeded.")
 	return(fit)
 }

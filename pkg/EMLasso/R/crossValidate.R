@@ -81,8 +81,8 @@ crossValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp,
 		wts<-rep(1, nrow(ds))
 	}
 	
-	logregres<-cv.logreg(dfr=ds, resp=out, wts=wts, verbosity=verbosity-1, useCols=useVarNames, 
-		dfrConvData=dsconvprobs, ...)
+	logregres<-try(cv.logreg(dfr=ds, resp=out, wts=wts, verbosity=verbosity-1, useCols=useVarNames, 
+		dfrConvData=dsconvprobs, ...))
 	if(needPredict>0)
 	{
 		#make the predicted ds object less memory intensive

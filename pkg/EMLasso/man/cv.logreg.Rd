@@ -4,7 +4,7 @@
 \usage{
   cv.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity =
   0, useCols = NULL, outName = "out", dfrConvData, nfolds =
-  10, type.measure = "auc")
+  10, type.measure = "auc", ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -32,6 +32,11 @@
   \item{nfolds}{number of folds}
 
   \item{type.measure}{see \code{\link{cv.glmnet}}}
+
+  \item{\dots}{passed on to \code{\link{cv.glmnet}} (note:
+  not allowed are named parameters: "x", "y", "family",
+  "weights", "lambda", "standardize", "nfolds",
+  "type.measure")}
 }
 \value{
   \code{\link{cv.glmnet}} object

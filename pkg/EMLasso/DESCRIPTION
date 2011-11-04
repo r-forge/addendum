@@ -53,3 +53,4 @@ Collate:
     'EMLasso.1l.lognet.param.R'
     'crossValidate.R'
     'simplyValidate.R'
+    'EMLasso-datasets.R'

@@ -7,13 +7,21 @@
 #' \tabular{ll}{ Package: \tab EMLasso\cr Type: \tab Package\cr Version: \tab
 #' 1.0\cr Date: \tab 2011-10-07\cr License: \tab GPL (>= 2)\cr
 #' LazyLoad: \tab yes\cr Depends: Matrix, glmnet, snowfall, addendum, NumDfr, GLoMo\cr} 
-#' \enumerate{
-#'	\item Important classes \enumerate{
+#' \itemize{
+#'	\item Important classes \itemize{
 #'		\item \code{\link{cv.1l.emlasso}}
 #'		\item \code{\link{cv.1l.emlasso.reduced}}
 #'		\item \code{\link{cv.emlasso}}
 #'	}
-#'	\item Helpers \enumerate{
+#'	\item data objects for demonstrational purposes \itemize{
+#'		\item \code{\link{aDfr}}
+#'		\item \code{\link{aDfr.MD}}
+#'		\item \code{\link{eml17}}
+#'		\item \code{\link{eml20}}
+#'		\item \code{\link{emlcvfit}}
+#'		\item \code{\link{y}}
+#'	}
+#'	\item Helpers \itemize{
 #'		\item \code{\link{calculateCriteria.EMLasso.1l.lognet}}
 #'		\item \code{\link{checkConvergence.lognet}}
 #'		\item \code{\link{EMLasso.1l.lognet.cv.param}}
@@ -42,7 +50,7 @@
 #'		\item \code{\link{validationOutAndPredProb}}
 #'		\item \code{\link{getMinMaxPosLikeGlmnet}}
 #'	}
-#'	\item Fitting / use \enumerate{
+#'	\item Fitting / use \itemize{
 #'		\item \code{\link{coef.cv.1l.emlasso}}
 #'		\item \code{\link{coef.cvpart.emlasso}}
 #'		\item \code{\link{EMLasso.1l.lognet.cv}}
@@ -54,32 +62,25 @@
 #'	}
 #'}
 #' Most important part of the call stack:
-#' \itemize{
-#' \item \code{\link{EMLasso.lognet.cv}} ("EMLasso.lognet.cv")\itemize{
-#'   \item \code{\link{EMLasso.1l.lognet.cv.param}}
-#'   \item \code{\link{run.parallel}}\itemize{
-#'     \item \code{\link{do.parallel}}\itemize{
-#'       \item \code{\link{EMLasso.1l.lognet.cv}} ("\code{\link{cv.1l.emlasso}}")\itemize{
-#'         \item \code{\link{EMLasso.1l.lognet.onefold}} ("cvpart.emlasso")\itemize{
-#'           \item \code{\link{EMLasso.1l.lognet}} ("EMLasso.1l.lognet") ->fitinfo\itemize{
-#'             \item \code{\link{rCatsAndCntInDfr}}
-#'             \item \code{\link{fit.lognet}} ("\code{\link{cv.glmnet}}")
-#'             \item \code{\link{GLoMo}} ("\code{\link{GLoMo}}")
-#'             \item \code{\link{predict.conditional.allrows.GLoMo}}
-#'             \item \code{\link{checkConvergence.lognet}}
-#'             \item \code{\link{fit.logreg}} ("\code{\link{cv.glmnet}}")
-#'             }
-#'           \item \code{\link{predict.GLoMo}}
-#'           }
-#'         \item \code{\link{mimic_cv_lognet}}
-#'         }
-#'       \item \code{\link{postprocess.reduce.1l.emlasso}}\itemize{
-#'         \item \code{\link{reduce.cv.1l.emlasso}} ("\code{\link{cv.1l.emlasso.reduced}}")
-#'         }
-#'       }
-#'     }
-#'   }
-#' \item \code{\link{reduce.EMLasso.lognet.cv}} ("\code{\link{cv.emlasso}}", "\code{\link{cv.glmnet}}")
+#' \code{
+#' \link{EMLasso.lognet.cv} ("EMLasso.lognet.cv")
+#'   \link{EMLasso.1l.lognet.cv.param}
+#'   \link{run.parallel}
+#'     \link{do.parallel}
+#'       \link{EMLasso.1l.lognet.cv} ("\link{cv.1l.emlasso}")
+#'         \link{EMLasso.1l.lognet.onefold} ("cvpart.emlasso")
+#'           \link{EMLasso.1l.lognet} ("EMLasso.1l.lognet") ->fitinfo
+#'             \link{rCatsAndCntInDfr}
+#'             \link{fit.lognet} ("\link{cv.glmnet}")
+#'             \link{GLoMo} ("\link{GLoMo}")
+#'             \link{predict.conditional.allrows.GLoMo}
+#'             \link{checkConvergence.lognet}
+#'             \link{fit.logreg} ("\link{cv.glmnet}")
+#'           \link{predict.GLoMo}
+#'         \link{mimic_cv_lognet}
+#'       \link{postprocess.reduce.1l.emlasso}
+#'         \link{reduce.cv.1l.emlasso} ("\link{cv.1l.emlasso.reduced}")
+#' \link{reduce.EMLasso.lognet.cv} ("\link{cv.emlasso}", "\link{cv.glmnet}")
 #' }
 #' @name EMLasso-package
 #' @aliases EMLasso-package EMLasso
