@@ -32,8 +32,14 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 	catwif(verbosity > 0, "after factorsToDummyVariables dim dfr.mat:", dim(dfr.mat))
 	if(!is.null(useCols))
 	{
-		catwif(verbosity > 0, "useCols in positions:", useCols)
-		catwif(verbosity > 0, "useCols:", colnames(dfr.mat)[useCols])
+    if (is.character(useCols)) {
+        useCols <- useCols[useCols %in% colnames(dfr.mat)]
+        catwif(verbosity > 0, "useCols:", useCols)
+    }
+    else {
+        catwif(verbosity > 0, "useCols in positions:", useCols)
+        catwif(verbosity > 0, "useCols:", colnames(dfr.mat)[useCols])
+    }
 		dfr.mat<-dfr.mat[,useCols, drop=FALSE]
 	}
 	catwif(verbosity > 0, "dim dfr.mat:", dim(dfr.mat), ", l(resp):", length(resp), ", l(wts):", length(wts), "\n")
