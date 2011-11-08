@@ -41,6 +41,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{qqWithPred}}
 		\item \code{\link{smartpairs}}
 		\item \code{\link{showNumericalHeatMap}}
+		\item \code{\link{makeTransparent}}
 	}
 	\item formulas \enumerate{
 		\item \code{\link{basisExpansionFormula}}
@@ -49,6 +50,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{formulaCols}}
 		\item \code{\link{makeNamesFormulaSafe}}
 		\item \code{\link{makeDatasetFormulaSafe}}
+		\item \code{\link{coefs2Formula}}
 	}
 	\item Multiple testing \enumerate{
 		\item \code{\link{checkSig}}
@@ -57,6 +59,7 @@ LazyLoad: \tab yes\cr
 	}
 	\item Meta coding \enumerate{
 		\item \code{\link{getAsFunction}}
+		\item \code{\link{loadSingleObjectFromFile}}
 	}
 	\item Profiling \enumerate{
 		\item Text \enumerate{
@@ -133,6 +136,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{quickFactor}}
 		\item \code{\link{postfixToMakeUnique}}
 		\item \code{\link{scaleNonFactors}}
+		\item \code{\link{scaleBack}}
 		\item \code{\link{logit}}
 		\item \code{\link{expit}}
 		\item \code{\link{invwhich}}
@@ -144,6 +148,7 @@ LazyLoad: \tab yes\cr
 	}
 	\item Data exploration \enumerate{
 		\item \code{\link{colsOfType}}
+		\item \code{\link{colsStartingWith}}
 		\item \code{\link{corWithCat}}
 		\item \code{\link{corWithoutCat}}
 		\item \code{\link{findParentTree}}

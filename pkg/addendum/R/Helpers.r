@@ -3466,3 +3466,58 @@ loadSingleObjectFromFile<-function(fname, verbosity = 0)
 	rm(tmpenv)
 	return(object)
 }
+
+#note: always pass alpha on the 0-255 scale
+makeTransparent<-function(someColor, alpha=100)
+{
+  newColor<-col2rgb(someColor)
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2], blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+}
+
+colsStartingWith<-function(dfr, strt)
+{
+	grep(paste("^", strt, ".*", sep=""), colnames(dfr), value=TRUE)
+}
+
+
+coefs2Formula<-function(coefs, sigdig=2, itcname="(intercept)", minabs=0.0001)
+{
+	coefs<-coefs[abs(coefs)>=minabs]
+	ns<-names(coefs)
+	ns<-c(ns[ns==itcname], ns[ns!=itcname]) #move intercept up front
+	ns[ns==itcname]<-""
+	coefs<-as.character(signif(coefs, sigdig))
+	gsub("  ", " ", gsub("+ -", "- ", paste(coefs, ns, collapse=" + "), fixed=TRUE), fixed=TRUE)
+}
+
+scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
+{
+	itc<-0
+	ipos<-match(itcname, names(coefs))
+	if(!is.na(ipos))
+	{
+		itc<-coefs[ipos]
+		coefs<-coefs[-ipos]
+	}
+	for(i in seq_along(coefs))
+	{
+		curname<-names(coefs)[i]
+		cpos<-match(curname, colnames(dfr))
+		usedScale<-attr(dfr[[cpos]], "scaled:center")
+		usedCenter<-attr(dfr[[cpos]], "scaled:scale")
+		if(! is.null(usedScale))
+		{
+			catwif(verbosity > 0, "Scaling back for variable", curname)
+			catwif(verbosity >1, "usedScale structure")
+			if(verbosity > 1) str(usedScale)
+			catwif(verbosity >1, "usedCenter structure")
+			if(verbosity > 1) str(usedCenter)
+			oldcoef<-coefs[i]
+			itc<-itc - ((oldcoef * usedCenter)/usedScale)
+			coefs[i]<-oldcoef / usedScale
+		}
+	}
+	coefs<-c(itc, coefs)
+	names(coefs)[1]<-itcname
+	return(coefs)
+}
