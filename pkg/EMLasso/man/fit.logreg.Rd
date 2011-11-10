@@ -3,7 +3,7 @@
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
   fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity
-  = 0, useCols = NULL, outName = "out", dfrConvData)
+  = 0, useCols = NULL, outName = "out", dfrConvData, ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -27,6 +27,10 @@
   \item{dfrConvData}{premade return value of
   \code{\link{dfrConversionProbs}} for that \code{glmnet}
   and dataset}
+
+  \item{\dots}{passed on to \code{\link{glmnet}}. Not
+  allowed: "x", "y", "family", "weights", "lambda",
+  "standardize"}
 }
 \value{
   \code{\link{glmnet}} object

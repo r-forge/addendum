@@ -6,19 +6,32 @@
 \alias{crossValidate.EMLasso.lognet}
 \alias{cv.EMLasso.1l.lognet}
 \alias{cv.EMLasso.lognet}
+\alias{cv.MI.logreg}
+\alias{repeatedlyPredictOut}
+\alias{repeatedPredictedProbAUC}
 \title{Crossvalidate a model}
 \usage{
   crossValidate(model, ..., verbosity = 0)
 
   \method{crossValidate}{EMLasso.1l.lognet}(model,
-  ds=model$dfr, out=model$resp, wts, dsconvprobs,
-  needPredict=0, betweenColAndLevel="",..., verbosity=0)
+  ds=model$dfr, out=model$resp, glomo=model$glomo,wts,
+  dsconvprobs, needPredict=0, betweenColAndLevel="",...,
+  verbosity=0)
 
   \method{crossValidate}{EMLasso.lognet}(model,
   ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
   wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
   betweenColAndLevel="",..., type.measure="auc",
-  keepResultPerLambda=FALSE, verbosity=0)
+  keepResultPerLambda=FALSE, useCombinedGLoMo=FALSE,
+  verbosity=0)
+
+  repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
+  nfolds = 10, dsconvprops = NULL, ..., verbosity = 0)
+
+  repeatedPredictedProbAUC(reppredprob, out, verbosity = 0)
+
+  cv.MI.logreg(glomo, ds, out, useVarNames, reps,
+  dsconvprops, lambda, useAsGlmnetFit, ..., verbosity = 0)
 }
 \arguments{
   \item{model}{model fit}
@@ -33,6 +46,9 @@
 
   \item{out}{vector (binary factor) of outcomes}
 
+  \item{glomo}{\code{\link{GLoMo}} object to use as
+  predictor model}
+
   \item{wts}{vector of weights (defaults to equal weights
   for all rows)}
 
@@ -40,7 +56,9 @@
 
   \item{needPredict}{If \code{> 0}, the number of rows that
   is predicted from the \code{GLoMo} in \code{model} for
-  rows with missing data in \code{ds}}
+  rows with missing data in \code{ds}. I \code{<0} then
+  crossvalidation happens in a multiple imputation fashion
+  (each time imputing only once, but doing so repeatedly)}
 
   \item{betweenColAndLevel}{see
   \code{\link{dfrConversionProbs}}}
@@ -51,6 +69,27 @@
   default), the individual results from the
   \code{crossValidate.EMLasso.1l.lognet} are also returned
   in an extra item \code{resultPerLambda}}
+
+  \item{useCombinedGLoMo}{if \code{FALSE} (default), a
+  distinct GLoMo is used for every lambda. Otherwise, the
+  combined GLoMo is used for all lambdas.}
+
+  \item{varsets}{list of character vectors holding the
+  variables (names) to be checked}
+
+  \item{reps}{how many times does imputation have to be
+  repeated?}
+
+  \item{nfolds}{number of folds for crossvalidation}
+
+  \item{dsconvprops}{see \code{dsconvprobs} (need to work
+  on universal and correct naming...)}
+
+  \item{reppredprob}{one of the matrices as return by
+  \code{repeatedlyPredictOut}}
+
+  \item{useAsGlmnetFit}{object that can be used for the
+  \code{glmnet.fit} item in the return value}
 }
 \value{
   object of type "cv.EMLasso.1l.lognet": \item{cv.logreg
@@ -68,6 +107,19 @@
   \item{resultPerLambda }{list of "cv.EMLasso.1l.lognet"
   objects per lambda. Not present if
   \code{keepResultPerLambda=FALSE}}
+
+  List of the same length as \code{varsets} (unless it was
+  length 1, then the first object is simply returned). Each
+  item is a matrix with one row for each row in \code{ds}
+  and one column per \code{reps}, and holds the predicted
+  probability in a crossvalidation.
+
+  named vector of length 2, holding the "AUC" and the
+  "AUCSD"
+
+  object of classes "cv.MI.logreg", "cv.glmnet" and
+  "cv.lognet". Has exactly the items of a
+  \code{\link{cv.glmnet}} object
 }
 \description{
   Crossvalidate a model

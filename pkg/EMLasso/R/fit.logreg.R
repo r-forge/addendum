@@ -11,6 +11,7 @@
 #' @param outName name that can be used safely for the outcome (i.e. a column name not present in \code{dfr})
 #' @param dfrConvData premade return value of \code{\link{dfrConversionProbs}} for that \code{glmnet}
 #' and dataset
+#' @param \dots passed on to \code{\link{glmnet}}. Not allowed: "x", "y", "family", "weights", "lambda", "standardize"
 #' @return \code{\link{glmnet}} object
 #' @note The warning in the old function pointed me to the fact that the weights are _not_
 #' probability weights in a binomial glm!!
@@ -21,7 +22,7 @@
 #' lreg<-fit.logreg(iris, y, wts=runif(nrow(iris)), verbosity=1)
 #' @export
 fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
-	outName="out", dfrConvData)
+	outName="out", dfrConvData, ...)
 {
 	catwif(verbosity > 0, "dim dfr:", dim(dfr))
 	if(missing(dfrConvData))
@@ -48,7 +49,7 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 		catwif(verbosity > 0, "No predictors, so returning NULL")
 		return(NULL)
 	}
-	fit<-glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=0, standardize=FALSE)
+	fit<-try(glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=0, standardize=FALSE, ...))
 	catwif(verbosity > 0, "glm fit succeeded.")
 	return(fit)
 }

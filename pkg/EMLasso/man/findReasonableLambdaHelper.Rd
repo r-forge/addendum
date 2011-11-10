@@ -2,6 +2,9 @@
 \alias{"[.LambdaHelper"}
 \alias{[.LambdaHelper}
 \alias{findReasonableLambdaHelper}
+\alias{getLambdas}
+\alias{getLambdas.LambdaHelper}
+\alias{getLambdas.lambdaregion}
 \title{Function to run on a dataset with not too much missing data to identify a set of reasonable lambda values}
 \usage{
   findReasonableLambdaHelper(ds, out, showFirst = 20,
@@ -10,6 +13,12 @@
   minNumHigher = 20, minNumLower = 20, maxNumLower = 30)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
+
+  getLambdas(x, ...)
+
+  \method{getLambdas}{lambdaregion}(x, ...)
+
+  \method{getLambdas}{LambdaHelper}(x, ...)
 }
 \arguments{
   \item{ds}{dataset to investigate}
@@ -53,6 +62,8 @@
 
   \item{drop}{if \code{TRUE} the result is coerced to the
   simplest structure possible}
+
+  \item{x}{object to find 'interesting' set of lambdas for}
 }
 \value{
   list of class "LambdaHelper": \item{topres
@@ -70,6 +81,8 @@
   \code{\link{getMinMaxPosLikeGlmnet}}}
 
   depends on the parameters
+
+  vector of lambda values, normally high to low
 }
 \description{
   Expects a singly imputed dataset and fits a logistic
@@ -89,6 +102,12 @@ data(emlcvfit, package="EMLasso")
 rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
 rlh[1]
 rlh[1:5, NULL]
+data(emlcvfit, package="EMLasso")
+rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
+getLambdas(rlh$regionOfInterestData)
+data(emlcvfit, package="EMLasso")
+rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
+getLambdas(rlh)
 }
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}

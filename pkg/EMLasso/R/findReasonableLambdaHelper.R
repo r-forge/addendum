@@ -131,3 +131,40 @@ findReasonableLambdaHelper<-function(ds, out, showFirst=20, showPlot=TRUE,
 	if(is.null(j) || is.na(j) || (j=="")) return(object$topres[i, seq(ncol(object$topres)), drop=drop])
 	else return(object$topres[i, j, drop=drop])
 }
+
+#' @rdname findReasonableLambdaHelper
+#' 
+#' @param x object to find 'interesting' set of lambdas for
+#' @return vector of lambda values, normally high to low
+#' @keywords lambda
+#' @export
+getLambdas<-function(x,...) UseMethod("getLambdas")
+
+
+#' @rdname findReasonableLambdaHelper
+#' 
+#' @inheritParams getLambdas
+#' @method getLambdas lambdaregion
+#' @usage \method{getLambdas}{lambdaregion}(x, ...)
+#' @export
+#' @examples data(emlcvfit, package="EMLasso")
+#' rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
+#' getLambdas(rlh$regionOfInterestData)
+getLambdas.lambdaregion<-function(x,...)
+{
+	x$lambda[(x$pos.higherlambda):(x$pos.lowerlambda)]
+}
+
+#' @rdname findReasonableLambdaHelper
+#' 
+#' @inheritParams getLambdas
+#' @method getLambdas LambdaHelper
+#' @usage \method{getLambdas}{LambdaHelper}(x, ...)
+#' @export
+#' @examples data(emlcvfit, package="EMLasso")
+#' rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
+#' getLambdas(rlh)
+getLambdas.LambdaHelper<-function(x,...)
+{
+	getLambdas(x$regionOfInterestData, ...)
+}
