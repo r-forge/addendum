@@ -1532,6 +1532,14 @@ calcAUC.Binary<-function(probs, trueOnes, trueZeroes, bootStrap=0,
 			trueZeroes<-seq(length(probs)) %in% trueZeroes
 		}
 	}
+	nas<-is.na(probs)
+	if(sum(nas) > 0)
+	{
+		catwif(verbosity > 0, "NAs found - will remove these first")
+		probs<-probs(!nas)
+		trueZeroes<-trueZeroes(!nas)
+		trueOnes<-trueOnes(!nas)
+	}
 	if(verbosity > 0)
 	{
 		catt("true zeroes:")
@@ -3520,4 +3528,34 @@ scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
 	coefs<-c(itc, coefs)
 	names(coefs)[1]<-itcname
 	return(coefs)
+}
+
+missingInfo<-function(dfr)
+{
+	missPerCol<-sapply(dfr, function(cc){sum(is.na(cc))})
+	missPerCol<-missPerCol[missPerCol > 0]
+	
+	missPerRow<-apply(dfr, 1, function(cc){sum(is.na(cc))})
+	names(missPerRow)<-rownames(dfr)
+	missPerRow<-missPerRow[missPerRow > 0]
+	
+	rv<-list(missPerCol=missPerCol, missPerRow=missPerRow, dim=dim(dfr))
+	class(rv)<-"missingInfo"
+	return(rv)
+}
+
+print.missingInfo<-function(x, minMissPerRow=1, minMissPerCol=1, ...)
+{
+	cat("Number of missing values (at most", x$dim[1], ") per column (only those with a minimim of", minMissPerCol, "missing values are shown):\n")
+	mpc<-x$missPerCol[x$missPerCol >= minMissPerCol]
+	#cat(mpc, "\n", fill=TRUE)
+	print(mpc)
+	cat("Number of missing values (at most", x$dim[2], ") per row (only those with a minimim of", minMissPerRow, "missing values are shown):\n")
+	mpr<-x$missPerRow[x$missPerRow >= minMissPerRow]
+	#cat(mpr, "\n", fill=TRUE)
+	print(mpr)
+
+	rv<-list(missPerCol=mpc, missPerRow=mpr, dim=x$dim)
+	class(rv)<-"missingInfo"
+	invisible(rv)
 }
