@@ -8,7 +8,6 @@
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
 #' @param useCols restrict the regression to only include these columns as predictors
-#' @param outName name that can be used safely for the outcome (i.e. a column name not present in \code{dfr})
 #' @param dfrConvData premade return value of \code{\link{dfrConversionProbs}} for that \code{glmnet}
 #' and dataset
 #' @param \dots passed on to \code{\link{glmnet}}/\code{\link{glm.fit}}. Not allowed: "x", "y", "family", ("weights", "lambda"), "standardize"
@@ -22,7 +21,7 @@
 #' lreg<-fit.logreg(iris, y, wts=runif(nrow(iris)), verbosity=1)
 #' @export
 fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
-	outName="out", dfrConvData, ...)
+	dfrConvData, ...)
 {
 	catwif(verbosity > 0, "dim dfr:", dim(dfr))
 	if(missing(dfrConvData))
@@ -52,7 +51,7 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 	if(all(wts==wts[1]))
 	{
 		#all weights are equal, so use simple logistic regression
-		fit<-try(logregLikeGlmnet(dfr.mat, resp, outName=outName, verbosity=verbosity-1, ...))
+		fit<-try(logregLikeGlmnet(dfr.mat, resp, verbosity=verbosity-1, ...))
 	}
 	else
 	{
@@ -70,14 +69,20 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 #' @return similar to the return value of \code{\link{glmnet}}
 #' @keywords logistic regression glmnet
 #' @export
-logregLikeGlmnet<-function(x, y, outName="out", useLambda=Inf, verbosity=0, ...)
+logregLikeGlmnet<-function(x, y, useLambda=Inf, verbosity=0, ...)
 {
-	catwif(verbosity>0, "faking glmnet result from simple lgoistic regression")
+	catwif(verbosity>0, "faking glmnet result from simple logistic regression")
+	nc<-ncol(x)
+	cn<-colnames(x)
 	thisCall<-match.call()
+	x<-cbind(1, x)
+	colnames(x)[1]<-"(Intercept)"
 	logregfit<-glm.fit(x=x, y=y, family=binomial(), ..., intercept=TRUE)
+	catwif(verbosity > 0, "Coefficients found:")
+	printif(verbosity > 0, logregfit$coefficients)
 	a0<-logregfit$coefficients[1] #intercept
-	beta<-new("dgCMatrix", Dim = c(ncol(x), 1), Dimnames = list(colnames(x), 
-    "s0"), x = logregfit$coefficients[-1], p = c(0,0), i = seq(ncol(x))-1)#intercept
+	beta<-new("dgCMatrix", Dim = as.integer(c(nc, 1)), Dimnames = list(cn, "s0"), 
+		x = logregfit$coefficients[-1], p = as.integer(c(0,0)), i = as.integer(seq(nc)-1))
 	lambda<-useLambda
 	dev.ratio<-(1-logregfit$deviance )/logregfit$null.deviance
 	#glmnet:

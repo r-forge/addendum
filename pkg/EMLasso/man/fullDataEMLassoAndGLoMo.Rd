@@ -66,7 +66,10 @@
   \code{\link{cv.1l.emlasso}} objects per lambda}
   \item{params }{\code{\link{EMLasso.1l.lognet.param}}
   parameters passed in} \item{logdir }{directory where
-  logging/saving occurred}
+  logging/saving occurred} \item{combinedGLoMo
+  }{\code{\link{GLoMo}} object: the combination (through
+  \code{\link{combineGLoMos}}) of the \code{\link{GLoMo}}s
+  for each lambda}
 }
 \description{
   Fit EMLasso to a complete dataset, creating a GLoMo for

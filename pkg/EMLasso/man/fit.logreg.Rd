@@ -4,10 +4,10 @@
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
   fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity
-  = 0, useCols = NULL, outName = "out", dfrConvData, ...)
+  = 0, useCols = NULL, dfrConvData, ...)
 
-  logregLikeGlmnet(x, y, outName = "out", useLambda = Inf,
-  verbosity = 0, ...)
+  logregLikeGlmnet(x, y, useLambda = Inf, verbosity = 0,
+  ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -24,9 +24,6 @@
 
   \item{useCols}{restrict the regression to only include
   these columns as predictors}
-
-  \item{outName}{name that can be used safely for the
-  outcome (i.e. a column name not present in \code{dfr})}
 
   \item{dfrConvData}{premade return value of
   \code{\link{dfrConversionProbs}} for that \code{glmnet}

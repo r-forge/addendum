@@ -143,9 +143,17 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 	}
 	if(useCombinedGLoMo)
 	{
-		catwif(verbosity>0, "Combining GLoMos across lambdas.")
-		glomolist<-lapply(model$result, "[[", "glomo") #each item of model$result is of class "EMLasso.1l.lognet"
-		combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
+		if(exists("combinedGLoMo", model))
+		{
+			catwif(verbosity>0, "Reusing combined GLoMo across lambdas.")
+			combinedGLoMo<-model$combinedGLoMo
+		}
+		else
+		{
+			catwif(verbosity>0, "Combining GLoMos across lambdas.")
+			glomolist<-lapply(model$result, "[[", "glomo") #each item of model$result is of class "EMLasso.1l.lognet"
+			combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
+		}
 		partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
 			glomo=combinedGLoMo, wts=wts, dsconvprobs=dsconvprobs,
 			needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
@@ -223,7 +231,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 				catwif(verbosity > 3, "*****varset", vsi, "/", length(varsets))
 				curUseVars<-varsets[[vsi]]
 				try({#sometimes this goes wrong...
-					curfit<-fit.logreg(dfr=fitds, resp=fitout, verbosity=verbosity-5, useCols=curUseVars, outName="out", dfrConvData=dsconvprops, ...)
+					curfit<-fit.logreg(dfr=fitds, resp=fitout, verbosity=verbosity-5, useCols=curUseVars, dfrConvData=dsconvprops, ...)
 					useCols<-rownames(curfit$beta)
 					#catwif(verbosity > 3, "Effectively used columns:", useCols)
 					valdscurvarset<-valds[,useCols]
@@ -282,7 +290,7 @@ cv.MI.logreg<-function(glomo, ds, out, useVarNames, reps, dsconvprops, lambda, u
 		..., dsconvprops=dsconvprops, verbosity=verbosity-1)
 	auc<-repeatedPredictedProbAUC(preds, out=out, verbosity=verbosity-1)
 	aucsd<-auc["AUCSD"]
-	aucsd<-auc["AUC"]
+	auc<-auc["AUC"]
 	logregres<-list(lambda=lambda, cvm=auc, cvsd=aucsd, cvup=auc+aucsd,
 		cvlo=auc-aucsd, nzero=length(useVarNames), name="auc", glmnet.fit=useAsGlmnetFit,
 		lambda.min=lambda, lambda.1se=lambda)

@@ -24,6 +24,8 @@
 #' \item{result }{list of \code{\link{cv.1l.emlasso}} objects per lambda} 
 #' \item{params }{\code{\link{EMLasso.1l.lognet.param}} parameters passed in} 
 #' \item{logdir }{directory where logging/saving occurred} 
+#' \item{combinedGLoMo }{\code{\link{GLoMo}} object: the combination (through \code{\link{combineGLoMos}}) of 
+#' 	the \code{\link{GLoMo}}s for each lambda} 
 #' @note If lambdas is not passed along or is \code{NULL}, a set of lambdas is used
 #' 	by utilizing \code{\link{findReasonableLambdaHelper}}
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
@@ -84,6 +86,11 @@ fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLe
 	#retval<-list(result=result, lambda=lambdas, params=params, logdir=logdir)
 	listOfLassoFits<-lapply(result, "[[", "lasso.fit")
 	useBeta<-try(do.call(cBind, lapply(listOfLassoFits, "[[", "beta")))
+	try({
+		glomolist<-lapply(result, "[[", "glomo")
+		combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
+	})
+
 	retval<-list(
 		call=this.call,
 		a0=try(sapply(listOfLassoFits, "[[", "a0")),
@@ -99,7 +106,8 @@ fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLe
 		jerr=try(sapply(listOfLassoFits, "[[", "jerr")), #this ends the glmnet items
 		result=result,
 		params=params, 
-		logdir=logdir
+		logdir=logdir,
+		combinedGLoMo=combinedGLoMo
 	)
 	class(retval)<-c("EMLasso.lognet", class(result[[1]]$lasso.fit))
 	return(retval)
