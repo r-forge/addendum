@@ -16,7 +16,7 @@ crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
 #' 
 #' @aliases crossValidate.EMLasso.1l.lognet cv.EMLasso.1l.lognet-class cv.EMLasso.1l.lognet
 #' @method crossValidate EMLasso.1l.lognet
-#' @usage \method{crossValidate}{EMLasso.1l.lognet}(model, ds=model$dfr, out=model$resp, glomo=model$glomo,wts, dsconvprobs, needPredict=0, betweenColAndLevel="",..., verbosity=0)
+#' @usage \method{crossValidate}{EMLasso.1l.lognet}(model, ds=model$dfr, out=model$resp, glomo=model$glomo,wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc",..., verbosity=0)
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
 #' @param glomo \code{\link{GLoMo}} object to use as predictor model
@@ -259,9 +259,9 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0)
 	AUCs<-sapply(repres, "[[", "AUC")
 	AUCVars<-sqrt(sapply(repres, "[[", "varAUC"))
 	
-	theAUC<-mean(AUCs)
+	theAUC<-mean(AUCs, na.rm = TRUE)
 	D<-length(AUCs)
-	avgWithinVar<-mean(AUCVars)
+	avgWithinVar<-mean(AUCVars, na.rm = TRUE)
 	betwImpVar<-var(AUCs)
 	totalVar<-avgWithinVar + (D+1)/D*betwImpVar
 	c(AUC=theAUC, AUCSD=sqrt(totalVar))
@@ -269,6 +269,8 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0)
 
 #' @rdname crossValidate
 #' 
+#' @param useVarNames names of columns to include in the model (character vector)
+#' @param lambda value to use as lambda in the return value (note: ignored for the rest)
 #' @param useAsGlmnetFit object that can be used for the \code{glmnet.fit} item in the return value
 #' @return object of classes "cv.MI.logreg", "cv.glmnet" and "cv.lognet". Has exactly the items of
 #' 	a \code{\link{cv.glmnet}} object

@@ -1,9 +1,13 @@
 \name{fit.logreg}
 \alias{fit.logreg}
+\alias{logregLikeGlmnet}
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
   fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity
   = 0, useCols = NULL, outName = "out", dfrConvData, ...)
+
+  logregLikeGlmnet(x, y, outName = "out", useLambda = Inf,
+  verbosity = 0, ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -28,12 +32,20 @@
   \code{\link{dfrConversionProbs}} for that \code{glmnet}
   and dataset}
 
-  \item{\dots}{passed on to \code{\link{glmnet}}. Not
-  allowed: "x", "y", "family", "weights", "lambda",
-  "standardize"}
+  \item{\dots}{passed on to
+  \code{\link{glmnet}}/\code{\link{glm.fit}}. Not allowed:
+  "x", "y", "family", ("weights", "lambda"), "standardize"}
+
+  \item{x}{model matrix (as supported by \code{glm})}
+
+  \item{y}{outcomes (as supported by \code{glm})}
+
+  \item{useLambda}{lambda item of the return value}
 }
 \value{
   \code{\link{glmnet}} object
+
+  similar to the return value of \code{\link{glmnet}}
 }
 \description{
   Fit logistic regression by using logistic LASSO with
@@ -53,6 +65,7 @@ lreg<-fit.logreg(iris, y, wts=runif(nrow(iris)), verbosity=1)
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }
 \keyword{fit}
+\keyword{glmnet}
 \keyword{logistic}
 \keyword{regression}
 

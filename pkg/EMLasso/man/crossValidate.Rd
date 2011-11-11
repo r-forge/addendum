@@ -15,8 +15,8 @@
 
   \method{crossValidate}{EMLasso.1l.lognet}(model,
   ds=model$dfr, out=model$resp, glomo=model$glomo,wts,
-  dsconvprobs, needPredict=0, betweenColAndLevel="",...,
-  verbosity=0)
+  dsconvprobs, needPredict=0, betweenColAndLevel="",
+  type.measure="auc",..., verbosity=0)
 
   \method{crossValidate}{EMLasso.lognet}(model,
   ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
@@ -87,6 +87,12 @@
 
   \item{reppredprob}{one of the matrices as return by
   \code{repeatedlyPredictOut}}
+
+  \item{useVarNames}{names of columns to include in the
+  model (character vector)}
+
+  \item{lambda}{value to use as lambda in the return value
+  (note: ignored for the rest)}
 
   \item{useAsGlmnetFit}{object that can be used for the
   \code{glmnet.fit} item in the return value}

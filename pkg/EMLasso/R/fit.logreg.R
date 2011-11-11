@@ -11,7 +11,7 @@
 #' @param outName name that can be used safely for the outcome (i.e. a column name not present in \code{dfr})
 #' @param dfrConvData premade return value of \code{\link{dfrConversionProbs}} for that \code{glmnet}
 #' and dataset
-#' @param \dots passed on to \code{\link{glmnet}}. Not allowed: "x", "y", "family", "weights", "lambda", "standardize"
+#' @param \dots passed on to \code{\link{glmnet}}/\code{\link{glm.fit}}. Not allowed: "x", "y", "family", ("weights", "lambda"), "standardize"
 #' @return \code{\link{glmnet}} object
 #' @note The warning in the old function pointed me to the fact that the weights are _not_
 #' probability weights in a binomial glm!!
@@ -49,7 +49,64 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 		catwif(verbosity > 0, "No predictors, so returning NULL")
 		return(NULL)
 	}
-	fit<-try(glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=0, standardize=FALSE, ...))
+	if(all(wts==wts[1]))
+	{
+		#all weights are equal, so use simple logistic regression
+		fit<-try(logregLikeGlmnet(dfr.mat, resp, outName=outName, verbosity=verbosity-1, ...))
+	}
+	else
+	{
+		fit<-try(glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=0, standardize=FALSE, ...))
+	}
 	catwif(verbosity > 0, "glm fit succeeded.")
 	return(fit)
+}
+
+#' @rdname fit.logreg
+#' 
+#' @param x model matrix (as supported by \code{glm})
+#' @param y outcomes (as supported by \code{glm})
+#' @param useLambda lambda item of the return value
+#' @return similar to the return value of \code{\link{glmnet}}
+#' @keywords logistic regression glmnet
+#' @export
+logregLikeGlmnet<-function(x, y, outName="out", useLambda=Inf, verbosity=0, ...)
+{
+	catwif(verbosity>0, "faking glmnet result from simple lgoistic regression")
+	thisCall<-match.call()
+	logregfit<-glm.fit(x=x, y=y, family=binomial(), ..., intercept=TRUE)
+	a0<-logregfit$coefficients[1] #intercept
+	beta<-new("dgCMatrix", Dim = c(ncol(x), 1), Dimnames = list(colnames(x), 
+    "s0"), x = logregfit$coefficients[-1], p = c(0,0), i = seq(ncol(x))-1)#intercept
+	lambda<-useLambda
+	dev.ratio<-(1-logregfit$deviance )/logregfit$null.deviance
+	#glmnet:
+	#The fraction of (null) deviance explained (for "elnet", this is the R-square). 
+	#The deviance calculations incorporate weights if present in the model. The 
+	#deviance is defined to be -2*(loglike_sat - loglike), where loglike_sat is the 
+	#log-likelihood for the saturated model (a model with a free parameter per 
+	#observation). Hence dev.fraction=1-dev/nulldev.
+	#glm
+	#up to a constant, minus twice the maximized log-likelihood. Where sensible, the 
+	#constant is chosen so that a saturated model has deviance zero.
+	nulldev<-logregfit$null.deviance 
+	#glmnet:
+	#Null deviance (per observation). This is defined to be -2*(loglike_sat -loglike(Null)); 
+	#The NULL model refers to the intercept model, except for the Cox, where it is the 0 model.
+	#glm
+	#The deviance for the null model, comparable with deviance. The null model will 
+	#include the offset, and an intercept if there is one in the model. Note that this 
+	#will be incorrect if the link function depends on the data other than through the 
+	#fitted mean: specify a zero offset to force a correct calculation.
+	df<-ncol(x)
+	dim<-c(ncol(x), 1)
+	nobs<-length(y)
+	npasses<-1
+	offset<-FALSE
+	jerr<-"dummy"
+	rv<-list(call=thisCall, a0=a0, beta=beta, lambda=lambda, dev.ratio=dev.ratio,
+		nulldev=nulldev, df=df, dim=dim, nobs=nobs, npasses=npasses, offset=offset,
+		jerr=jerr)
+	class(rv)<-c("lognet", "glmnet")
+	return(rv)
 }
