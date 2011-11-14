@@ -1505,6 +1505,70 @@ bootStrapAUC<-function(pos.scores, neg.scores, bootStrap)
 	return(mean(bs.pos > bs.neg) + 0.5 * mean(bs.pos == bs.neg))
 }
 
+calcAUC.glmnet<-function(predmat, groups, y, weights=rep(1, nrow(predmat)), verbosity=0)
+{
+	#note: here, we assume that the number of folds per 'lambda' is constant
+	#We know that the number of 'lambdas' per fold is constant (nr of cols in predmat)!!
+  nc<-dim(y)
+  if (is.null(nc)) {
+      y<-as.factor(y)
+      ntab<-table(y)
+      nc<-as.integer(length(ntab))
+      y<-diag(nc)[as.numeric(y), ]
+  }	
+	nlams<-ncol(predmat)
+  if((is.null(dim(groups))) || (dim(groups)[2]==1))
+	{
+  	catwif(verbosity > 0, "groups was onedimensional, so extending")
+  	foldid<-as.vector(groups) #keep for use in tapply
+		groups<-matrix(groups, nrow=length(groups), ncol=1)
+		groupColPerRow<-rep(1, nlams)
+  	#catwif(verbosity > 0, "length(weights):", length(weights), "; length(foldid):", length(foldid))
+		fweights<-tapply(weights, foldid, sum)
+		fweights<-matrix(fweights, nrow=length(fweights), ncol=nlams)
+	}
+	else
+	{
+  	catwif(verbosity > 0, "groups was 2-dimensional")
+		groupColPerRow<-seq(ncol(predmat))
+		fweights<-sapply(seq(nlams), function(j)
+		{
+			foldid<-groups[,groupColPerRow[j]]
+			tapply(weights, foldid, sum)
+		})
+	}
+	grprng<-range(groups)
+	nfolds<-grprng[2] - grprng[1] + 1
+	
+	cvraw<-matrix(NA, nrow=nfolds, ncol=nlams)
+	good<-cvraw * 0
+	for (i in seq(nfolds)) {
+    good[i, seq(nlams)]<-1
+    for (j in seq(nlams)) {
+  		foldid<-groups[,groupColPerRow[j]]
+  		inCurFold<-(foldid == (grprng[1] + i - 1))
+      cvraw[i, j] = auc.mat(y[inCurFold, ], predmat[inCurFold, j], weights[inCurFold])
+    }
+	}
+  #catwif(verbosity > 0, "dim(fweights):", dim(fweights))
+	N<-apply(good, 2, sum)
+	#catwif(verbosity > 0, "N (", length(N), "): ", N)
+  #cvm<-apply(cvraw, 2, weighted.mean, w = weights, na.rm = TRUE)
+  cvm<-sapply(seq(nlams), function(j){
+  	weighted.mean(cvraw[,j], w=fweights[,j], na.rm=TRUE)
+  })
+	#catwif(verbosity > 0, "cvm (", length(cvm), "): ", cvm)
+  cvd2<-scale(cvraw, cvm, FALSE)^2
+  #catwif(verbosity > 0, "dim(cvd2):", dim(cvd2))
+  cvvar<-sapply(seq(nlams), function(j){
+  	weighted.mean(cvd2[,j], w=fweights[,j], na.rm=TRUE)
+  })
+	#catwif(verbosity > 0, "cvvar (", length(cvvar), "): ", cvvar)
+  cvsd<-sqrt(cvvar/(N - 1))
+  rbind(cvm=cvm, cvsd=cvsd)
+}
+
+
 #calculate AUC for binary outcomes
 #probs: (predicted) probabilities
 #trueOnes: which items are really 'cases'
