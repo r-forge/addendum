@@ -26,9 +26,11 @@
   verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
-  nfolds = 10, dsconvprops = NULL, ..., verbosity = 0)
+  nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
+  ..., reusabledata, verbosity = 0)
 
-  repeatedPredictedProbAUC(reppredprob, out, verbosity = 0)
+  repeatedPredictedProbAUC(reppredprob, out, verbosity = 0,
+  groups, onlyresult = TRUE, glmnetlike = TRUE)
 
   cv.MI.logreg(glomo, ds, out, useVarNames, reps,
   dsconvprops, lambda, useAsGlmnetFit, ..., verbosity = 0)
@@ -85,8 +87,27 @@
   \item{dsconvprops}{see \code{dsconvprobs} (need to work
   on universal and correct naming...)}
 
+  \item{returnGroups}{if \code{TRUE}, a list is returned
+  with the normal result as its \code{result} item and a
+  matrix holding the group assignment per repetition as the
+  \code{groups} item.}
+
+  \item{reusabledata}{optional premade result of
+  \code{\link{reusableDataForGLoMoSampling}}}
+
   \item{reppredprob}{one of the matrices as return by
   \code{repeatedlyPredictOut}}
+
+  \item{groups}{vector/matrix of fold membership
+  assignment. If nor present, 10 random groups are created}
+
+  \item{onlyresult}{if \code{FALSE}, the return value holds
+  (as list members) the the overall AUC and sd, but also
+  the results per repetition}
+
+  \item{glmnetlike}{if \code{TRUE},
+  \code{\link{calcAUC.glmnet}} is used to calculate AUC and
+  sd, otherwise \code{\link{calcAUC.Binary}} is used}
 
   \item{useVarNames}{names of columns to include in the
   model (character vector)}

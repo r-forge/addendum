@@ -51,10 +51,12 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 	if(all(wts==wts[1]))
 	{
 		#all weights are equal, so use simple logistic regression
+		catwif(verbosity > 0, "All weights are equal, so use simple logistic regression")
 		fit<-try(logregLikeGlmnet(dfr.mat, resp, verbosity=verbosity-1, ...))
 	}
 	else
 	{
+		catwif(verbosity > 0, "Not all weights are equal, so use glmnet with lambda=0")
 		fit<-try(glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=0, standardize=FALSE, ...))
 	}
 	catwif(verbosity > 0, "glm fit succeeded.")
@@ -78,11 +80,12 @@ logregLikeGlmnet<-function(x, y, useLambda=Inf, verbosity=0, ...)
 	x<-cbind(1, x)
 	colnames(x)[1]<-"(Intercept)"
 	logregfit<-glm.fit(x=x, y=y, family=binomial(), ..., intercept=TRUE)
+	cofs<-logregfit$coefficients
 	catwif(verbosity > 0, "Coefficients found:")
-	printif(verbosity > 0, logregfit$coefficients)
-	a0<-logregfit$coefficients[1] #intercept
+	printif(verbosity > 0, cofs)
+	a0<-cofs[1] #intercept
 	beta<-new("dgCMatrix", Dim = as.integer(c(nc, 1)), Dimnames = list(cn, "s0"), 
-		x = logregfit$coefficients[-1], p = as.integer(c(0,0)), i = as.integer(seq(nc)-1))
+		x = cofs[-1], p = as.integer(c(0,length(cofs)-1)), i = as.integer(seq(nc)-1))
 	lambda<-useLambda
 	dev.ratio<-(1-logregfit$deviance )/logregfit$null.deviance
 	#glmnet:

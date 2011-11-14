@@ -154,9 +154,10 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 			glomolist<-lapply(model$result, "[[", "glomo") #each item of model$result is of class "EMLasso.1l.lognet"
 			combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
 		}
+		reusabledata<-reusableDataForGLoMoSampling(glomo = combinedGLoMo, dfr = ds, verbosity = verbosity - 1)
 		partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
 			glomo=combinedGLoMo, wts=wts, dsconvprobs=dsconvprobs,
-			needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
+			needPredict=needPredict, reusabledata=reusabledata, ..., type.measure=type.measure, verbosity=verbosity-1)
 	}
 	else
 	{
@@ -197,12 +198,16 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 #' @param reps how many times does imputation have to be repeated?
 #' @param nfolds number of folds for crossvalidation
 #' @param dsconvprops see \code{dsconvprobs} (need to work on universal and correct naming...)
+#' @param returnGroups if \code{TRUE}, a list is returned with the normal result as its \code{result}
+#' 	item and a matrix holding the group assignment per repetition as the \code{groups} item.
+#' @param reusabledata optional premade result of \code{\link{reusableDataForGLoMoSampling}}
 #' @return List of the same length as \code{varsets} (unless it was length 1, then the first 
 #' 	object is simply returned). Each item is a matrix with one row for each row in \code{ds}
 #' 	and one column per \code{reps}, and holds the predicted probability in a crossvalidation.
 #' @keywords GLoMo EMLasso crossvalidate
 #' @export
-repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsconvprops=NULL, ..., verbosity=0)
+repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsconvprops=NULL, 
+	returnGroups=FALSE, ..., reusabledata, verbosity=0)
 {
 	if((missing(dsconvprops)) || (is.null(dsconvprops)))
 	{
@@ -210,14 +215,20 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 		dsconvprops<-dfrConversionProbs(dfr=ds, betweenColAndLevel="")
 	}
 	
-	catwif(verbosity > 0, "Create reusable data for GLoMo sampling up front...")
-  reusabledata <- reusableDataForGLoMoSampling(glomo = glomo, dfr = ds, verbosity = verbosity - 10)
+	if(missing(reusabledata))
+	{
+		catwif(verbosity > 0, "Create reusable data for GLoMo sampling up front...")
+	  reusabledata <- reusableDataForGLoMoSampling(glomo = glomo, dfr = ds, verbosity = verbosity - 10)
+	}
 	
 	result<-replicate(length(varsets), matrix(NA, nrow=nrow(ds), ncol=reps), simplify=FALSE)
+	if(returnGroups) allgrps<-matrix(NA, nrow=nrow(ds), ncol=reps)
+	
 	for(currep in seq(reps))
 	{
 		catwif(verbosity > 1, "***repeat", currep, "/", reps)
 		grps<-similarSizeGroups(ngroups=nfolds, nobs=nrow(ds), rand=TRUE)
+		if(returnGroups) allgrps[,currep]<-grps
 		curds<-predict(glomo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-5)
 		for(curfld in seq(nfolds))
 		{
@@ -230,7 +241,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 			{
 				catwif(verbosity > 3, "*****varset", vsi, "/", length(varsets))
 				curUseVars<-varsets[[vsi]]
-				try({#sometimes this goes wrong...
+				try({#sometimes this goes wrong??
 					curfit<-fit.logreg(dfr=fitds, resp=fitout, verbosity=verbosity-5, useCols=curUseVars, dfrConvData=dsconvprops, ...)
 					useCols<-rownames(curfit$beta)
 					#catwif(verbosity > 3, "Effectively used columns:", useCols)
@@ -242,16 +253,29 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 		}
 	}
 	if(length(result)==1) result<-result[[1]]
-	return(result)
+	if(returnGroups)
+	{
+		list(result=result, groups=allgrps)
+	}
+	else
+	{
+		return(result)
+	}
 }
 
 #' @rdname crossValidate
 #' 
 #' @param reppredprob one of the matrices as return by \code{repeatedlyPredictOut}
+#' @param groups vector/matrix of fold membership assignment. If nor present, 10 
+#' 	random groups are created
+#' @param onlyresult if \code{FALSE}, the return value holds (as list members) the
+#' 	the overall AUC and sd, but also the results per repetition
+#' @param glmnetlike if \code{TRUE}, \code{\link{calcAUC.glmnet}} is used to calculate AUC and sd,
+#' 	otherwise \code{\link{calcAUC.Binary}} is used
 #' @return named vector of length 2, holding the "AUC" and the "AUCSD"
 #' @keywords GLoMo EMLasso crossvalidate
 #' @export
-repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0)
+repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0, groups, onlyresult=TRUE, glmnetlike=TRUE)
 {
 	if(is.factor(out))
 	{
@@ -261,18 +285,37 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0)
 	{
 		out<- out > 1
 	}
+	if(missing(groups))
+	{
+		groups<-similarSizeGroups(ngroups=10, nobs=nrow(reppredprob), rand=TRUE)
+	}
 	#note: this is in fact multiple imputation!
 	#As such, we can use the formulas on p86 of "Statistical Analysis with Missing Data" here
-	repres<-apply(reppredprob, 2, calcAUC.Binary, trueOnes=out, includeSE=TRUE)
-	AUCs<-sapply(repres, "[[", "AUC")
-	AUCVars<-sqrt(sapply(repres, "[[", "varAUC"))
-	
+	if(glmnetlike)
+	{
+		repres<-calcAUC.glmnet(predmat=reppredprob, groups=groups, y=out, verbosity=verbosity-1)
+		AUCs<-repres["cvm",]
+		AUCVars<-(repres["cvsd",])^2
+	}
+	else
+	{
+		repres<-apply(reppredprob, 2, calcAUC.Binary, trueOnes=out, includeSE=TRUE)
+		AUCs<-sapply(repres, "[[", "AUC")
+		AUCVars<-sqrt(sapply(repres, "[[", "varAUC"))
+	}
 	theAUC<-mean(AUCs, na.rm = TRUE)
 	D<-length(AUCs)
 	avgWithinVar<-mean(AUCVars, na.rm = TRUE)
 	betwImpVar<-var(AUCs)
 	totalVar<-avgWithinVar + (D+1)/D*betwImpVar
-	c(AUC=theAUC, AUCSD=sqrt(totalVar))
+	if(onlyresult)
+	{
+		return(c(AUC=theAUC, AUCSD=sqrt(totalVar)))
+	}
+	else
+	{
+		list(AUC=theAUC, AUCSD=sqrt(totalVar), allAUC=AUCs, allVars=AUCVars)
+	}
 }
 
 #' @rdname crossValidate
@@ -287,8 +330,11 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0)
 cv.MI.logreg<-function(glomo, ds, out, useVarNames, reps, dsconvprops, lambda, useAsGlmnetFit, ..., verbosity=0)
 {
 	preds<-repeatedlyPredictOut(glomo=glomo, ds=ds, out=out, varsets=list(useVarNames), reps=reps, 
-		..., dsconvprops=dsconvprops, verbosity=verbosity-1)
-	auc<-repeatedPredictedProbAUC(preds, out=out, verbosity=verbosity-1)
+		..., dsconvprops=dsconvprops, returnGroups=TRUE, verbosity=verbosity-1)
+	groups<-preds$groups
+	preds<-preds$result
+	
+	auc<-repeatedPredictedProbAUC(preds, out=out, verbosity=verbosity-1, groups=groups, onlyresult=TRUE, glmnetlike=TRUE)
 	aucsd<-auc["AUCSD"]
 	auc<-auc["AUC"]
 	logregres<-list(lambda=lambda, cvm=auc, cvsd=aucsd, cvup=auc+aucsd,
