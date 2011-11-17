@@ -4,7 +4,7 @@
 \usage{
   fit.lognet(dfr, resp, lambda, weights = (rep(1,
   dim(dfr)[1])), verbosity = 0, standardize = FALSE,
-  type.measure = NULL, dfrConvData)
+  type.measure = NULL, dfrConvData, ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -31,6 +31,9 @@
   \item{dfrConvData}{premade return value of
   \code{\link{dfrConversionProbs}} for that \code{glmnet}
   and dataset}
+
+  \item{\dots}{passed on to \code{\link{glmnet}} or
+  \code{\link{cv.glmnet}}.}
 }
 \value{
   depending on \code{type.measure} being \code{NULL}, a

@@ -22,8 +22,8 @@
   ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
   wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
   betweenColAndLevel="",..., type.measure="auc",
-  keepResultPerLambda=FALSE, useCombinedGLoMo=FALSE,
-  verbosity=0)
+  keepResultPerLambda=FALSE, simple=FALSE,
+  useCombinedGLoMo=simple, verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
   nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
@@ -75,6 +75,10 @@
   \item{useCombinedGLoMo}{if \code{FALSE} (default), a
   distinct GLoMo is used for every lambda. Otherwise, the
   combined GLoMo is used for all lambdas.}
+
+  \item{simple}{if \code{TRUE}, crossvalidation is done on
+  \code{needPredict} multiple imputed datasets, by simply
+  using cv.glmnet!!}
 
   \item{varsets}{list of character vectors holding the
   variables (names) to be checked}

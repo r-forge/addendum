@@ -13,6 +13,7 @@
 #' \code{NULL} (default) to not do crossvalidation
 #' @param dfrConvData premade return value of \code{\link{dfrConversionProbs}} for that \code{glmnet}
 #' and dataset
+#' @param \dots passed on to \code{\link{glmnet}} or \code{\link{cv.glmnet}}.
 #' @return depending on \code{type.measure} being \code{NULL}, a \code{\link{glmnet}} or
 #' \code{\link{cv.glmnet}} object.
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
@@ -23,7 +24,7 @@
 #' cv.lnet<-fit.lognet(iris, y, lambda=0.05, weights=runif(nrow(iris)), verbosity=1, type.measure="auc")
 #' @export
 fit.lognet<-function(dfr, resp, lambda, weights=(rep(1, dim(dfr)[1])),
-	verbosity=0, standardize=FALSE, type.measure=NULL, dfrConvData)
+	verbosity=0, standardize=FALSE, type.measure=NULL, dfrConvData, ...)
 {
 	catwif(verbosity > 0, "Create Design matrix")
 	catwif(verbosity > 0, "Original dimension:", dim(dfr))
@@ -39,12 +40,12 @@ fit.lognet<-function(dfr, resp, lambda, weights=(rep(1, dim(dfr)[1])),
 	if(!is.null(type.measure))
 	{
 		fit<-cv.glmnet(dfr.mat, resp, family="binomial", weights=weights, lambda=lambda,
-			standardize=standardize, type.measure=type.measure)
+			standardize=standardize, type.measure=type.measure, ...)
 	}
 	else
 	{
 		fit<-glmnet(dfr.mat, resp, family="binomial", weights=weights, lambda=lambda,
-			standardize=standardize)
+			standardize=standardize, ...)
 	}
 	return(fit)
 }

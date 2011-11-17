@@ -113,13 +113,15 @@ crossValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp,
 #' 
 #' @aliases crossValidate.EMLasso.lognet cv.EMLasso.lognet-class cv.EMLasso.lognet
 #' @method crossValidate EMLasso.lognet
-#' @usage \method{crossValidate}{EMLasso.lognet}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, useCombinedGLoMo=FALSE, verbosity=0)
+#' @usage \method{crossValidate}{EMLasso.lognet}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, simple=FALSE, useCombinedGLoMo=simple, verbosity=0)
 #' @param type.measure see \code{\link{cv.glmnet}}
 #' @param keepResultPerLambda if \code{TRUE} (not the default), the individual results
 #' 	from the \code{crossValidate.EMLasso.1l.lognet} are also returned in an extra item
 #' 	\code{resultPerLambda}
 #' @param useCombinedGLoMo if \code{FALSE} (default), a distinct GLoMo is used for every lambda. 
 #' 	Otherwise, the combined GLoMo is used for all lambdas.
+#' @param simple if \code{TRUE}, crossvalidation is done on \code{needPredict} multiple imputed
+#' 	datasets, by simply using cv.glmnet!!
 #' @return object of type "cv.EMLasso.lognet". This is mainly the same as a \code{\link{cv.glmnet}}.
 #' The added/altered items are:
 #' \item{glmnet.fit }{is now the model passed in, so of class "EMLasso.lognet", besides "glmnet"} 
@@ -129,7 +131,7 @@ crossValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp,
 #' @export
 crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, 
 	wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", 
-	keepResultPerLambda=FALSE, useCombinedGLoMo=FALSE, verbosity=0)
+	keepResultPerLambda=FALSE, simple=FALSE, useCombinedGLoMo=simple, verbosity=0)
 {
 	if(missing(dsconvprobs))
 	{
@@ -155,21 +157,51 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 			combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
 		}
 		reusabledata<-reusableDataForGLoMoSampling(glomo = combinedGLoMo, dfr = ds, verbosity = verbosity - 1)
-		partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
-			glomo=combinedGLoMo, wts=wts, dsconvprobs=dsconvprobs,
-			needPredict=needPredict, reusabledata=reusabledata, ..., type.measure=type.measure, verbosity=verbosity-1)
+	}
+	if(simple)
+	{
+		lambda<-model$lambda
+		partres<-matrix(NA, nrow=length(lambda)*2, ncol=needPredict)
+		for(i in seq(needPredict))
+		{
+			curds<-predict(combinedGLoMo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-2)
+			curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda, weights=wts, verbosity=verbosity-2, 
+				type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
+			partres[,i]<-c(curcv$cvm, curcv$cvsd)
+		}
+		#one row per lambda, 1 col per repetition
+		cvms<-partres[seq_along(lambda),]
+		cvsds<-partres[-seq_along(lambda),]
+		#now use MI formulas per lambda
+		cvm<-rowMeans(cvms, na.rm = TRUE)
+		D<-ncol(partres)
+		cvsd<-sapply(seq_along(lambda), function(lami){
+			avgWithinVar<-mean((cvsds[lami,])^2, na.rm = TRUE)
+			betwImpVar<-var(cvms[lami,], na.rm = TRUE)
+			totalVar<-avgWithinVar + (D+1)/D*betwImpVar
+		}) #calculate variance so far
+		cvsd<-sqrt(cvsd)
 	}
 	else
 	{
-		partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
-			wts=wts, dsconvprobs=dsconvprobs,
-			needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
+		if(useCombinedGLoMo)
+		{
+			partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
+				glomo=combinedGLoMo, wts=wts, dsconvprobs=dsconvprobs,
+				needPredict=needPredict, reusabledata=reusabledata, ..., type.measure=type.measure, verbosity=verbosity-1)
+		}
+		else
+		{
+			partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
+				wts=wts, dsconvprobs=dsconvprobs,
+				needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
+		}
+		cvlogreglist<-lapply(partres, "[[", "cv.logreg")
+		
+		lambda<-model$lambda
+		cvm<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvm"))))
+		cvsd<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvsd"))))
 	}
-	cvlogreglist<-lapply(partres, "[[", "cv.logreg")
-	
-	lambda<-model$lambda
-	cvm<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvm"))))
-	cvsd<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvsd"))))
 	nz<-try(sapply(predict(model, type = "nonzero"), length))
 	out<-list(
 		lambda=lambda,
