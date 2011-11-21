@@ -175,12 +175,15 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 		#now use MI formulas per lambda
 		cvm<-rowMeans(cvms, na.rm = TRUE)
 		D<-ncol(partres)
-		cvsd<-sapply(seq_along(lambda), function(lami){
-			avgWithinVar<-mean((cvsds[lami,])^2, na.rm = TRUE)
-			betwImpVar<-var(cvms[lami,], na.rm = TRUE)
-			totalVar<-avgWithinVar + (D+1)/D*betwImpVar
-		}) #calculate variance so far
-		cvsd<-sqrt(cvsd)
+		cvsd<-cvm
+		cvwithinvar<-cvm
+		cvbetweenvar<-cvm
+		for(lami in seq_along(lambda))
+		{
+			cvwithinvar[lami]<-mean((cvsds[lami,])^2, na.rm = TRUE)
+			cvbetweenvar[lami]<-var(cvms[lami,], na.rm = TRUE)
+		} #calculate variance so far
+		cvsd<-sqrt(cvwithinvar + (D+1)/D*cvbetweenvar)
 	}
 	else
 	{
@@ -201,6 +204,8 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 		lambda<-model$lambda
 		cvm<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvm"))))
 		cvsd<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvsd"))))
+		cvwithinvar<-cvsd
+		cvbetweenvar<-rep(0, length(cvsd))
 	}
 	nz<-try(sapply(predict(model, type = "nonzero"), length))
 	out<-list(
