@@ -1903,14 +1903,14 @@ getBeta.glmnet<-function(object, type=NULL)
 #add the crossvalidation plot to a recently created coefficient plot for glmnet
 addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red",
-	fillsidecolor="#0000ff22", verbosity=0)
+	fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo)
 {
 	require(glmnet)
  	x<-getXIndices(cvobj, xvar=xvar)
 	catwif(verbosity > 0, "Using x indices of length ", length(x), ":", x)
 	#yrange<-range(coef(cvobj$glmnet.fit))
 	yrange<-par("yaxp")[1:2] #current outer limits of the axis
-	truerange<-range(c(cvobj$cvup, cvobj$cvlo)) #outer limits of the true value
+	truerange<-range(c(cvup, cvlo)) #outer limits of the true value
 	scaleFact<-(yrange[2] - yrange[1])/(truerange[2] - truerange[1])
 	yvalue<-function(untrans){yrange[1] + (untrans - truerange[1]) * scaleFact  }
 	
@@ -1994,19 +1994,84 @@ firstRepeatedAppearance<-function(cvobj, repsNeeded)
 	return(firstAppearance)
 }
 
+getAsRGBColors<-function(clrs=palette(), alpha=TRUE)
+{
+	rgbs<-col2rgb(clrs, alpha=TRUE)
+	rgbs<-rbind(rgbs, maxColorValue=255)
+	someCol<-ifelse(alpha, rgb(0,0,0, 0.5), rgb(0,0,0))
+	res<-rep(someCol, length(clrs))
+	for(i in seq_along(res))
+	{
+		res[i]<-do.call(rgb, as.list(rgbs[,i]))
+	}
+	return(res)
+}
+
+neatColorSet<-function(excludergb, sampleN, alpha=TRUE)
+{
+	rv<-getAsRGBColors(c("black", "red", "green3", "blue", "cyan", "magenta", "yellow", "gray",
+											 "powderblue", "gold", "deeppink1", "green", "tomato", "purple", "turquoise",
+											 "brown1", "plum", "darkgrey", "yellow3", "seagreen3", "maroon4",
+											 "chocolate2", "olivedrab", "violetred2", "royalblue3"), alpha=alpha)
+	if(! missing(excludergb))
+	{
+		if(length(excludergb) > 0)
+		{
+			rv<-setdiff(rv, excludergb)
+		}
+	}
+	if(! missing(sampleN))
+	{
+		if(sampleN == 0)
+		{
+			sampleN<-length(rv)
+		}
+		else if(sampleN < 0)
+		{
+			sampleN<-max(-sampleN, length(rv))
+		}
+		repl<-sampleN > length(rv)
+		rv<-sample(rv, sampleN, replace=repl)
+	}
+	return(rv)
+}
+
 #combine the glmnet plot with the crossvalidation plot
 plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
 	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
 	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3,
-	beta.type=NULL, ..., verbosity=0)
+	beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols)
 {
 	catwif(verbosity>0, "simple glmnet plot")
-	simpleplot(cvobj, xvar, beta.type=beta.type, ..., verbosity=verbosity-1)
+	#new addition: control the colors of the first appearing predictors
+	colsPassed<-sapply(list(lamIndexAxisCol, errorbarcolor, centercolor, fillsidecolor, "black"), getAsRGBColors)
+	if(missing(matplotCols))
+	{
+		matplotCols<-neatColorSet(excludergb=colsPassed)
+	}
+	#manipulate the columns as it is done in plot.glmnet / plotCoef
+	appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=legendOf)
+	theBeta<-getBeta(cvobj, type=beta.type)
+	w<-nonzeroCoef(theBeta)
+	varsInOrder<-rownames(theBeta)[w] #this holds the variables names in the order they will be passed to matplot
+	k<-length(varsInOrder)#same name as in matplot
+	if (length(matplotCols) < k) 
+	{
+		matplotCols <- rep(matplotCols, length.out = k)	
+	}
+	whereInOrder<-match(appearData$legendForVars, varsInOrder)
+	legendForVars<-appearData$legendForVars[!is.na(whereInOrder)]
+	whereAppearing<-appearData$whereAppearing[!is.na(whereInOrder)]
+	whereInOrder<-whereInOrder[!is.na(whereInOrder)]
+	useColors<-matplotCols[seq_along(whereInOrder)] #pick the rights number of colors
+	matplotCols[whereInOrder]<-useColors #force the color for the first variables to be these ones
+	
+	simpleplot(cvobj, xvar, beta.type=beta.type, col=matplotCols, ..., verbosity=verbosity-1)
 	catwif(verbosity>0, "adding cross validation plot")
 	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 		errorbarcolor=errorbarcolor, centercolor=centercolor,
-		fillsidecolor=fillsidecolor, verbosity=verbosity-1)
+		fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo)
 	if(! is.null(lamIndexAxisCol))
 	{
 		catwif(verbosity>0, "adding lambda index axis")
@@ -2017,10 +2082,8 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 
 	if(!is.null(legendPos))
 	{
-		appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=legendOf)
-		cols<-rep(1:6, length.out=max(appearData$orderOfFirstAppearance))
-		useColors<-cols[appearData$whereAsInPlotCoef]
-		legendForVars<-paste(appearData$legendForVars, " (", appearData$whereAppearing, ")", sep="")
+		
+		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
 		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
 	}
 	invisible(cvpsc)
@@ -2113,7 +2176,7 @@ addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...
 	useIndex<-sort(unique(c(useIndex, ioflambda.min, ioflambda.1se)))
  	useX<-x[useIndex]
   axis(4, at = useX, labels = paste(useIndex), ...)
-	ttl<-paste("best:", round(cvobj$cvm[ioflambda.min], 2), "(l=", round(cvobj$lambda.min, 4),"), corrected:", round(cvobj$cvm[ioflambda.1se], 2), "(l=", round(cvobj$lambda.1se, 4),")")
+	ttl<-paste("best:", round(cvobj$cvm[ioflambda.min], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.min, 3),"), corrected:", round(cvobj$cvm[ioflambda.1se], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.1se, 3),")")
 	title(main=ttl)
 }
 

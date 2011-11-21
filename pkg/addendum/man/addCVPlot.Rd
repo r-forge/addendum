@@ -16,7 +16,7 @@ optimization parameter \code{lambda}. It also provides a way to plot crossvalida
 results. This method adds the crossvalidation plot on top of the coefficient plot.
 }
 \usage{
-addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0)
+addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo)
 getXIndices(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
 addLamIndexAxis(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,..., verbosity=0)
 \method{getBeta}{cv.glmnet}(object, type=NULL)
@@ -61,6 +61,12 @@ used to be able to return various types of beta for some objects.
 }
   \item{\dots}{
 passed on to \code{\link{axis}}.
+}
+  \item{cvup}{
+upper value(s) for the right side axis
+}
+  \item{cvlo}{
+lower value(s) for the right side axis
 }
 }
 \details{

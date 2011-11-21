@@ -13,7 +13,7 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0)
+plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols)
 \method{simpleplot}{cv.glmnet}(object, beta.type=NULL,..., verbosity=0)
 firstRepeatedAppearance(cvobj, repsNeeded)
 getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
@@ -71,6 +71,16 @@ Extra parameters passed on to \code{plot.glmnet}
   \item{verbosity}{
 The higher this value, the more levels of progress and debug information is
 displayed (note: in R for Windows, turn off buffered output)
+}
+  \item{cvup}{
+upper value(s) for the right side axis
+}
+  \item{cvlo}{
+lower value(s) for the right side axis
+}
+  \item{matplotCols}{
+if not missing, these colors (and in this order) are used for the \code{glmnet} plot and
+the legend. If not, the return value of \code{\link{neatColorSet}} is used.
 }
   \item{object}{
 object for which 'simple' plot must be made (typically: the non-crossvalidation
