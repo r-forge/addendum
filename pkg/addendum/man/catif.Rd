@@ -8,6 +8,7 @@
 \alias{curfntester}
 \alias{curfnfinder}
 \alias{setExtraPrefix}
+\alias{strif}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Conditional cat with time indication
@@ -25,6 +26,7 @@ printif(cond=TRUE, ...)
 curfntester()
 curfnfinder(skipframes=0, cils=typicalCleanItemList(), defaultCI=mapCleanItem("(.*)", 1), retIfNone="Not in function", retStack=FALSE, extraPrefPerLevel="\t")
 setExtraPrefix(xp="\t")
+strif(cond=TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -132,6 +134,7 @@ testct2<-function(showTester=TRUE){
 testct2()
 testct2(FALSE)
 do.call(testct2, list(showTester=TRUE))
+strif(getOption("verbose", default=TRUE), iris)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

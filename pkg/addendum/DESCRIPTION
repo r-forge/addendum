@@ -9,3 +9,5 @@ Description: In essence this is a recap of things I've created over the last thr
 License: GPL (>= 2)
 LazyLoad: yes
 Depends: glmnet, rgl, Matrix, mgcv, snowfall
+Suggests: brglm
+Enhances: glmnet

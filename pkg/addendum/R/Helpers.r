@@ -1361,6 +1361,13 @@ printif<-function(cond=TRUE, ...)
 	}
 }
 
+strif<-function(cond=TRUE, ...)
+{
+	if(cond)
+	{
+		str(...)
+	}
+}
 #get colors for a set of values to display them
 #x: values to translate to color
 #mini: value that refers to the lowest possible value, i.e. the 'smallest' color
@@ -1893,7 +1900,7 @@ getXIndices<-function(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
 getBeta<-function(object, type=NULL) UseMethod("getBeta")
 getBeta.cv.glmnet<-function(object, type=NULL)
 {
-	object$glmnet.fit$beta
+	getBeta(object$glmnet.fit, type=type)
 }
 getBeta.glmnet<-function(object, type=NULL)
 {
@@ -2036,6 +2043,46 @@ neatColorSet<-function(excludergb, sampleN, alpha=TRUE)
 	return(rv)
 }
 
+addLegend<-function(cvobj, matplotCols=1:6, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL,
+	excludergb=NULL, legendPos="topright", legendCex=0.5)
+{
+	if(is.null(matplotCols))
+	{
+		matplotCols<-neatColorSet(excludergb=excludergb)
+	}
+	coldata<-colorsForPlotEx(cvobj=cvobj, matplotCols=matplotCols, 
+		repsNeededForFirstOccurrence=repsNeededForFirstOccurrence, topHowMany=topHowMany, beta.type=beta.type)
+	addLegendFromColData(coldata=coldata, legendPos=legendPos, legendCex=legendCex)
+}
+
+addLegendFromColData<-function(coldata, legendPos="topright", legendCex=0.5)
+{
+	legendForVars<-paste(coldata$legendForVars, " (", coldata$whereAppearing, ")", sep="")
+	legend(legendPos, legend=legendForVars, text.col=coldata$useColors, cex=legendCex)
+	invisible()
+}
+
+colorsForPlotEx<-function(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL)
+{
+	appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=topHowMany)
+	theBeta<-getBeta(cvobj, type=beta.type)
+	w<-nonzeroCoef(theBeta)
+	varsInOrder<-rownames(theBeta)[w] #this holds the variables names in the order they will be passed to matplot
+	k<-length(varsInOrder)#same name as in matplot
+	if (length(matplotCols) < k) 
+	{
+		matplotCols <- rep(matplotCols, length.out = k)	
+	}
+	whereInOrder<-match(appearData$legendForVars, varsInOrder)
+	legendForVars<-appearData$legendForVars[!is.na(whereInOrder)]
+	whereAppearing<-appearData$whereAppearing[!is.na(whereInOrder)]
+	whereInOrder<-whereInOrder[!is.na(whereInOrder)]
+	useColors<-matplotCols[seq_along(whereInOrder)] #pick the rights number of colors
+	matplotCols[whereInOrder]<-useColors #force the color for the first variables to be these ones
+	list(matplotCols=matplotCols, legendForVars=legendForVars, whereAppearing=whereAppearing,
+			 useColors=useColors)
+}
+
 #combine the glmnet plot with the crossvalidation plot
 plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
@@ -2051,23 +2098,10 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 		matplotCols<-neatColorSet(excludergb=colsPassed)
 	}
 	#manipulate the columns as it is done in plot.glmnet / plotCoef
-	appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=legendOf)
-	theBeta<-getBeta(cvobj, type=beta.type)
-	w<-nonzeroCoef(theBeta)
-	varsInOrder<-rownames(theBeta)[w] #this holds the variables names in the order they will be passed to matplot
-	k<-length(varsInOrder)#same name as in matplot
-	if (length(matplotCols) < k) 
-	{
-		matplotCols <- rep(matplotCols, length.out = k)	
-	}
-	whereInOrder<-match(appearData$legendForVars, varsInOrder)
-	legendForVars<-appearData$legendForVars[!is.na(whereInOrder)]
-	whereAppearing<-appearData$whereAppearing[!is.na(whereInOrder)]
-	whereInOrder<-whereInOrder[!is.na(whereInOrder)]
-	useColors<-matplotCols[seq_along(whereInOrder)] #pick the rights number of colors
-	matplotCols[whereInOrder]<-useColors #force the color for the first variables to be these ones
+	coldata<-colorsForPlotEx(cvobj=cvobj, matplotCols=matplotCols, 
+		repsNeededForFirstOccurrence=repsNeededForFirstOccurrence, topHowMany=legendOf, beta.type=beta.type)
 	
-	simpleplot(cvobj, xvar, beta.type=beta.type, col=matplotCols, ..., verbosity=verbosity-1)
+	simpleplot(cvobj, xvar, beta.type=beta.type, col=coldata$matplotCols, ..., verbosity=verbosity-1)
 	catwif(verbosity>0, "adding cross validation plot")
 	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 		errorbarcolor=errorbarcolor, centercolor=centercolor,
@@ -2082,9 +2116,7 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 
 	if(!is.null(legendPos))
 	{
-		
-		legendForVars<-paste(legendForVars, " (", whereAppearing, ")", sep="")
-		legend(legendPos, legend=legendForVars, text.col=useColors, cex=legendCex)
+		addLegendFromColData(coldata=coldata, legendPos=legendPos, legendCex=legendCex)
 	}
 	invisible(cvpsc)
 }
@@ -3686,3 +3718,347 @@ print.missingInfo<-function(x, minMissPerRow=1, minMissPerCol=1, ...)
 	class(rv)<-"missingInfo"
 	invisible(rv)
 }
+
+lognetUnbias<-function(lnet, orgx, orgy, outname="out", verbosity=0, methodForNonConvergence=c("ridge", "brglm", "none"))
+{
+	methodForNonConvergence<-match.arg(methodForNonConvergence)
+	beta<-lnet$beta
+	alpha<-lnet$a0
+	df<-lnet$df
+	lnet$orgbeta<-beta
+	lnet$orga0<-alpha
+	lnet$orgdf<-df
+	
+	lambda<-lnet$lambda
+	conv<-rep(FALSE, length(lambda))
+	dfr<-data.frame(orgy, orgx)
+	colnames(dfr)[1]<-outname
+	for(lami in seq_along(lambda))
+	{
+		useVarIndexes<-as.vector(unlist(predict(lnet, s=lambda[lami], type="nonzero")))
+		useVarNames<-rownames(lnet$beta)[useVarIndexes]
+		catwif(verbosity > 2, "Using variable names:", useVarNames)
+		frm<-modelText(outname, useVarNames)
+		curmdl<-suppressWarnings(glm(as.formula(frm), data=dfr, family=binomial()))
+		if((curmdl$converged) || (methodForNonConvergence=="none"))
+		{
+			cofs<-curmdl$coefficients
+			catwif(verbosity > 3, "Coefficients obtained:")
+			printif(verbosity > 3, cofs)
+			conv[lami]<-curmdl$converged
+			if(length(useVarNames) > 0)
+			{
+				beta[useVarIndexes,lami]<-cofs[-1]
+			}
+			alpha[lami]<-cofs[1]
+		}
+		else if(methodForNonConvergence=="brglm")
+		{
+			catwif(verbosity>0, "Need to use brglm to avoid complete separation")
+			#avoid complete separation: if not converged, use brglm
+			require("brglm") #avoid explicit dependency on brglm
+			tmpfnc<-get("brglm")
+			newmdl<-tmpfnc(as.formula(frm), data=dfr, family=binomial())
+			cofs<-newmdl$coefficients
+			catwif(verbosity > 3, "Coefficients obtained:")
+			printif(verbosity > 3, cofs)
+			conv[lami]<-newmdl$converged
+			if(length(useVarNames) > 0)
+			{
+				beta[useVarIndexes,lami]<-cofs[-1]
+			}
+			alpha[lami]<-cofs[1]
+		}
+		else #we assume then (methodForNonConvergence=="glmnet")
+		{
+			#method below led to massive rise in "downward bias" of the coefficients, making the comparison
+			#completely unfair; even the smallest lambda selected still highly penalizes the coefficients
+			#on second look, this may not have been the case...
+			catwif(verbosity>0, "Need to use ridge regression to avoid nonconvergence/complete separation")
+			#avoid complete separation: if not converged, use (near) ridge regression
+			tmpx<-orgx[, useVarIndexes]
+			newmdl<-glmnet(x=tmpx, y=orgy, family="binomial", standardize=FALSE, alpha=0.01)
+			minlam<-newmdl$lambda[length(newmdl$lambda)]#use last one (smallest lambda)
+			nonzeroes<-as.vector(predict(newmdl, s=minlam, type="nonzero"))
+			df[lami]<-length(nonzeroes)
+			conv[lami]<-!(df[lami] < length(useVarNames))
+			#If not all variables were selected, we consider this unconverged for now...
+			if(! conv[lami]) catwif(verbosity >0, "Non-ideal convergence in ridge regression as well")
+			cofs<-coef(newmdl, s=minlam)
+			catwif(verbosity > 3, "Coefficients obtained:")
+			printif(verbosity > 3, cofs)
+			cofs<-as.vector(cofs)
+			beta[useVarIndexes,lami]<-cofs[-1]
+			alpha[lami]<-cofs[1]
+		}
+	}
+	lnet$beta<-beta
+	lnet$a0<-alpha
+	lnet$df<-df
+	lnet$convergencePerLambda<-conv
+	return(lnet)
+}
+
+sdcolinfo<-function(mat, sdpostfix="sd", rangewithsd=TRUE, skipBaseCols=NULL, onlyBaseCols=NULL)
+{
+	#skipBaseCols: pass a character vector of columns you don't want plotted
+	#onlyBaseCols: pass a character vector of columns, then these are the only ones plotted
+	allnames<-colnames(mat)
+	if(! is.null(onlyBaseCols))
+	{
+		allnames<-intersect(allnames, c(onlyBaseCols, paste(onlyBaseCols, sdpostfix, sep="")))
+	}
+	if(! is.null(skipBaseCols))
+	{
+		allnames<-setdiff(allnames, c(skipBaseCols, paste(skipBaseCols, sdpostfix, sep="")))
+	}
+	
+	colswithsd<-sapply(allnames, function(cn){
+		paste(cn, sdpostfix, sep="") %in% allnames
+	})
+	cnwsd<-allnames[colswithsd]
+	cnsdn<-paste(cnwsd, sdpostfix, sep="")
+	if(length(intersect(cnwsd, cnsdn))>0)
+	{
+		stop(paste("Unsupported situation: SD present for SD column(s):", paste(intersect(cnwsd, cnsdn), collapse=", ")))
+	}
+	cnother<-setdiff(allnames, c(cnwsd, cnsdn))
+	rv<-do.call(rbind, lapply(c(cnwsd, cnother), function(curn){
+		usesd<-curn %in% cnwsd
+		if(usesd && rangewithsd)
+		{
+			sdcol<-paste(curn, sdpostfix, sep="")
+			rng<-range(c(mat[,curn]-mat[,sdcol],mat[,curn]-mat[,sdcol]), na.rm=TRUE)
+		}
+		else
+		{
+			rng<-range(mat[,curn], na.rm=TRUE)
+		}
+		data.frame(name=curn, sdname=ifelse(usesd, paste(curn, sdpostfix, sep=""), NA), min=rng[1], max=rng[2], stringsAsFactors=FALSE)
+	}))
+# 	print(rv)
+# 	colnames(rv)<-c(cnwsd, cnother)
+# 	rownames(rv)<-c("name", "sdname", "min", "max")
+	retval<-list(rangeinfo=rv, colswithsd=cnwsd, colswithoutsd=cnother, colssd=cnsdn, 
+		ignoredcols=setdiff(colnames(mat), allnames), usedcols=allnames)
+	class(retval)<-"sdcolinfo"
+	return(retval)
+}
+# sdcolinfo(tst)
+
+matplotsd<-function(x, y, sdpostfix="sd", type = "p", lty = 1:5, lwd = 1, lend = par("lend"),
+	pch = NULL, col = 1:6, cex = NULL, bg = NA, xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
+	..., add = FALSE, verbose = getOption("verbose"), erbarcol=makeTransparent(col, alpha=50), 
+	skipBaseCols=NULL, onlyBaseCols=NULL, verbosity=0, legendx, legendy, legendcex=1)
+{
+	sdci<-sdcolinfo(mat=y, sdpostfix=sdpostfix, skipBaseCols=skipBaseCols, onlyBaseCols=onlyBaseCols)
+	fullrng<-unlist(range(sdci$rangeinfo[,c("min", "max")], na.rm=TRUE))
+	if((missing(ylim)) || (is.null(ylim)))
+	{
+		ylim<-fullrng
+		catwif(verbosity > 1, "ylim set to:", ylim, " with structure:")
+		strif(verbosity > 1, ylim)
+	}
+	usedBaseCols<-c(sdci$colswithsd, sdci$colswithoutsd)
+	catwif(verbosity > 5, "Used columns for plot:", usedBaseCols)
+	nosdy<-y[,usedBaseCols,drop=FALSE]
+	catwif(verbosity > 0, "Will actually matplot", ncol(nosdy), "columns")
+	matplot(x=x, y=nosdy, type = type, lty = lty, lwd = lwd, lend = lend,
+		pch = pch, col = col, cex = cex, bg = bg, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+		..., add = add, verbose=verbose)
+	#now we'll add the error flags
+	#first map the colors used in matplot to the names of the columns
+	catwif(verbosity>0, "Collect colors")
+	if(length(erbarcol) < ncol(nosdy))
+	{
+		erbarcol<-rep(erbarcol, length.out=ncol(nosdy))
+	}
+	names(erbarcol)[seq(ncol(nosdy))]<-colnames(nosdy) #makes it easy to find the colors below
+	for(icolwithsdname in seq_along(sdci$colswithsd))
+	{
+		catwif(verbosity>0, "Column", icolwithsdname, "/", length(sdci$colswithsd))
+		colwithsdname<-sdci$colswithsd[icolwithsdname]
+		colsdname<-sdci$colssd[icolwithsdname]
+		yup<-y[,colwithsdname]+y[,colsdname]
+		ylo<-y[,colwithsdname]-y[,colsdname]
+		gn.error.bars(x, yup, ylo, width = 0.01, col = erbarcol[colwithsdname])
+	}
+	#For identifiability, replot the points
+	catwif(verbosity>0, "Redo matplot")
+	matplot(x=x, y=nosdy, type = type, lty = lty, lwd = lwd, lend = lend,
+		pch = pch, col = col, cex = cex, bg = bg, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
+		..., add = TRUE, verbose=verbose)
+	if((!missing(legendx)) || (!missing(legendy)))
+	{
+		if(length(col) < ncol(nosdy))
+		{
+			col<-rep(col, length.out=ncol(nosdy))
+		}
+		names(col)[seq(ncol(nosdy))]<-colnames(nosdy) #makes it easy to find the colors below
+		legend(x=legendx, y=legendy, legend=colnames(nosdy), text.col=col, cex=legendcex)
+	}
+	invisible()
+}
+	
+	
+cv.glmnet.stability<-function(orgx, orgy, nfolds=10, stability.type=c("MC", "MCR", "FP", "FPR", "FN", "FNR", "FDR", "DST", "DSTPV"), 
+	unbiasFullCorrectionType=c("dont", "ridge", "brglm", "none"), 
+	unbiasFoldCorrectionType=c("dont", "ridge", "brglm", "none", "full_ridge", "full_brglm", "full_none"),
+	outname="out", ..., verbosity=0)
+{
+	stability.type<-match.arg(stability.type, several.ok=TRUE)
+	catwif(verbosity > 0, "stability.type(s):", stability.type)
+	unbiasFullCorrectionType<-match.arg(unbiasFullCorrectionType)
+	unbiasFoldCorrectionType<-match.arg(unbiasFoldCorrectionType)
+	N<-nrow(orgx)
+	lnet<-glmnet(x=orgx, y=orgy, ...)
+	if(unbiasFullCorrectionType != "dont")
+	{
+		lnet<-lognetUnbias(lnet=lnet, orgx=orgx, orgy=orgy, outname=outname, verbosity=verbosity-1, 
+											 methodForNonConvergence=unbiasFullCorrectionType)
+	}
+	lambda<-lnet$lambda
+	nz<-predict(lnet, type = "nonzero")
+	nv<-nrow(lnet$beta) #total number of variables
+	foldid<-sample(rep(seq(nfolds), length = N))
+	
+	selCoef<-replicate(length(stability.type), matrix(NA, nrow=nfolds, ncol=length(lambda)), simplify=FALSE)
+	#collect the models for each of the folds and each of the lambdas
+	for (i in seq(nfolds)) 
+	{
+		catwif(verbosity>0, "fold", i, "/", nfolds)
+		valrows<-(foldid == i)
+		if(grepl("full_", unbiasFoldCorrectionType, fixed=TRUE))
+		{
+			useUnbiasFoldCorrectionType<-substr(unbiasFoldCorrectionType, 6, 100)
+			curmdl<-lognetUnbias(lnet=lnet, orgx=orgx[!valrows, , drop=FALSE], orgy=orgy[!valrows], outname=outname, 
+													 verbosity=verbosity-1, methodForNonConvergence=useUnbiasFoldCorrectionType)
+		}
+		else
+		{
+			curmdl<-glmnet(x=orgx[!valrows, , drop=FALSE], y=orgy[!valrows], lambda=lambda, ...)
+			if(unbiasFoldCorrectionType != "dont")
+			{
+				curmdl<-lognetUnbias(lnet=curmdl, orgx=orgx[!valrows, , drop=FALSE], orgy=orgy[!valrows], outname=outname,  
+														 verbosity=verbosity-1, methodForNonConvergence=unbiasFoldCorrectionType)
+			}
+		}
+		curnz<-predict(curmdl, type = "nonzero")
+		
+		for(lami in seq_along(lambda))
+		{
+			catwif(verbosity>1, "  lambda", lami, "/", length(lambda))
+			#compare nz[[lami]] to curnz[[lami]]
+			FN<-length(setdiff(nz[[lami]], curnz[[lami]]))
+			FP<-length(setdiff(curnz[[lami]], nz[[lami]]))
+			TP<-length(intersect(nz[[lami]], curnz[[lami]]))
+			TN<-nv - FN - FP - TP
+			coefDiff<-(as.vector(lnet$beta[,lami]) - as.vector(curmdl$beta[,lami]))
+			for(sti in seq_along(stability.type))
+			{
+				selCoef[[sti]][i, lami]<-switch(stability.type[sti],
+																				MC=FN+FP,
+																				MCR=(FN+FP)/nv,
+																				FP=FP,
+																				FPR=FP/(FP+TN),
+																				FN=FN,
+																				FNR=FN/(TP+FN),
+																				FDR=FP/(FP+TP),
+																				DST=sqrt(sum(coefDiff^2)),
+																				DSTPV=sqrt(sum((coefDiff/nv)^2)))
+			}
+		}
+	}
+	rv<-do.call(cbind, lapply(seq_along(stability.type), function(sti){
+		cvm<-colMeans(selCoef[[sti]])
+		cvsd<-apply(selCoef[[sti]], 2, sd, na.rm=TRUE)
+		res<-cbind(cvm, cvsd)
+		colnames(res)<-paste(stability.type[sti], c("", "sd"), sep="")
+		return(res)
+	}))
+	return(rv)
+}
+
+plotWSD<-function(x, y, ysd, ylim, erbarwidth=0.01, col="red", erbarcol=makeTransparent(col, alpha=50), ..., add=FALSE)
+{
+	if(missing(x))
+	{
+		x<-seq_along(y)
+	}
+	ylo<-y-ysd
+	yup<-y+ysd
+	if(add)
+	{
+		points(x, y, col=col, ...)
+	}
+	else
+	{
+		if(missing(ylim))
+		{
+			ylim<-range(c(ylo, yup))
+		}
+		plot(x, y, ylim=ylim, type="p", col=col, ...)
+	}
+	
+	gn.error.bars(x, yup, ylo, width = 0.01, col = erbarcol)
+	points(x, y, col=col, ...)
+}
+
+predict2<-function(object, orgx, orgy, outname="out", newx, 
+	methodForNonConvergence=c("ridge", "brglm", "none"), s = NULL, 
+	type=c("link","response","coefficients","nonzero","class"), exact = FALSE, 
+	offset, ..., verbosity=0)
+{
+	object<-lognetUnbias(lnet=object, orgx=orgx, orgy=orgy, outname=outname, verbosity=verbosity-1, 
+											 methodForNonConvergence=c("ridge", "brglm", "none"))
+	predict(object=object, newx=newx, s = s, type="response", exact = exact, offset, ...)
+}
+
+plot.cv.glmnet<-function(x, sign.lambda = 1, ..., add=FALSE, errbarcol)
+{
+	cvobj = x
+	xlab = "log(Lambda)"
+	if (sign.lambda < 0) 
+		xlab = paste("-", xlab, sep = "")
+	plot.args = list(x = sign.lambda * log(cvobj$lambda), y = cvobj$cvm, 
+		ylim = range(cvobj$cvup, cvobj$cvlo), xlab = xlab, ylab = cvobj$name, 
+		type = "n")
+	new.args = list(...)
+	if (length(new.args)) 
+		plot.args[names(new.args)] = new.args
+	if(!add)
+	{
+		do.call("plot", plot.args)
+	}
+	if(missing(errbarcol))
+	{
+		if("col" %in% names(new.args))
+		{
+			useCol<-new.args[["col"]]
+			errbarcol<-makeTransparent(someColor=useCol, alpha=75)
+		}
+		else
+		{
+			useCol<-"red"
+			errbarcol<-"darkgrey"
+		}
+	}
+	gn.error.bars(sign.lambda * log(cvobj$lambda), cvobj$cvup, cvobj$cvlo, 
+		width = 0.01, col = errbarcol)
+#	error.bars(sign.lambda * log(cvobj$lambda), cvobj$cvup, cvobj$cvlo, 
+#		width = 0.01, col = errbarcol)
+	points(sign.lambda * log(cvobj$lambda), cvobj$cvm, pch = 20, 
+		col = useCol)
+	if(!add)
+	{
+		axis(side = 3, at = sign.lambda * log(cvobj$lambda), labels = paste(cvobj$nz), 
+			tick = FALSE, line = 0)
+	}
+	abline(v = sign.lambda * log(cvobj$lambda.min), lty = 3, col=useCol)
+	abline(v = sign.lambda * log(cvobj$lambda.1se), lty = 3, col=useCol)
+	invisible()
+}
+	
+	
+	
+	
