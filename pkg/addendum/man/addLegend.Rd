@@ -16,10 +16,10 @@ addLegendFromColData(coldata, legendPos="topright", legendCex=0.5)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{cvobj}{
-result of \code{\link{cv.glmnet} or \code{\link{glmnet}
+result of \code{\link{cv.glmnet}} or \code{\link{glmnet}}
 }
   \item{matplotCols}{
-colors that have been passed to \code{\link{plot.glmnet}}. IF \code{NULL}, \code{\link{neatColorSet}}
+colors that have been passed to \code{\link{plot.glmnet}}. If \code{NULL}, \code{\link{neatColorSet}}
 is used with parameter \code{excludergb}.
 }
   \item{repsNeededForFirstOccurrence}{

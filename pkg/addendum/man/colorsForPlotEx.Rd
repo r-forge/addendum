@@ -56,7 +56,7 @@ px=exp(fx)
 px=px/(1+px)
 ly=rbinom(n=length(px),prob=px,size=1)
 cvob1=cv.glmnet(x,y)
-colorsForPlotEx(cvob1, matplotCols=neatColorSet(excludergb=excludergb), topHowMany=10)
+colorsForPlotEx(cvob1, matplotCols=neatColorSet(excludergb=col2rgb("black")), topHowMany=10)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

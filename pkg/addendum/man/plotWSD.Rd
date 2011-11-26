@@ -15,6 +15,9 @@ plotWSD(x, y, ysd, ylim, erbarwidth=0.01, col="red", erbarcol=makeTransparent(co
   \item{x, y, ylim,col}{
 similar to \code{\link{plot}} (but the default for \code{col} is "red")
 }
+  \item{ysd}{
+for each item of \code{y}, the matching SD.
+}
   \item{\dots}{
 passed on to \code{\link{plot}}
 }

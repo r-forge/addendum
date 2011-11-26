@@ -9,7 +9,7 @@ Compares, with several measures, the coefficients of the model fit to the whole 
 and to each fold's fitting set.
 }
 \usage{
-cv.glmnet.stability<-function(orgx, orgy, nfolds=10, stability.type=c("MC", "MCR", "FP", "FPR", "FN", "FNR", "FDR", "DST", "DSTPV"), unbiasFullCorrectionType=c("dont", "ridge", "brglm", "none"), unbiasFoldCorrectionType=c("dont", "ridge", "brglm", "none", "full_ridge", "full_brglm", "full_none"), outname="out", ..., verbosity=0)}
+cv.glmnet.stability(orgx, orgy, nfolds=10, stability.type=c("MC", "MCR", "FP", "FPR", "FN", "FNR", "FDR", "DST", "DSTPV"), unbiasFullCorrectionType=c("dont", "ridge", "brglm", "none"), unbiasFoldCorrectionType=c("dont", "ridge", "brglm", "none", "full_ridge", "full_brglm", "full_none"), outname="out", ..., verbosity=0)}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{orgx, orgy, nfolds}{
@@ -30,7 +30,7 @@ logistic regression). The ones prefixed with "full_" do the same, but now they u
 the full dataset: "full_ridge", "full_brglm" and "full_none".
 }
   \item{outname}{
-name that can does not coincide with a column name already in \code{orgx.
+name that can does not coincide with a column name already in \code{orgx}.
 }
   \item{\dots}{
 passed on to \code{\link{glmnet}}.
@@ -55,11 +55,11 @@ Nick Sabbe (nick.sabbe@ugent.be)
 \code{\link{plot}}, \code{\link{par}}
 }
 \examples{
-y<-as.factor(sample(2, nrow(iris)))
+y<-as.factor(rbinom(n=nrow(iris),prob=0.5,size=1))
 x<-factorsToDummyVariables(iris)
 tststab<-cv.glmnet.stability(orgx=x, orgy=y, stability.type=c("MC", "MCR", "FP", "FPR", "FN", "FNR", "FDR"),
 	unbiasFullCorrectionType="dont", unbiasFoldCorrectionType="dont", family="binomial", verbosity=1)
-matplotsd(tststab, col=neatColorSet(), legendx="topleft", legendcex=0.5)
+matplotsd(x=seq(nrow(tststab)), y=tststab, col=neatColorSet(), legendx="topleft", legendcex=0.5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

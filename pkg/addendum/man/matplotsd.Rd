@@ -54,6 +54,9 @@ displayed (note: in R for Windows, turn off buffered output)
   \item{mat}{
 \code{cex} parameter to \code{\link{legend}}
 }
+	\item{rangewithsd}{
+if \code{TRUE} (the default), the range for each variable employs the sd (i.e. value +/- sd)
+}
 }
 \value{
 For sdcolinfo, an object of class "", i.e.: list with the following items:
