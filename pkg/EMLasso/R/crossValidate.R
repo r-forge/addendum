@@ -162,12 +162,33 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 	{
 		lambda<-model$lambda
 		partres<-matrix(NA, nrow=length(lambda)*2, ncol=needPredict)
+		if(!useCombinedGLoMo)
+		{
+			reusableDatas<-lapply(lapply(model$result, "[[", "glomo"), reusableDataForGLoMoSampling, dfr = ds, verbosity = verbosity - 1)
+		}
 		for(i in seq(needPredict))
 		{
-			curds<-predict(combinedGLoMo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-2)
-			curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda, weights=wts, verbosity=verbosity-2, 
-				type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
-			partres[,i]<-c(curcv$cvm, curcv$cvsd)
+			catwif(verbosity > 1, "Imputation", i, "/", needPredict)
+			if(useCombinedGLoMo)
+			{
+				catwif(verbosity > 2, "  with combined GLoMo")
+				curds<-predict(combinedGLoMo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-2)
+				curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda, weights=wts, verbosity=verbosity-2, 
+					type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
+				partres[,i]<-c(curcv$cvm, curcv$cvsd)
+			}
+			else
+			{
+				for(j in seq_along(lambda))
+				{
+					catwif(verbosity > 2, "  Lambda", j, "/", length(lambda))
+					curglomo<-model$result[[j]]$glomo
+					curds<-predict(curglomo, newdata=ds, reusabledata = reusableDatas[[j]], verbosity=verbosity-2)
+					curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda[j], weights=wts, verbosity=verbosity-2, 
+														type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
+					partres[c(j, length(lambda)+j),i]<-c(curcv$cvm, curcv$cvsd)
+				}
+			}
 		}
 		#one row per lambda, 1 col per repetition
 		cvms<-partres[seq_along(lambda),]
@@ -215,7 +236,9 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 		cvup=try(cvm+cvsd),
 		cvlo=try(cvm-cvsd),
 		nzero=nz,
-		glmnet.fit=model
+		glmnet.fit=model,
+		cvwithinvar=cvwithinvar,
+		cvbetweenvar=cvbetweenvar
 	)
   lamin<-try(if (type.measure == "auc") 
       getmin(lambda, -cvm, cvsd)
