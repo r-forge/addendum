@@ -23,8 +23,35 @@ numdfr<-function(dfr)
 	{
 		return(.getMatrix(x)[i,j, drop=drop])
 	}
-	newlvls<-if (missing(j)) .getLevels(x) else .getLevels(x)[j]
-	newmat<-.getMatrix(x)[i,j, drop=FALSE]
+	if(missing(j) && is.matrix(i) && (length(dim(i))==2)  )
+	{
+		rv<-.getMatrix(x)[i]#don't specify drop=FALSE or the wrong kind of getter is used...
+		usedcols<-unique(i[,2])
+		newlvls<-.getLevels(x)[usedcols]
+		factors<-!(sapply(newlvls, is.null))
+		if(sum(factors) > 0)
+		{
+			rv<-as.list(rv)
+			names(rv)<-rownames(i)
+			for(lvli in seq_along(newlvls))
+			{
+				if(factors[lvli])
+				{
+					wrv<-which(i[,2]==usedcols[lvli])
+					for(j in wrv)
+					{
+						rv[[j]]<-quickFactor(x=rv[[j]], labels=newlvls[[lvli]])
+					}
+				}
+			}
+		}
+		return(rv)
+	}
+	else
+	{
+		newlvls<-if (missing(j)) .getLevels(x) else .getLevels(x)[j]
+		newmat<-.getMatrix(x)[i,j, drop=FALSE]
+	}
 	retval<-list(mat=newmat, lvls=newlvls)
 	class(retval)<-"numdfr"
 	return(retval)
