@@ -31,6 +31,11 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{showInterestingCoef}}
 		\item \code{\link{internalMissClassificationPerLambdaLognet}}
 		\item \code{\link{smallestInternallyPerfectLognet}}
+		\item \code{\link{colorsForPlotEx}}
+		\item \code{\link{cv.glmnet.stability}}
+		\item \code{\link{lognetUnbias}}
+		\item \code{\link{plot.cv.glmnet}}
+		\item \code{\link{predict2}}
 	}
 	\item plotting \enumerate{
 		\item \code{\link{getColorRange}}
@@ -42,6 +47,9 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{smartpairs}}
 		\item \code{\link{showNumericalHeatMap}}
 		\item \code{\link{makeTransparent}}
+		\item \code{\link{sdcolinfo}}
+		\item \code{\link{matplotsd}}
+		\item \code{\link{plotWSD}}
 	}
 	\item formulas \enumerate{
 		\item \code{\link{basisExpansionFormula}}

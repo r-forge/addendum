@@ -4059,6 +4059,23 @@ plot.cv.glmnet<-function(x, sign.lambda = 1, ..., add=FALSE, errbarcol)
 	invisible()
 }
 	
-	
-	
-	
+dfrDifferences<-function(dfrl, dfrr, verbosity=0)
+{
+	diml<-dim(dfrl)
+	dimr<-dim(dfrr)
+	if(any(diml != dimr)) stop("Can only compare datasets of the same dimension")
+	do.call(rbind, lapply(seq(dimr[2]), function(colnr){
+		catwif(verbosity > 0, "Comparing column number", colnr, "/", dimr[2])
+		simplydiff<-dfrl[[colnr]] != dfrr[[colnr]]
+		nadiff<-is.na(dfrl[[colnr]]) != is.na(dfrr[[colnr]])
+		rownr<-which(simplydiff | nadiff)
+		if(length(rownr) > 0)
+		{
+			cbind(rownr=rownr, colnr=colnr)
+		}
+		else
+		{
+			return(NULL)
+		}
+	}))
+}
