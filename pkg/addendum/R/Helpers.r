@@ -1918,6 +1918,7 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	#yrange<-range(coef(cvobj$glmnet.fit))
 	yrange<-par("yaxp")[1:2] #current outer limits of the axis
 	truerange<-range(c(cvup, cvlo)) #outer limits of the true value
+	catwif(verbosity > 0, "Need to convert true cv range [", truerange, "] to y range [", yrange, "].")
 	scaleFact<-(yrange[2] - yrange[1])/(truerange[2] - truerange[1])
 	yvalue<-function(untrans){yrange[1] + (untrans - truerange[1]) * scaleFact  }
 	
