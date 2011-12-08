@@ -10,7 +10,7 @@
 }
 \details{
   \tabular{ll}{ Package: \tab EMLasso\cr Type: \tab
-  Package\cr Version: \tab 1.0\cr Date: \tab 2011-10-07\cr
+  Package\cr Version: \tab 1.1\cr Date: \tab 2011-12-08\cr
   License: \tab GPL (>= 2)\cr LazyLoad: \tab yes\cr
   Depends: Matrix, glmnet, snowfall, addendum, NumDfr,
   GLoMo\cr} \itemize{ \item Important classes \itemize{
@@ -56,8 +56,11 @@
   \code{\link{EMLasso.lognet.cv}} \item
   \code{\link{reduce.cv.1l.emlasso}} \item
   \code{\link{reduce.EMLasso.lognet.cv}} \item
-  \code{\link{fullDataEMLassoAndGLoMo}} } } Most important
-  part of the call stack: \code{ \link{EMLasso.lognet.cv}
+  \code{\link{fullDataEMLassoAndGLoMo}} } \item Diagnostics
+  \itemize{ \item \code{\link{convergenceDiagnostics}}
+  \item \code{\link{plotCoefConvergence}} \item
+  \code{\link{differentModels}} } } Most important part of
+  the call stack: \code{ \link{EMLasso.lognet.cv}
   ("EMLasso.lognet.cv") \link{EMLasso.1l.lognet.cv.param}
   \link{run.parallel} \link{do.parallel}
   \link{EMLasso.1l.lognet.cv} ("\link{cv.1l.emlasso}")

@@ -5,7 +5,7 @@
 #' Fit (logistic) LASSO when there is missing data in the predictors
 #' 
 #' \tabular{ll}{ Package: \tab EMLasso\cr Type: \tab Package\cr Version: \tab
-#' 1.0\cr Date: \tab 2011-10-07\cr License: \tab GPL (>= 2)\cr
+#' 1.1\cr Date: \tab 2011-12-08\cr License: \tab GPL (>= 2)\cr
 #' LazyLoad: \tab yes\cr Depends: Matrix, glmnet, snowfall, addendum, NumDfr, GLoMo\cr} 
 #' \itemize{
 #'	\item Important classes \itemize{
@@ -59,6 +59,11 @@
 #'		\item \code{\link{reduce.cv.1l.emlasso}}
 #'		\item \code{\link{reduce.EMLasso.lognet.cv}}
 #'		\item \code{\link{fullDataEMLassoAndGLoMo}}
+#'	}
+#'	\item Diagnostics \itemize{
+#'		\item \code{\link{convergenceDiagnostics}}
+#'		\item \code{\link{plotCoefConvergence}}
+#'		\item \code{\link{differentModels}}
 #'	}
 #'}
 #' Most important part of the call stack:

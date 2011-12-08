@@ -80,6 +80,25 @@
   of lambdas is used by utilizing
   \code{\link{findReasonableLambdaHelper}}
 }
+\examples{
+y<-rbinom(nrow(iris), 1, 0.5)
+require(addendum)
+require(NumDfr)
+require(GLoMo)
+require(snowfall)
+require(EMLasso)
+sfInit(parallel = FALSE, cpus = 1)
+sfLibrary(addendum)
+sfLibrary(NumDfr)
+sfLibrary(GLoMo)
+sfLibrary(EMLasso)
+iris.cpy<-randomNA(iris, n=0.1)
+iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,
+showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
+nrOfSamplesPerMDRow=10, verbosity=2,
+minIt=5, maxIt=150, precalcGuidData=FALSE)
+sfStop()
+}
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }

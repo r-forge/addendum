@@ -31,6 +31,23 @@
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @seealso \code{\link{EMLasso.1l.lognet}}
 #' @keywords GLoMo EMLasso
+#' @examples y<-rbinom(nrow(iris), 1, 0.5)
+#' require(addendum)
+#' require(NumDfr)
+#' require(GLoMo)
+#' require(snowfall)
+#' require(EMLasso)
+#' sfInit(parallel = FALSE, cpus = 1)
+#' sfLibrary(addendum)
+#' sfLibrary(NumDfr)
+#' sfLibrary(GLoMo)
+#' sfLibrary(EMLasso)
+#' iris.cpy<-randomNA(iris, n=0.1)
+#' iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,  
+#' 	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
+#' 	nrOfSamplesPerMDRow=10, verbosity=2,
+#' 	minIt=5, maxIt=150, precalcGuidData=FALSE)
+#' sfStop()
 #' @export
 fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLevel="", 
 	showPlot=TRUE, type.measure="auc", repsNeededForFirstOccurrence=3, minNumHigher = 20, 
