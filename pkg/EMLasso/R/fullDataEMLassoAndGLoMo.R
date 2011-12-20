@@ -101,12 +101,23 @@ fullDataEMLassoAndGLoMo<-function(ds, out, dsconvprobs, lambdas, betweenColAndLe
 		loadLibsIfSfNotRunning=c("Matrix", "glmnet", "addendum", "NumDfr", "GLoMo", "EMLasso"))
 	catwif(verbosity > 0, "Done with parallel run, so collecting results and returning.")
 	#retval<-list(result=result, lambda=lambdas, params=params, logdir=logdir)
-	listOfLassoFits<-lapply(result, "[[", "lasso.fit")
-	useBeta<-try(do.call(cBind, lapply(listOfLassoFits, "[[", "beta")))
-	try({
-		glomolist<-lapply(result, "[[", "glomo")
-		combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
-	})
+	if(any(sapply(result, class) == "try-error"))
+	{
+		catw("At least one run failed, so will not attempt to complete")
+		listOfLassoFits<-NULL
+		useBeta<-NULL
+		glomolist<-NULL
+		combinedGLoMo<-NULL
+	}
+	else
+	{
+		listOfLassoFits<-lapply(result, "[[", "lasso.fit")
+		useBeta<-try(do.call(cBind, lapply(listOfLassoFits, "[[", "beta")))
+		try({
+			glomolist<-lapply(result, "[[", "glomo")
+			combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
+		})
+	}
 
 	retval<-list(
 		call=this.call,

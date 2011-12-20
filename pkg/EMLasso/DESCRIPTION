@@ -2,8 +2,8 @@ Package: EMLasso
 Type: Package
 Title: Fit (logistic) LASSO when there is missing data in
     the predictors
-Version: 1.1
-Date: 2011-12-08
+Version: 1.1.1
+Date: 2011-12-19
 Author: Nick Sabbe <nick.sabbe@ugent.be>
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: Fit (logistic) LASSO when there is missing

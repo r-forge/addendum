@@ -38,9 +38,12 @@ lognetProbWrapper<-function(lognet, dfr, betweenColAndLevel, usecol, verbosity=0
 		if(ncol(lognet$beta) != 1) stop("lognetProbWrapper needs usecol if not 1 lambda lognet")
 		usecol<-1
 	}
+	catwif(verbosity > 0, "usecol:", usecol)
 	dfr$newformdata$betas<-lognet$beta[,usecol]
 	keepVars<-abs(dfr$newformdata$betas)>0
-	catwif(verbosity >0, "reducing from ", nrow(dfr$newformdata), "to", sum(keepVars), "variables/dummies")
+	catwif(verbosity >0, "reducing from ", nrow(dfr$newformdata), "to", sum(keepVars), "variables/dummies\n",
+				 "because these are the only ones used in the model for the lambda of interest")
+	catwif(verbosity >5, "Variables kept are:", dfr$newformdata$newcoln[keepVars])
 	dfr$newformdata<-dfr$newformdata[keepVars,]
 
 	dfr$newformdata$mustEqual<-rep(1, nrow(dfr$newformdata))
