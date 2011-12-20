@@ -106,6 +106,19 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	}
 
 	naLevels<-allLevels(dfrl)
+	for(i in seq_along(probs))
+	{
+		unusedLevels<-(probs[[i]] == 0)
+		if(sum(unusedLevels) > 0)
+		{
+			catwif(verbosity > 0, "Unused levels detected in column", names(naLevels)[i], ".")
+			catwif(verbosity > 0, "Unused levels are:")
+			printif(verbosity > 0, naLevels[[i]][unusedLevels])
+			catwif(verbosity > 0, "Better to remove these up front; will try to ignore them now.")
+			naLevels[[i]]<-naLevels[[i]][!unusedLevels]
+			probs[[i]]<-probs[[i]][!unusedLevels]
+		}
+	}
 	dfr<-as.nummatrix(dfr)
 	catwif(verbosity>0, "dfr is now a matrix of dimension:", dim(dfr), "and class",
 		class(dfr))
