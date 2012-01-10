@@ -27,7 +27,7 @@
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
   nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
-  ..., reusabledata, verbosity = 0)
+  returnCoefs = FALSE, ..., reusabledata, verbosity = 0)
 
   repeatedPredictedProbAUC(reppredprob, out, verbosity = 0,
   groups, onlyresult = TRUE, glmnetlike = TRUE)
@@ -95,6 +95,11 @@
   with the normal result as its \code{result} item and a
   matrix holding the group assignment per repetition as the
   \code{groups} item.}
+
+  \item{returnCoefs}{if \code{TRUE}, a list is returned
+  with the normal result as its \code{result} item and a
+  list of matrices holding the coefficient values per
+  repetition and per fold as the \code{coefs} item.}
 
   \item{reusabledata}{optional premade result of
   \code{\link{reusableDataForGLoMoSampling}}}

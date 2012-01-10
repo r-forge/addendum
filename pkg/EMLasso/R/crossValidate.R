@@ -260,6 +260,9 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 #' @param dsconvprops see \code{dsconvprobs} (need to work on universal and correct naming...)
 #' @param returnGroups if \code{TRUE}, a list is returned with the normal result as its \code{result}
 #' 	item and a matrix holding the group assignment per repetition as the \code{groups} item.
+#' @param returnCoefs if \code{TRUE}, a list is returned with the normal result as its \code{result}
+#' 	item and a list of matrices holding the coefficient values per repetition and per fold as the 
+#' 	\code{coefs} item.
 #' @param reusabledata optional premade result of \code{\link{reusableDataForGLoMoSampling}}
 #' @return List of the same length as \code{varsets} (unless it was length 1, then the first 
 #' 	object is simply returned). Each item is a matrix with one row for each row in \code{ds}
@@ -267,7 +270,7 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 #' @keywords GLoMo EMLasso crossvalidate
 #' @export
 repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsconvprops=NULL, 
-	returnGroups=FALSE, ..., reusabledata, verbosity=0)
+	returnGroups=FALSE, returnCoefs=FALSE, ..., reusabledata, verbosity=0)
 {
 	if((missing(dsconvprops)) || (is.null(dsconvprops)))
 	{
@@ -283,6 +286,8 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 	
 	result<-replicate(length(varsets), matrix(NA, nrow=nrow(ds), ncol=reps), simplify=FALSE)
 	if(returnGroups) allgrps<-matrix(NA, nrow=nrow(ds), ncol=reps)
+	if(returnCoefs) 	coefs<-lapply(varsets, function(curvs){matrix(NA, nrow=length(curvs)+1, ncol=reps*nfolds)})
+		
 	
 	for(currep in seq(reps))
 	{
@@ -303,6 +308,13 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 				curUseVars<-varsets[[vsi]]
 				try({#sometimes this goes wrong??
 					curfit<-fit.logreg(dfr=fitds, resp=fitout, verbosity=verbosity-5, useCols=curUseVars, dfrConvData=dsconvprops, ...)
+					if(returnCoefs)
+					{
+						curcoef<-coef(curfit)
+						rownames(coefs[[vsi]])<-rownames(curcoef)
+						curcoef<-as.vector(curcoef)
+						coefs[[vsi]][,((currep-1)*nfolds)+curfld]<-curcoef
+					}
 					useCols<-rownames(curfit$beta)
 					#catwif(verbosity > 3, "Effectively used columns:", useCols)
 					valdscurvarset<-valds[,useCols]
@@ -312,10 +324,17 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 			}
 		}
 	}
-	if(length(result)==1) result<-result[[1]]
-	if(returnGroups)
+	if(length(result)==1)
 	{
-		list(result=result, groups=allgrps)
+		result<-result[[1]]
+		if(returnCoefs) coefs<-coefs[[1]]
+	}
+	if(returnGroups | returnCoefs)
+	{
+		rv<-list(result=result)
+		if(returnGroups) rv$groups<-allgrps
+		if(returnCoefs) rv$coefs<-coefs
+		return(rv)
 	}
 	else
 	{

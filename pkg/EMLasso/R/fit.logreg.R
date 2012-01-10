@@ -33,6 +33,8 @@ fit.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL
 	if(!is.null(useCols))
 	{
     if (is.character(useCols)) {
+    		unfoundUseCols<-setdiff(useCols, colnames(dfr.mat))
+    		if(length(unfoundUseCols)>0) catw("Requested to use unfound columns:", unfoundUseCols)
         useCols <- useCols[useCols %in% colnames(dfr.mat)]
         catwif(verbosity > 0, "useCols:", useCols)
     }
