@@ -3660,6 +3660,20 @@ coefs2Formula<-function(coefs, sigdig=2, itcname="(intercept)", minabs=0.0001)
 
 scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
 {
+	if(missing(coefs))
+	{
+		for(cl in seq_along(dfr))
+		{
+			usedScale <- attr(dfr[[cl]], "scaled:center")
+			usedCenter <- attr(dfr[[cl]], "scaled:scale")
+			if (!is.null(usedScale)) {
+				catwif(verbosity > 0, "Scaling back for variable", colnames(dfr)[cl])
+				catwif(verbosity > 0, "w Scale", usedScale, "and Center", usedCenter)
+				dfr[[cl]]<-(dfr[[cl]]*usedScale) + usedCenter
+			}
+		}
+		return(dfr)
+	}
 	itc<-0
 	ipos<-match(itcname, names(coefs))
 	if(!is.na(ipos))
@@ -3671,8 +3685,8 @@ scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
 	{
 		curname<-names(coefs)[i]
 		cpos<-match(curname, colnames(dfr))
-		usedScale<-attr(dfr[[cpos]], "scaled:center")
-		usedCenter<-attr(dfr[[cpos]], "scaled:scale")
+		usedScale<-attr(dfr[[cpos]], "scaled:scale")
+		usedCenter<-attr(dfr[[cpos]], "scaled:center")
 		if(! is.null(usedScale))
 		{
 			catwif(verbosity > 0, "Scaling back for variable", curname)
@@ -4079,4 +4093,60 @@ dfrDifferences<-function(dfrl, dfrr, verbosity=0)
 			return(NULL)
 		}
 	}))
+}
+
+linearPredict<-function(dfr, coefs, itcname="(Intercept)", dfrconv, betweenColAndLevel="", verbosity=0)
+{
+	if(missing(dfrconv))
+	{
+		dfrconv<-dfrConversionProbs(dfr, "")
+	}
+	dfr.mat<-factorsToDummyVariables(dfr, betweenColAndLevel = betweenColAndLevel, 
+																	 dfrConvData=dfrconv, verbosity=verbosity-1) #Some factors are only partially there!
+	
+	itcidx<-match(itcname, names(coefs))
+	if(is.na(itcidx))
+	{
+		usemat<-dfr.mat[,names(coefs)]
+	}
+	else
+	{
+		itc<-coefs[itcidx]
+		usemat<-dfr.mat[,names(coefs)[-itcidx]]
+		usemat<-cbind(1, usemat)
+		coefs<-c(itc, coefs[-itcidx])
+	}
+	lins<-as.vector(usemat %*% coefs)
+	names(lins)<-rownames(dfr)
+	return(lins)
+}
+
+histGroups<-function(vals, grps, bins=10, lbls)
+{
+	if(length(bins)==1)
+	{
+		minv<-min(vals)
+		maxv<-max(vals)
+		dst<-(maxv - minv)/1000
+		minv<-minv-dst
+		max<-maxv+dst
+		bins<-seq(minv, maxv, length.out=bins+1)
+	}
+	else
+	{
+		bins<-sort(bins) #just in case
+	}
+	if(missing(lbls))
+	{
+		lbls<-format(bins[-length(bins)], nsmall=2)
+	}
+	ugrp<-unique(grps)
+	grpcnt<-sapply(seq_along(ugrp), function(curgrpi){
+		curgrp<-ugrp[curgrpi]
+		curvals<-sort(vals[grps==curgrp])
+		iS <- cut(curvals, breaks = bins, include.lowest = TRUE, labels = FALSE)
+		curcnt<-sapply(seq(length(bins)-1), function(i){sum(iS==i)})
+		return(curcnt)
+	})
+	barplot(t(grpcnt), beside=TRUE, legend.text=ugrp, names.arg=lbls, cex.names=0.5, las=3)
 }
