@@ -1,6 +1,7 @@
 \name{run.parallel}
 \alias{run.parallel}
 \alias{do.parallel}
+\alias{sfInitEx}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Divide taks over multiple processors in \code{snowfall} setting and gather results
@@ -14,7 +15,8 @@ a separate file.
 \usage{
 run.parallel(..., paramcreationname, functionname, paramname, logdir,	savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"),	postprocessname=NULL, loadLibsIfSfNotRunning=c("Matrix", "glmnet", "addendum"))
 do.parallel(i, functionname, paramname, logdir, savedir=logdir, logorsavename= paste(functionname, "parallel", sep="_"), postprocessname=NULL, verbosity)
-}
+sfInitEx(parallel = NULL, cpus = NULL, type = NULL, socketHosts = NULL, 
+					restore = NULL, slaveOutfile = NULL, nostart = FALSE, useRscript = FALSE)}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{
@@ -61,6 +63,9 @@ subtask number - see details.
 The higher this value, the more levels of progress and debug information is
 displayed (note: in R for Windows, turn off buffered output)
 }
+  \item{parallel, cpus, type, socketHosts, restore, slaveOutfile, nostart, useRscript}{
+see \code{\link{sfInit}}
+}
 }
 \details{
 The key to success here, is providing a proper parameter creation function, and
@@ -86,6 +91,9 @@ typically needs to write a custom "[.testing" for this class (2 parameters,
 \code{x} and \code{i})
 
 For simple cases (see examples), these customisations are not necessary
+
+Note: sfInitEx is provided as an extension to sfInit that automatically connects
+to an existing MPI cluster if one is already running.
 }
 \value{
 Depends on \code{functionname} and others, but typically a list of the results

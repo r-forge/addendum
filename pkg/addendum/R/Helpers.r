@@ -3014,7 +3014,7 @@ run.parallel<-function(..., paramcreationname, functionname, paramname, logdir,
   if(!sfIsRunning())
   {
   	warning("There was no snowfall cluster running at the start of run.parallel!!! Will start a single CPU now.")
-		sfInit(parallel = FALSE, cpus = 1)
+		sfInitEx(parallel = FALSE, cpus = 1)
   	for(curlib in loadLibsIfSfNotRunning) sfLibrary(curlib, character.only=TRUE)
   	on.exit(sfStop())
     #stop("run.parallel can only be used when a snowfall cluster is running.")
@@ -4149,4 +4149,17 @@ histGroups<-function(vals, grps, bins=10, lbls)
 		return(curcnt)
 	})
 	barplot(t(grpcnt), beside=TRUE, legend.text=ugrp, names.arg=lbls, cex.names=0.5, las=3)
+}
+
+sfInitEx<-function (parallel = NULL, cpus = NULL, type = NULL, socketHosts = NULL, 
+					restore = NULL, slaveOutfile = NULL, nostart = FALSE, useRscript = FALSE)
+{
+	mpicll<-length(getMPIcluster())
+	if(mpicll > 0)
+	{
+		catw("Reusing existing MPI cluster with", mpicll, "nodes.")
+		return(snowfall::sfInit(parallel=TRUE, type="MPI", cpus=mpicll))
+	}
+	snowfall::sfInit(parallel = parallel, cpus = cpus, type = type, socketHosts = socketHosts, 
+		restore = restore, slaveOutfile = slaveOutfile, nostart = nostart, useRscript = useRscript)
 }
