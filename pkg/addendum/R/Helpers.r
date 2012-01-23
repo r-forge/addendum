@@ -3674,6 +3674,16 @@ scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
 		}
 		return(dfr)
 	}
+	if(class(coefs)=="dgCMatrix")
+	{
+		if(dim(coefs)[2]==1)
+		{
+			catwif("Coefficients were passed as 1-col dgCMatrix. will try to correct for that.")
+			cnms<-rownames(coefs)
+			coefs<-as.vector(coefs)
+			names(coefs)<-cnms
+		}
+	}
 	itc<-0
 	ipos<-match(itcname, names(coefs))
 	if(!is.na(ipos))
