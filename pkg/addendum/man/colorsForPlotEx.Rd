@@ -9,7 +9,7 @@ Returns how colors are used in \code{\link{plotex}} (and \code{\link{plot.glmnet
 for displaying a legend (as in \code{\link{addLegend}})
 }
 \usage{
-colorsForPlotEx(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL)
+colorsForPlotEx(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL, altColNameIn=NULL, altColExpressionOut=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +27,13 @@ See \code{showTop} in \code{\link{getOrderOfAppearance}}
 }
   \item{beta.type}{
 See \code{\link{getOrderOfAppearance}}
+}
+  \item{altColNameIn}{
+These columns are given an alternative text for display
+}
+  \item{altColExpressionOut}{
+Alternative text used for display for the columns in \code{altColNameIn}. Obviously the character/expression vector 
+should be just as long.
 }
 }
 \value{

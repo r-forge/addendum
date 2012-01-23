@@ -16,9 +16,9 @@ optimization parameter \code{lambda}. It also provides a way to plot crossvalida
 results. This method adds the crossvalidation plot on top of the coefficient plot.
 }
 \usage{
-addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo)
+addCVPlot(cvobj, xvar=c("norm", "lambda", "dev"), numTicks, smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red", fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, by)
 getXIndices(cvobj, xvar=c("norm", "lambda", "dev"), verbosity=0)
-addLamIndexAxis(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,..., verbosity=0)
+addLamIndexAxis(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,..., addIdxAx=TRUE, addTitle=TRUE, coldata, verbosity=0)
 \method{getBeta}{cv.glmnet}(object, type=NULL)
 \method{getBeta}{glmnet}(object, type=NULL)
 }
@@ -53,6 +53,16 @@ with this color. Advised to ensure that it is transparent (low alpha value)
 The higher this value, the more levels of progress and debug information is
 displayed (note: in R for Windows, turn off buffered output)
 }
+  \item{addIdxAx}{
+if \code{TRUE} (default), the axis on the bottom with the index in the set of lambdas is shown
+}
+  \item{addTitle}{
+if \code{TRUE} (default), the title showing info on optimal points is shown
+}
+  \item{coldata}{
+can be used to correct the number of variables occurring to only count the variables that don't
+appear coincidentally. This is the return value of a call to \code{\link{colorsForPlotEx}}
+}
   \item{object}{
 object for which the beta must be obtained
 }
@@ -67,6 +77,9 @@ upper value(s) for the right side axis
 }
   \item{cvlo}{
 lower value(s) for the right side axis
+}
+  \item{by}{
+if passed along, used as an alternative to find how many ticks are needed for the axis on the right side.
 }
 }
 \details{

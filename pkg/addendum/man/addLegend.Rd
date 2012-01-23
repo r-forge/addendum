@@ -11,7 +11,7 @@ Add legend to standard (cv.)glmnet plot, to show which variables occur at which 
 \usage{
 addLegend(cvobj, matplotCols=1:6, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL,
 	excludergb=NULL, legendPos="topright", legendCex=0.5)
-addLegendFromColData(coldata, legendPos="topright", legendCex=0.5)
+addLegendFromColData(coldata, legendPos="topright", legendCex=0.5, showApp=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,6 +43,9 @@ code{cex} that is passed to \code{legend}
 }
   \item{coldata}{
 result of a call to \code{\link{colorsForPlotEx}}
+}
+  \item{showApp}{
+if \code{TRUE} (default), the lambda index where this variable appears is shown
 }
 }
 \value{

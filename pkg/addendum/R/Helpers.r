@@ -1910,7 +1910,7 @@ getBeta.glmnet<-function(object, type=NULL)
 #add the crossvalidation plot to a recently created coefficient plot for glmnet
 addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	smoothed=FALSE, errorbarcolor="darkgrey", centercolor="red",
-	fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo)
+	fillsidecolor="#0000ff22", verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, by)
 {
 	require(glmnet)
  	x<-getXIndices(cvobj, xvar=xvar)
@@ -1972,10 +1972,18 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	  points(x, scaledOut$cvm, pch = 20, col = centercolor)
 	}
 	catwif(verbosity > 0, "Adding right axis")
-  axis(side = 4, at = seq(yrange[1], yrange[2], length.out=numTicks),
-		labels = paste(round(seq(truerange[1], truerange[2], length.out=numTicks),
-			2)),
-		tick = TRUE, line = 0)
+	if(missing(by))
+	{
+		cvmaxisticks<-round(seq(truerange[1], truerange[2], length.out=numTicks), 2)
+		cvmaxispos<-seq(yrange[1], yrange[2], length.out=numTicks)
+	}
+	else
+	{
+		cvmaxisticks<-round(seq(truerange[1], truerange[2], by=by), 2)
+		cvmaxispos<-seq(yrange[1], yrange[2], length.out=length(cvmaxisticks))
+	}
+	axis(side = 4, at = cvmaxispos, labels = paste(cvmaxisticks), tick = TRUE, line = 0)
+	
 	catwif(verbosity > 0, "Adding vertical lines at lambdas of interest")
   abline(v = x[ioflambda.min], lty = 3)
   abline(v = x[ioflambda.1se], lty = 3)
@@ -2056,14 +2064,22 @@ addLegend<-function(cvobj, matplotCols=1:6, repsNeededForFirstOccurrence=3, topH
 	addLegendFromColData(coldata=coldata, legendPos=legendPos, legendCex=legendCex)
 }
 
-addLegendFromColData<-function(coldata, legendPos="topright", legendCex=0.5)
+addLegendFromColData<-function(coldata, legendPos="topright", legendCex=0.5, showApp=TRUE)
 {
-	legendForVars<-paste(coldata$legendForVars, " (", coldata$whereAppearing, ")", sep="")
+	if(showApp)
+	{
+		legendForVars<-paste(coldata$legendForVars, " (", coldata$whereAppearing, ")", sep="")
+	}
+	else
+	{
+		legendForVars<-coldata$altNames
+	}
 	legend(legendPos, legend=legendForVars, text.col=coldata$useColors, cex=legendCex)
 	invisible()
 }
 
-colorsForPlotEx<-function(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL)
+colorsForPlotEx<-function(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL,
+													altColNameIn=NULL, altColExpressionOut=NULL)
 {
 	appearData<-getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=topHowMany)
 	theBeta<-getBeta(cvobj, type=beta.type)
@@ -2080,8 +2096,18 @@ colorsForPlotEx<-function(cvobj, matplotCols, repsNeededForFirstOccurrence=3, to
 	whereInOrder<-whereInOrder[!is.na(whereInOrder)]
 	useColors<-matplotCols[seq_along(whereInOrder)] #pick the rights number of colors
 	matplotCols[whereInOrder]<-useColors #force the color for the first variables to be these ones
+	
+	altNames<-legendForVars
+	useAltCol<-altColNameIn %in% legendForVars
+	if(sum(useAltCol) > 0)
+	{
+		altColNameIn<-altColNameIn[useAltCol]
+		altColExpressionOut<-altColExpressionOut[useAltCol]
+		altNames[match(altColNameIn, legendForVars)]<-altColExpressionOut
+	}
+	
 	list(matplotCols=matplotCols, legendForVars=legendForVars, whereAppearing=whereAppearing,
-			 useColors=useColors)
+			 useColors=useColors, altNames=altNames)
 }
 
 #combine the glmnet plot with the crossvalidation plot
@@ -2089,35 +2115,41 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 	lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright",
 	legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",
 	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3,
-	beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols)
+	beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols,
+	altColNameIn=NULL, altColExpressionOut=NULL, showApp=TRUE, skipMoreColors="black",
+	cvby, addIdxAx=TRUE, addTitle=TRUE)
 {
 	catwif(verbosity>0, "simple glmnet plot")
 	#new addition: control the colors of the first appearing predictors
-	colsPassed<-sapply(list(lamIndexAxisCol, errorbarcolor, centercolor, fillsidecolor, "black"), getAsRGBColors)
+	colsPassed<-list(lamIndexAxisCol, errorbarcolor, centercolor, fillsidecolor)
+	colsPassed<-c(colsPassed, skipMoreColors)
+	colsPassed<-sapply(colsPassed, getAsRGBColors)
 	if(missing(matplotCols))
 	{
 		matplotCols<-neatColorSet(excludergb=colsPassed)
 	}
 	#manipulate the columns as it is done in plot.glmnet / plotCoef
 	coldata<-colorsForPlotEx(cvobj=cvobj, matplotCols=matplotCols, 
-		repsNeededForFirstOccurrence=repsNeededForFirstOccurrence, topHowMany=legendOf, beta.type=beta.type)
+		repsNeededForFirstOccurrence=repsNeededForFirstOccurrence, topHowMany=legendOf, beta.type=beta.type,
+		altColNameIn=altColNameIn, altColExpressionOut=altColExpressionOut)
 	
 	simpleplot(cvobj, xvar, beta.type=beta.type, col=coldata$matplotCols, ..., verbosity=verbosity-1)
 	catwif(verbosity>0, "adding cross validation plot")
 	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 		errorbarcolor=errorbarcolor, centercolor=centercolor,
-		fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo)
+		fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo, by=cvby)
 	if(! is.null(lamIndexAxisCol))
 	{
 		catwif(verbosity>0, "adding lambda index axis")
 		if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
 		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,
-			pos=lamIndexAxisPos, col=lamIndexAxisCol, verbosity=verbosity-1)
+			pos=lamIndexAxisPos, col=lamIndexAxisCol, addIdxAx=addIdxAx, addTitle=addTitle, 
+			coldata=coldata, verbosity=verbosity-1)
 	}
 
 	if(!is.null(legendPos))
 	{
-		addLegendFromColData(coldata=coldata, legendPos=legendPos, legendCex=legendCex)
+		addLegendFromColData(coldata=coldata, legendPos=legendPos, legendCex=legendCex, showApp=showApp)
 	}
 	invisible(cvpsc)
 }
@@ -2189,7 +2221,8 @@ findUnivariateSignificancePVal<-function(dfr, outcomecol, betweenColAndLevel="",
 	return(list(dfr=dfr, pvals=pvalpercol[selectedCols]))
 }
 
-addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,..., verbosity=0)
+addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...,
+	addIdxAx=TRUE, addTitle=TRUE, coldata, verbosity=0)
 {
 	ioflambda.min<-match(cvobj$lambda.min, cvobj$lambda)
 	ioflambda.1se<-match(cvobj$lambda.1se, cvobj$lambda)
@@ -2200,17 +2233,45 @@ addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...
 #   prettydf = trunc(approx(x = x, y = cvobj$df, xout = atdf, rule = 2)$y)
 #   axis(3, at = atdf, label = prettydf, tcl = NA)
 	
+	if(! missing(coldata))
+	{
+		mxind<-max(coldata$whereAppearing)
+		if(mxind > 0)
+		{
+			for(i in seq(mxind))
+			{
+				catwif(verbosity>1, "Current index:", i)
+				#change df to show only the columns actually occurring repeatedly
+				trulyUsed<-coldata$legendForVars[coldata$whereAppearing <=i]
+				catwif(verbosity>1,"Truly used variables up to that index:", trulyUsed)
+				curcoef<-cvobj$glmnet.fit$beta[,i] 
+				names(curcoef)<-rownames(cvobj$glmnet.fit$beta)
+				curnames<-rownames(cvobj$glmnet.fit$beta)[abs(curcoef) > 0.0001]
+				catwif(verbosity>1,"Names:", curnames)
+				catwif(verbosity>1,"df was: ", cvobj$glmnet.fit$df[i])
+				cvobj$glmnet.fit$df[i]<-length(intersect(curnames, trulyUsed))
+				catwif(verbosity>1,"df became: ", cvobj$glmnet.fit$df[i])
+			}
+		}
+	}
 	useXforDF<-x[isofinterest]
 	useDF<-trunc(approx(x = x, y = cvobj$glmnet.fit$df, xout = useXforDF, rule = 2)$y)
 	#useDF<-cvobj$df[isofinterest]
 	axis(3, at = useXforDF, label = useDF, tcl = NA)
 	
- 	useIndex<-as.integer(seq(from=1, to=length(x), length.out=numTicks))
-	useIndex<-sort(unique(c(useIndex, ioflambda.min, ioflambda.1se)))
- 	useX<-x[useIndex]
-  axis(4, at = useX, labels = paste(useIndex), ...)
-	ttl<-paste("best:", round(cvobj$cvm[ioflambda.min], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.min, 3),"), corrected:", round(cvobj$cvm[ioflambda.1se], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.1se, 3),")")
-	title(main=ttl)
+	if(addIdxAx)
+	{
+	 	useIndex<-as.integer(seq(from=1, to=length(x), length.out=numTicks))
+		useIndex<-sort(unique(c(useIndex, ioflambda.min, ioflambda.1se)))
+	 	useX<-x[useIndex]
+	  axis(4, at = useX, labels = paste(useIndex), ...)
+	}
+	if(addTitle)
+	{
+		ttl<-paste("best:", round(cvobj$cvm[ioflambda.min], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.min, 3),"), corrected:", round(cvobj$cvm[ioflambda.1se], 2), "[", round(cvobj$cvsd[ioflambda.min], 2), "]", "(l=", round(cvobj$lambda.1se, 3),")")
+		title(main=ttl)
+	}
+	invisible()
 }
 
 colsOfType<-function(dfr, type=c("factor", "char"))

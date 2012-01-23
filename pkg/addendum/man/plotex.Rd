@@ -13,7 +13,9 @@ Plots both crossvalidation plot and coefficient plot from glmnet in one plot
 Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one graph
 }
 \usage{
-plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols)
+plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols,
+altColNameIn=NULL, altColExpressionOut=NULL, showApp=TRUE, skipMoreColors="black", cvby,
+addIdxAx=TRUE, addTitle=TRUE)
 \method{simpleplot}{cv.glmnet}(object, beta.type=NULL,..., verbosity=0)
 firstRepeatedAppearance(cvobj, repsNeeded)
 getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
@@ -81,6 +83,21 @@ lower value(s) for the right side axis
   \item{matplotCols}{
 if not missing, these colors (and in this order) are used for the \code{glmnet} plot and
 the legend. If not, the return value of \code{\link{neatColorSet}} is used.
+}
+  \item{altColNameIn, altColExpressionOut}{
+see \code{\link{colorsForPlotEx}}
+}
+  \item{showApp}{
+see \code{\link{addLegendFromColData}}
+}
+  \item{skipMoreColors}{
+if passed along, these colors are skipped from the colors of \code{matplotCols}. Default is "black".
+}
+  \item{cvby}{
+passed as \code{by} argument to \code{\link{addCVPlot}}.
+}
+  \item{addIdxAx, addTitle}{
+see \code{\link{addLamIndexAxis}}
 }
   \item{object}{
 object for which 'simple' plot must be made (typically: the non-crossvalidation
