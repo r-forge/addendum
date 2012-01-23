@@ -3678,7 +3678,7 @@ scaleBack<-function(coefs, dfr, itcname="(intercept)", verbosity=0)
 	{
 		if(dim(coefs)[2]==1)
 		{
-			catwif("Coefficients were passed as 1-col dgCMatrix. will try to correct for that.")
+			catwif(verbosity > 0, "Coefficients were passed as 1-col dgCMatrix. will try to correct for that.")
 			cnms<-rownames(coefs)
 			coefs<-as.vector(coefs)
 			names(coefs)<-cnms
