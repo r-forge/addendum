@@ -1921,6 +1921,13 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	catwif(verbosity > 0, "Need to convert true cv range [", truerange, "] to y range [", yrange, "].")
 	scaleFact<-(yrange[2] - yrange[1])/(truerange[2] - truerange[1])
 	yvalue<-function(untrans){yrange[1] + (untrans - truerange[1]) * scaleFact  }
+
+	if(verbosity > 5)
+	{
+		catw("true range is:", truerange)
+		catw("after conversion:", sapply(truerange, yvalue))
+		catw("this should be the same as the plotting y range:", yrange)
+	}
 	
 	ioflambda.min<-match(cvobj$lambda.min, cvobj$lambda)
 	ioflambda.1se<-match(cvobj$lambda.1se, cvobj$lambda)
@@ -1972,16 +1979,26 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 	  points(x, scaledOut$cvm, pch = 20, col = centercolor)
 	}
 	catwif(verbosity > 0, "Adding right axis")
+	catwif(verbosity > 1, "True y range is:", truerange)
+	catwif(verbosity > 1, "plotting y range is:", yrange)
 	if(missing(by))
 	{
 		cvmaxisticks<-round(seq(truerange[1], truerange[2], length.out=numTicks), 2)
-		cvmaxispos<-seq(yrange[1], yrange[2], length.out=numTicks)
+#		cvmaxispos<-seq(yrange[1], yrange[2], length.out=numTicks)
 	}
 	else
 	{
-		cvmaxisticks<-round(seq(truerange[1], truerange[2], by=by), 2)
-		cvmaxispos<-seq(yrange[1], yrange[2], length.out=length(cvmaxisticks))
+		sq<-seq(truerange[1], truerange[2], by=by)
+		cvmaxisticks<-round(sq, 2)
+		catwif(verbosity>1, "After rounding:", cvmaxisticks)
+# 		cvmaxispos<-seq(yrange[1], yrange[2], length.out=length(cvmaxisticks))
+# 		catwif(verbosity>1, "Will be put at plotting place:", cvmaxispos)
+# 		if(verbosity > 5)
+# 		{
+# 			catw("Should be put at plotting place:", sapply(cvmaxisticks, yvalue))
+# 		}
 	}
+	cvmaxispos<-sapply(cvmaxisticks, yvalue)
 	axis(side = 4, at = cvmaxispos, labels = paste(cvmaxisticks), tick = TRUE, line = 0)
 	
 	catwif(verbosity > 0, "Adding vertical lines at lambdas of interest")
