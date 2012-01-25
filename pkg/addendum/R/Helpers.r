@@ -4252,7 +4252,7 @@ sfInitEx<-function (parallel = NULL, cpus = NULL, type = NULL, socketHosts = NUL
 		restore = restore, slaveOutfile = slaveOutfile, nostart = nostart, useRscript = useRscript)
 }
 
-plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, verbosity=0)
+plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, showEquiDistThres=10, verbosity=0)
 {
 	if (is.factor(out)) {
 		out <- as.integer(out)
@@ -4264,7 +4264,7 @@ plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=roun
 	nneg<-sum(!out, na.rm=TRUE)
 	
 	thres<-unique(c(0, thres, 1))
-	thres<-sort(thres[thres>=0 & thres <= 1])
+	thres<-sort(thres[thres>=0 & thres <= 1], decreasing=TRUE)
 	nthres<-length(thres)
 	nrep<-ncol(obsrepprob)
 	
@@ -4291,8 +4291,8 @@ plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=roun
 	thresFPR<-rowMeans(thresrepFPR)
 	thresTPRsd<-apply(thresrepTPR, 1, sd, na.rm=TRUE)
 	thresFPRsd<-apply(thresrepFPR, 1, sd, na.rm=TRUE)
-	catwif(verbosity>0, "TPR sds:\n", thresTPRsd)
-	catwif(verbosity>0, "FPR sds:\n", thresFPRsd)
+	catwif(verbosity>3, "TPR sds:\n", thresTPRsd)
+	catwif(verbosity>3, "FPR sds:\n", thresFPRsd)
 	thresTPRtl<-thresTPR+thresTPRsd
 	thresFPRtl<-thresFPR-thresFPRsd
 	thresTPRbr<-thresTPR-thresTPRsd
@@ -4313,12 +4313,38 @@ plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=roun
 	
 	if(doPlot)
 	{
+		catwif(verbosity > 0, "Plotting")
 		plot(thresFPR, thresTPR, type="l", xlim=c(0,1), ylim=c(0,1), xlab="FPR", ylab="TPR")
 		lines(thresFPRtl, thresTPRtl, lty="dashed")
 		lines(thresFPRbr, thresTPRbr, lty="dashed")
 		lines(c(0,1), c(0,1), col="red")
+		if(showEquiDistThres > 0)
+		{
+			if(nthres > showEquiDistThres)
+			{
+				catwif(verbosity>0, "Will plot threshold points for", showEquiDistThres, "points.")
+				stps<-as.integer(nthres/showEquiDistThres)#always rounded down
+				strt<-max(as.integer((nthres%%showEquiDistThres)/2), 1)
+				useThresPos<-strt+(0:(showEquiDistThres-1))*stps
+			}
+			else
+			{
+				catwif(verbosity>0, "Will plot threshold points for", nthres, "points.")
+				useThresPos<-seq_along(thres)
+			}
+			catwif(verbosity>0, "Plotted threshold points should be:", useThresPos)
+			points(thresFPR[useThresPos], thresTPR[useThresPos])
+			text(thresFPR[useThresPos], thresTPR[useThresPos], labels=paste("t=", format(thres[useThresPos], nsmall=2) ), pos=4)
+		}
 	}
 	rv<-cbind(thres, thresTPR, thresFPR)
 	colnames(rv)<-c("threshold", "TPR", "FPR")
+	class(rv)<-"ROCFromRepPredProb"
 	return(rv)
+}
+
+AUCFromRepPredProb<-function(ROCFromRepPredProb)
+{
+	nthres<-dim(ROCFromRepPredProb)[1]
+	sum(diff(ROCFromRepPredProb[,3])*(diff(ROCFromRepPredProb[,2])/2 + ROCFromRepPredProb[-nthres,2]))	
 }
