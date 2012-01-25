@@ -4251,3 +4251,74 @@ sfInitEx<-function (parallel = NULL, cpus = NULL, type = NULL, socketHosts = NUL
 	snowfall::sfInit(parallel = parallel, cpus = cpus, type = type, socketHosts = socketHosts, 
 		restore = restore, slaveOutfile = slaveOutfile, nostart = nostart, useRscript = useRscript)
 }
+
+plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, verbosity=0)
+{
+	if (is.factor(out)) {
+		out <- as.integer(out)
+	}
+	if (!is.logical(out)) {
+		out <- out > 1
+	}
+	npos<-sum(out, na.rm=TRUE)
+	nneg<-sum(!out, na.rm=TRUE)
+	
+	thres<-unique(c(0, thres, 1))
+	thres<-sort(thres[thres>=0 & thres <= 1])
+	nthres<-length(thres)
+	nrep<-ncol(obsrepprob)
+	
+	thresrepTPR<-matrix(NA, nrow=nthres, ncol=nrep)
+	thresrepFPR<-thresrepTPR
+	catwif(verbosity > 0, "Will now collect TPR and FPR")
+	for(thresi in seq_along(thres))
+	{
+		catwif(verbosity > 1, "Threshold", thresi, "/", nthres)
+		curthres<-thres[thresi]
+		for(repi in seq(nrep))
+		{
+			catwif(verbosity > 2, "Repeat", repi, "/", nrep)
+			curprobs<-obsrepprob[,repi]
+			pos<-curprobs > curthres
+			TP<-sum(out & pos, na.rm=TRUE)
+			FP<-sum((!out) & pos, na.rm=TRUE)
+			thresrepTPR[thresi, repi]<-TP/npos
+			thresrepFPR[thresi, repi]<-FP/nneg
+		}
+	}
+	catwif(verbosity > 0, "Summarizing...")
+	thresTPR<-rowMeans(thresrepTPR)
+	thresFPR<-rowMeans(thresrepFPR)
+	thresTPRsd<-apply(thresrepTPR, 1, sd, na.rm=TRUE)
+	thresFPRsd<-apply(thresrepFPR, 1, sd, na.rm=TRUE)
+	catwif(verbosity>0, "TPR sds:\n", thresTPRsd)
+	catwif(verbosity>0, "FPR sds:\n", thresFPRsd)
+	thresTPRtl<-thresTPR+thresTPRsd
+	thresFPRtl<-thresFPR-thresFPRsd
+	thresTPRbr<-thresTPR-thresTPRsd
+	thresFPRbr<-thresFPR+thresFPRsd
+	thresTPRtl<-min(pmax(thresTPRtl, 0), 1)
+	thresFPRtl<-min(pmax(thresFPRtl, 0), 1)
+	thresTPRbr<-min(pmax(thresTPRbr, 0), 1)
+	thresFPRbr<-min(pmax(thresFPRbr, 0), 1)
+	catwif(verbosity > 0, "Checking that they are properly rising")
+	if(sum(diff(thresTPR)<0) > 0)
+	{
+		warning("TPR is not non-descending")
+	}
+	if(sum(diff(thresFPR)<0) > 0)
+	{
+		warning("FPR is not non-descending")
+	}
+	
+	if(doPlot)
+	{
+		plot(thresFPR, thresTPR, type="l", xlim=c(0,1), ylim=c(0,1), xlab="FPR", ylab="TPR")
+		lines(thresFPRtl, thresTPRtl, lty="dashed")
+		lines(thresFPRbr, thresTPRbr, lty="dashed")
+		lines(c(0,1), c(0,1), col="red")
+	}
+	rv<-cbind(thres, thresTPR, thresFPR)
+	colnames(rv)<-c("threshold", "TPR", "FPR")
+	return(rv)
+}
