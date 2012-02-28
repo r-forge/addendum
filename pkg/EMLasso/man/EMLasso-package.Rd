@@ -10,8 +10,8 @@
 }
 \details{
   \tabular{ll}{ Package: \tab EMLasso\cr Type: \tab
-  Package\cr Version: \tab 1.1.1\cr Date: \tab
-  2011-12-19\cr License: \tab GPL (>= 2)\cr LazyLoad: \tab
+  Package\cr Version: \tab 1.1.2\cr Date: \tab
+  2012-02-28\cr License: \tab GPL (>= 2)\cr LazyLoad: \tab
   yes\cr Depends: Matrix, glmnet, snowfall, addendum,
   NumDfr, GLoMo\cr} \itemize{ \item Important classes
   \itemize{ \item \code{\link{cv.1l.emlasso}} \item
