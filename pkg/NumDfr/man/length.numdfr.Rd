@@ -8,7 +8,7 @@ Length of an Object
 Get or set the length of \code{\link{numdfr}} objects.
 }
 \usage{
-length.numdfr(x)
+\method{length}{numdfr}(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
