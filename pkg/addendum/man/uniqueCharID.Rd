@@ -43,7 +43,7 @@ Nick Sabbe
 }
 \examples{
 #ran this testing code to see the difference
-poolOfStrings<-randomStrings(n=500,maxLength=400, alphabet=character(1:3), separator=",")
+poolOfStrings<-randomStrings(n=500,maxLength=400, alphabet=as.character(1:3), separator=",")
 curSize<-1000
 reps<-100
 tst<-replicate(reps, {
@@ -66,5 +66,5 @@ rowMeans(tst)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~random }
-\keyword{ ~character }
+\keyword{ random }
+\keyword{ character }

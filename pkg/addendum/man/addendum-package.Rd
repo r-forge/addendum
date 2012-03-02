@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.6.4\cr
-Date: \tab 2012-01-25\cr
+Version: \tab 1.6.5\cr
+Date: \tab 2012-03-02\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
