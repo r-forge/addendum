@@ -1,4 +1,5 @@
-\name{predict.conditional.allrows.GLoMo}
+\name{predict.conditional}
+\alias{predict.conditional}
 \alias{predict.conditional.allrows.GLoMo}
 \alias{predict.conditional.GLoMo}
 \alias{validateFunction.acceptall}
@@ -15,8 +16,8 @@ to provide an extra function that might reject sampled data based on other
 criteria. The non-allrows version does so for 1 row at a time.
 }
 \usage{
-predict.conditional.allrows.GLoMo(object, nobs = 1, dfr, forrows = seq(nrow(dfr)), validateFunction = validateFunction.default, guiddata = NULL, otherData = NULL, initialSuccessRateGuess = 0.5, verbosity = 0, minimumSuccessRate=0.001,...)
-predict.conditional.GLoMo(object, nobs=1, dfr, forrow, validateFunction=validateFunction.default, guiddata=NULL, otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0, minimumSuccessRate=0.001,...)
+\method{predict.conditional}{allrows.GLoMo}(object, nobs = 1, dfr, forrows = seq(nrow(dfr)), validateFunction = validateFunction.default, guiddata = NULL, otherData = NULL, initialSuccessRateGuess = 0.5, verbosity = 0, minimumSuccessRate=0.001,...)
+\method{predict.conditional}{GLoMo}(object, nobs=1, dfr, forrows, validateFunction=validateFunction.default, guiddata=NULL, otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0, minimumSuccessRate=0.001,...)
 validateFunction.acceptall(attempts, otherData, forrow, verbosity = 0)
 validateFunction.useprob(attempts, otherData, forrow, verbosity = 0)
 validateFunction.default(attempts, otherData, forrow, verbosity = 0)
@@ -33,7 +34,7 @@ number of observations to sample. Can be a single integer or (for
   \item{dfr}{
 \code{\link{data.frame}} or \code{\link{numdfr}} to sample observations for
 }
-  \item{forrows,forrow}{
+  \item{forrows, forrow}{
 Which of the row(s) from \code{dfr} should be considered
 }
   \item{validateFunction}{

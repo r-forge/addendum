@@ -1,8 +1,8 @@
 Package: GLoMo
 Type: Package
 Title: Naive General Location Model
-Version: 1.2.1
-Date: 2011-12-19
+Version: 1.2.2
+Date: 2012-03-02
 Author: Nick Sabbe
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: General Location Model as e.g. found in "Statistical Analysis with Missing Data". This version can be fit to a data.frame or numdfr without missing data, and supports prediction of new data and 'completion prediction' of data with missing values. It also supports conditional completion.

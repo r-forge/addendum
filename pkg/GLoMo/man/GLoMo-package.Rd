@@ -14,8 +14,8 @@ values. It also supports conditional completion.
 \tabular{ll}{
 Package: \tab GLoMo\cr
 Type: \tab Package\cr
-Version: \tab 1.2.1\cr
-Date: \tab 2011-12-19\cr
+Version: \tab 1.2.2\cr
+Date: \tab 2012-03-02\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }

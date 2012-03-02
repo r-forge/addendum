@@ -877,11 +877,20 @@ validateFunction.default<-function(attempts, otherData, forrow, verbosity=0)
 #validateFunction, like the examples above, is a function that must return the
 #		indices (rownumbers) of rows that are accepted
 #->only supported for 1 row at a time
-predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrow, 
+
+
+predict.conditional<-function(object, nobs=1, dfr, forrows, 
+	validateFunction=validateFunction.default, guiddata=NULL,
+	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,
+	minimumSuccessRate=0.001,...) UseMethod("predict.conditional")
+
+predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrows, 
 	validateFunction=validateFunction.default, guiddata=NULL,
 	otherData=NULL, initialSuccessRateGuess=0.5, verbosity=0,
 	minimumSuccessRate=0.001,...)
 {
+	if(length(forrows)!=1) stop("In the GLoMo version of predict.conditional, only one row should be passed!")
+	forrow<-forrows #This method used to have a parameter forrow -> makes it easier like this
 	glomo<-object #to make it more recognizable in the following code
 	catwif(verbosity > 0, "for row", forrow)
 	if(! .hasNA(dfr[forrow,]))
@@ -1004,7 +1013,7 @@ predict.conditional.allrows.GLoMo<-function(object, nobs=1, dfr,
 	#that means: tim spent outside of the predict.conditional.GLoMo !!
 	predPerRow<-lapply(seq_along(forrows), function(currowi){
 			predict.conditional.GLoMo(object=glomo, nobs=nobs[currowi],
-				dfr=dfr, forrow=forrows[currowi], validateFunction=validateFunction, 
+				dfr=dfr, forrows=forrows[currowi], validateFunction=validateFunction, 
 				guiddata=guiddata,otherData=otherData,
 				initialSuccessRateGuess=initialSuccessRateGuess, verbosity=verbosity-1,
 				minimumSuccessRate=minimumSuccessRate)
