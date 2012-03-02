@@ -2,9 +2,9 @@
 \alias{cv.logreg}
 \title{Crossvalidate logistic regression by using logistic LASSO with lambda=0}
 \usage{
-  cv.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity =
-  0, useCols = NULL, outName = "out", dfrConvData, nfolds =
-  10, type.measure = "auc", ...)
+  cv.logreg(dfr, resp, wts = rep(1, nrow(dfr)),
+    verbosity = 0, useCols = NULL, outName = "out",
+    dfrConvData, nfolds = 10, type.measure = "auc", ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or

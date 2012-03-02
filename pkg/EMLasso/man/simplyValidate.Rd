@@ -1,25 +1,25 @@
 \name{simplyValidate}
-\alias{"sv.EMLasso.1l.lognet-class"}
-\alias{"sv.EMLasso.lognet-class"}
 \alias{simplyValidate}
 \alias{simplyValidate.EMLasso.1l.lognet}
 \alias{simplyValidate.EMLasso.lognet}
 \alias{sv.EMLasso.1l.lognet}
+\alias{sv.EMLasso.1l.lognet-class}
 \alias{sv.EMLasso.lognet}
+\alias{sv.EMLasso.lognet-class}
 \title{Validate a model (to its original data)}
 \usage{
   simplyValidate(model, ..., verbosity = 0)
 
   \method{simplyValidate}{EMLasso.1l.lognet}(model,
-  ds=model$dfr, out=model$resp, wts, dsconvprobs,
-  needPredict=0, betweenColAndLevel="", type.measure="auc",
-  ..., verbosity=0)
+    ds=model$dfr, out=model$resp, wts, dsconvprobs,
+    needPredict=0, betweenColAndLevel="",
+    type.measure="auc", ..., verbosity=0)
 
   \method{simplyValidate}{EMLasso.lognet}(model,
-  ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
-  wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
-  betweenColAndLevel="",..., type.measure="auc",
-  keepResultPerLambda=FALSE, verbosity=0)
+    ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
+    wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
+    betweenColAndLevel="",..., type.measure="auc",
+    keepResultPerLambda=FALSE, verbosity=0)
 }
 \arguments{
   \item{model}{model fit}

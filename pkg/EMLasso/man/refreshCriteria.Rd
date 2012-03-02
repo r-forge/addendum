@@ -4,20 +4,20 @@
 \alias{refreshCriteria.cvpart.emlasso}
 \title{S3 Generic method for recalculating criteria}
 \usage{
-  refreshCriteria(object, calculateCriteria =
-  calculateCriteria.EMLasso.1l.lognet, verbosity = 0, ...)
+  refreshCriteria(object,
+    calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
+    verbosity = 0, ...)
 
   \method{refreshCriteria}{cvpart.emlasso} (object,
-  calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
-  verbosity = 0, ...)
+    calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
+    verbosity = 0, ...)
 
   \method{refreshCriteria}{cv.1l.emlasso} (object,
-  calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
-  verbosity = 0, type.measure =
-  ifelse(is.null(object$type.measure), "auc",
-  object$type.measure), grouped =
-  ifelse(is.null(object$type.grouped), TRUE,
-  object$type.grouped), maxFracZeroesAllowed = 0, ...)
+    calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
+    verbosity = 0,
+    type.measure = ifelse(is.null(object$type.measure), "auc", object$type.measure),
+    grouped = ifelse(is.null(object$type.grouped), TRUE, object$type.grouped),
+    maxFracZeroesAllowed = 0, ...)
 }
 \arguments{
   \item{object}{object for which to recalculate the

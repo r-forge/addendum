@@ -2,8 +2,8 @@
 \alias{getSortedReducedResultList}
 \title{Reduce several cv.1l.emlasso objects (saved or not), sort and return as a new list}
 \usage{
-  getSortedReducedResultList(object, orgdfr, ..., verbosity
-  = 0, splitPatternLastPart = "/")
+  getSortedReducedResultList(object, orgdfr, ...,
+    verbosity = 0, splitPatternLastPart = "/")
 }
 \arguments{
   \item{object}{list of \code{\link{cv.1l.emlasso}}

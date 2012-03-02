@@ -2,8 +2,8 @@
 \alias{EMLasso.lognet.cv}
 \title{Run EMLasso.1l.lognet.cv for several lambda values through snowFall}
 \usage{
-  EMLasso.lognet.cv(..., logdir = "./", saveTempResults =
-  TRUE)
+  EMLasso.lognet.cv(..., logdir = "./",
+    saveTempResults = TRUE)
 }
 \arguments{
   \item{\dots}{passed on to

@@ -1,16 +1,16 @@
 \name{EMLasso.1l.lognet.param}
-\alias{"[.EMLasso.1l.lognet.param"}
 \alias{[.EMLasso.1l.lognet.param}
 \alias{EMLasso.1l.lognet.param}
 \alias{length.EMLasso.1l.lognet.param}
 \title{Collect parameters to EMLasso.1l.lognet into one list}
 \usage{
   EMLasso.1l.lognet.param(dfr, resp, lambda,
-  nrOfSamplesPerMDRow = 10, rowsToUseForFit =
-  seq(nrow(dfr)), maxIt = 20, minIt = 10, weightsName =
-  "weights", orgriName = "orgri", precalcGuidData = FALSE,
-  dfrconvprobs, verbosity = 0, reuseDebugLevel = -1,
-  betweenColAndLevel = "")
+    nrOfSamplesPerMDRow = 10,
+    rowsToUseForFit = seq(nrow(dfr)), maxIt = 20,
+    minIt = 10, weightsName = "weights",
+    orgriName = "orgri", precalcGuidData = FALSE,
+    dfrconvprobs, verbosity = 0, reuseDebugLevel = -1,
+    betweenColAndLevel = "")
 
   \method{[}{EMLasso.1l.lognet.param}(x, i)
 

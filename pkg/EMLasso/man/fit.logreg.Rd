@@ -3,11 +3,11 @@
 \alias{logregLikeGlmnet}
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
-  fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)), verbosity
-  = 0, useCols = NULL, dfrConvData, ...)
+  fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)),
+    verbosity = 0, useCols = NULL, dfrConvData, ...)
 
   logregLikeGlmnet(x, y, useLambda = Inf, verbosity = 0,
-  ...)
+    ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or

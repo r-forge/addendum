@@ -2,9 +2,9 @@
 \alias{differentModels}
 \title{Find the different models selected during crossvalidation for EMLasso.lognet objects}
 \usage{
-  differentModels(model, ds = model$result[[1]]$dfr, out =
-  model$result[[1]]$resp, nfolds = 10, dsconvprobs,
-  reusableDatas, zeroThres = 1e-04, verbosity = 0)
+  differentModels(model, ds = model$result[[1]]$dfr,
+    out = model$result[[1]]$resp, nfolds = 10, dsconvprobs,
+    reusableDatas, zeroThres = 1e-04, verbosity = 0)
 }
 \arguments{
   \item{model}{\code{\link{EMLasso.lognet}} object}
@@ -21,7 +21,7 @@
   and \code{\link{fit.lognet}}}
 
   \item{reusableDatas}{list of reusableData objects, one
-  per \code{\link{GLoMo}} object, i.e. one per lambda. See
+  per \code{\link{GLoMo}} object, i.e. one per lambda.  See
   also \code{\link{predict.GLoMo}}}
 
   \item{zeroThres}{how high does a value have to be (in
@@ -56,9 +56,9 @@ sfLibrary(GLoMo)
 sfLibrary(EMLasso)
 iris.cpy<-randomNA(iris, n=0.1)
 iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,
-showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
-nrOfSamplesPerMDRow=10, verbosity=2,
-minIt=5, maxIt=150, precalcGuidData=FALSE)
+	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
+	nrOfSamplesPerMDRow=10, verbosity=2,
+	minIt=5, maxIt=150, precalcGuidData=FALSE)
 sfStop()
 differentModels(iris.emlognet, verbosity=1)
 }

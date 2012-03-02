@@ -1,11 +1,11 @@
 \name{crossValidate}
-\alias{"cv.EMLasso.1l.lognet-class"}
-\alias{"cv.EMLasso.lognet-class"}
 \alias{crossValidate}
 \alias{crossValidate.EMLasso.1l.lognet}
 \alias{crossValidate.EMLasso.lognet}
 \alias{cv.EMLasso.1l.lognet}
+\alias{cv.EMLasso.1l.lognet-class}
 \alias{cv.EMLasso.lognet}
+\alias{cv.EMLasso.lognet-class}
 \alias{cv.MI.logreg}
 \alias{repeatedlyPredictOut}
 \alias{repeatedPredictedProbAUC}
@@ -14,26 +14,27 @@
   crossValidate(model, ..., verbosity = 0)
 
   \method{crossValidate}{EMLasso.1l.lognet}(model,
-  ds=model$dfr, out=model$resp, glomo=model$glomo,wts,
-  dsconvprobs, needPredict=0, betweenColAndLevel="",
-  type.measure="auc",..., verbosity=0)
+    ds=model$dfr, out=model$resp, glomo=model$glomo,wts,
+    dsconvprobs, needPredict=0, betweenColAndLevel="",
+    type.measure="auc",..., verbosity=0)
 
   \method{crossValidate}{EMLasso.lognet}(model,
-  ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
-  wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
-  betweenColAndLevel="",..., type.measure="auc",
-  keepResultPerLambda=FALSE, simple=FALSE,
-  useCombinedGLoMo=simple, verbosity=0)
+    ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
+    wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
+    betweenColAndLevel="",..., type.measure="auc",
+    keepResultPerLambda=FALSE, simple=FALSE,
+    useCombinedGLoMo=simple, verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
-  nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
-  returnCoefs = FALSE, ..., reusabledata, verbosity = 0)
+    nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
+    returnCoefs = FALSE, ..., reusabledata, verbosity = 0)
 
   repeatedPredictedProbAUC(reppredprob, out, verbosity = 0,
-  groups, onlyresult = TRUE, glmnetlike = TRUE)
+    groups, onlyresult = TRUE, glmnetlike = TRUE)
 
   cv.MI.logreg(glomo, ds, out, useVarNames, reps,
-  dsconvprops, lambda, useAsGlmnetFit, ..., verbosity = 0)
+    dsconvprops, lambda, useAsGlmnetFit, ...,
+    verbosity = 0)
 }
 \arguments{
   \item{model}{model fit}
@@ -73,7 +74,7 @@
   in an extra item \code{resultPerLambda}}
 
   \item{useCombinedGLoMo}{if \code{FALSE} (default), a
-  distinct GLoMo is used for every lambda. Otherwise, the
+  distinct GLoMo is used for every lambda.  Otherwise, the
   combined GLoMo is used for all lambdas.}
 
   \item{simple}{if \code{TRUE}, crossvalidation is done on

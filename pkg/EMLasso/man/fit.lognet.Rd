@@ -2,9 +2,10 @@
 \alias{fit.lognet}
 \title{Tailormade weighted fitting of logistic glmnet}
 \usage{
-  fit.lognet(dfr, resp, lambda, weights = (rep(1,
-  dim(dfr)[1])), verbosity = 0, standardize = FALSE,
-  type.measure = NULL, dfrConvData, ...)
+  fit.lognet(dfr, resp, lambda,
+    weights = (rep(1, dim(dfr)[1])), verbosity = 0,
+    standardize = FALSE, type.measure = NULL, dfrConvData,
+    ...)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or

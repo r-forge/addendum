@@ -1,11 +1,11 @@
 \name{reduce.cv.1l.emlasso}
-\alias{"cv.1l.emlasso.reduced-class"}
 \alias{cv.1l.emlasso.reduced}
+\alias{cv.1l.emlasso.reduced-class}
 \alias{reduce.cv.1l.emlasso}
 \title{Reduce memory footprint of cv.1l.emlasso object}
 \usage{
   \method{reduce}{cv.1l.emlasso} (object, orgdfr, ...,
-  verbosity = 0)
+    verbosity = 0)
 }
 \arguments{
   \item{object}{\code{\link{cv.1l.emlasso}} object to

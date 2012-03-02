@@ -3,7 +3,7 @@
 \title{validation function for use in \code{predict.conditional.allrows.GLoMo}}
 \usage{
   validateFunction.lognet(attempts, otherData, forrow,
-  verbosity = 0)
+    verbosity = 0)
 }
 \arguments{
   \item{attempts}{\code{\link{numdfr}} or

@@ -3,7 +3,7 @@
 \title{Function to calculate predicted probability of a lognet fit}
 \usage{
   lognetProbWrapper(lognet, dfr, betweenColAndLevel,
-  usecol, verbosity = 0)
+    usecol, verbosity = 0)
 }
 \arguments{
   \item{lognet}{binomial \code{\link{glmnet}} fit to use

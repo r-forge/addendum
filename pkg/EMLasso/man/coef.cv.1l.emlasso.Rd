@@ -3,15 +3,15 @@
 \title{Get coefficients of a "cv.1l.emlasso" object}
 \usage{
   \method{coef}{cv.1l.emlasso} (object, foldname = "fold",
-  itername = "iter", onlyFinal = FALSE,
-  onlyEqualZeroPercent = 0, verbosity = 0, form =
-  c("data.frame", "matrix", "sparse"), ...)
+    itername = "iter", onlyFinal = FALSE,
+    onlyEqualZeroPercent = 0, verbosity = 0,
+    form = c("data.frame", "matrix", "sparse"), ...)
 }
 \arguments{
   \item{object}{\code{\link{cv.1l.emlasso}} object}
 
   \item{foldname}{name that can be safely given to a column
-  holding the fold number. If \code{NULL}, no such column
+  holding the fold number.  If \code{NULL}, no such column
   is added}
 
   \item{itername}{name that can be safely given to a column

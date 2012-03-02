@@ -1,5 +1,4 @@
 \name{findReasonableLambdaHelper}
-\alias{"[.LambdaHelper"}
 \alias{[.LambdaHelper}
 \alias{findReasonableLambdaHelper}
 \alias{getLambdas}
@@ -8,9 +7,9 @@
 \title{Function to run on a dataset with not too much missing data to identify a set of reasonable lambda values}
 \usage{
   findReasonableLambdaHelper(ds, out, showFirst = 20,
-  showPlot = TRUE, type.measure = "auc",
-  repsNeededForFirstOccurrence = 3, ..., verbosity = 0,
-  minNumHigher = 20, minNumLower = 20, maxNumLower = 30)
+    showPlot = TRUE, type.measure = "auc",
+    repsNeededForFirstOccurrence = 3, ..., verbosity = 0,
+    minNumHigher = 20, minNumLower = 20, maxNumLower = 30)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
 

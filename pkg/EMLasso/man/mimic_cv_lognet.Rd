@@ -2,8 +2,9 @@
 \alias{mimic_cv_lognet}
 \title{Calculate criteria similarly as is done in glmnet, but for EMLasso}
 \usage{
-  mimic_cv_lognet(cv.eml, type.measure = "auc", grouped =
-  TRUE, verbosity = 0, useAsFitObject = "lasso.fit")
+  mimic_cv_lognet(cv.eml, type.measure = "auc",
+    grouped = TRUE, verbosity = 0,
+    useAsFitObject = "lasso.fit")
 }
 \arguments{
   \item{cv.eml}{list of \code{\link{cvpart.emlasso}}

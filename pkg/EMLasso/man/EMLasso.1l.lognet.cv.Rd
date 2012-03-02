@@ -1,20 +1,21 @@
 \name{EMLasso.1l.lognet.cv}
-\alias{"cv.1l.emlasso-class"}
-\alias{"cvpart.emlasso-class"}
 \alias{cv.1l.emlasso}
+\alias{cv.1l.emlasso-class}
 \alias{cvpart.emlasso}
+\alias{cvpart.emlasso-class}
 \alias{EMLasso.1l.lognet.cv}
 \title{Crossvalidate EMLasso for 1 lambda}
 \usage{
   EMLasso.1l.lognet.cv(dfr, resp, lambda,
-  nrOfSamplesPerMDRow, howManyFold = 10, groupNrPerRow =
-  NULL, maxIt = 20, minIt = 10, weightsName = "weights",
-  orgriName = "orgri", precalcGuidData = TRUE,
-  nrOfSamplesForCriteria = nrOfSamplesPerMDRow,
-  calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
-  verbosity = 0, reuseDebugLevel = -1, type.measure =
-  "auc", grouped = TRUE, maxFracZeroesAllowed = 0,
-  dfrconvprobs)
+    nrOfSamplesPerMDRow, howManyFold = 10,
+    groupNrPerRow = NULL, maxIt = 20, minIt = 10,
+    weightsName = "weights", orgriName = "orgri",
+    precalcGuidData = TRUE,
+    nrOfSamplesForCriteria = nrOfSamplesPerMDRow,
+    calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
+    verbosity = 0, reuseDebugLevel = -1,
+    type.measure = "auc", grouped = TRUE,
+    maxFracZeroesAllowed = 0, dfrconvprobs)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or

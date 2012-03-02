@@ -2,9 +2,9 @@
 \alias{simpleplot.cv.emlasso}
 \title{simpleplot implementation for class cv.emlasso}
 \usage{
-  \method{simpleplot}{cv.emlasso} (object, beta.type =
-  NULL, xvar = c("norm", "lambda", "dev"), label = FALSE,
-  ..., verbosity = 0)
+  \method{simpleplot}{cv.emlasso} (object,
+    beta.type = NULL, xvar = c("norm", "lambda", "dev"),
+    label = FALSE, ..., verbosity = 0)
 }
 \arguments{
   \item{object}{\code{\link{cv.emlasso}} object}

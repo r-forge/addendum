@@ -57,6 +57,7 @@ cv.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
 		tmpln<-glmnet(dfr.mat, resp, family="binomial", weights=wts, standardize=FALSE)
 		#get the biggest lambda there, and just multiply it by 10
 		useLambda<-10*max(tmpln$lambda) #get huge value for lambda and hope it works to set coef to 0
+		useLambda<-c(useLambda, useLambda+0.000001)
 	}
 	else
 	{
@@ -78,7 +79,7 @@ cv.logreg<-function(dfr, resp, wts=rep(1, nrow(dfr)), verbosity=0, useCols=NULL,
 			resp<-resp[-whichrowsna]
 			wts<-wts[-whichrowsna]
 		}
-		useLambda<-0
+		useLambda<-c(0,0.00000001)
 	}
 	fit<-cv.glmnet(dfr.mat, resp, family="binomial", weights=wts, lambda=useLambda, 
 		standardize=FALSE, nfolds=nfolds, type.measure=type.measure, ...)

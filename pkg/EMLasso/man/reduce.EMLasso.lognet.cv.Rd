@@ -1,13 +1,13 @@
 \name{reduce.EMLasso.lognet.cv}
-\alias{"cv.emlasso-class"}
 \alias{cv.emlasso}
+\alias{cv.emlasso-class}
 \alias{reduce.EMLasso.lognet.cv}
 \title{Reduce memory footprint of a list of \code{\link{cv.1l.emlasso}} objects and recalculates some criteria}
 \usage{
   \method{reduce}{EMLasso.lognet.cv} (object, orgdfr,
-  orgresp, samplesForFinalFit = 10, ..., verbosity = 0,
-  splitPatternLastPart = "/", keepReducedResultList =
-  FALSE)
+    orgresp, samplesForFinalFit = 10, ..., verbosity = 0,
+    splitPatternLastPart = "/",
+    keepReducedResultList = FALSE)
 }
 \arguments{
   \item{object}{list of \code{\link{cv.1l.emlasso}} objects
@@ -39,7 +39,7 @@
 \value{
   object of class "cv.emlasso" (and
   \code{\link{cv.glmnet}}, to be able to abuse some of
-  \code{\link{glmnet}}'s code). (where I write dataset,
+  \code{\link{glmnet}}'s code).  (where I write dataset,
   this could either be a \code{\link{data.frame}} or
   \code{\link{numdfr}} object) Very similarly shaped to
   \code{\link{cv.glmnet}} objects (in fact, all objects of

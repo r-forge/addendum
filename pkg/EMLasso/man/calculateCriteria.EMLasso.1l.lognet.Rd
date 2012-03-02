@@ -3,7 +3,7 @@
 \title{Function to calculate AUC / missclassification based on a logistic EMLasso}
 \usage{
   calculateCriteria.EMLasso.1l.lognet(fitinfo, valsample,
-  verbosity)
+    verbosity)
 }
 \arguments{
   \item{fitinfo}{\code{\link{EMLasso.1l.lognet}} object}
@@ -32,7 +32,7 @@ data(emlcvfit, package="EMLasso")
 \dontrun{emlfit<-EMLasso.1l.lognet(aDfr.MD, y, lambda=0.05, nrOfSamplesPerMDRow=7, verbosity=10)}
 emlfit<-eml17$actualfits[[1]]$fitinfo
 valSample<-predict(object=emlfit$glomo, nobs=5,
-newdata=numdfr(aDfr.MD), returnRepeats=TRUE, verbosity=10)
+	newdata=numdfr(aDfr.MD), returnRepeats=TRUE, verbosity=10)
 valSample$resp<-rep(y, valSample$numRepPerRow)
 crits<-calculateCriteria.EMLasso.1l.lognet(emlfit, valSample, verbosity=10)
 }

@@ -1,14 +1,15 @@
 \name{fullDataEMLassoAndGLoMo}
-\alias{"EMLasso.lognet-class"}
 \alias{EMLasso.lognet}
+\alias{EMLasso.lognet-class}
 \alias{fullDataEMLassoAndGLoMo}
 \title{Fit EMLasso to a complete dataset, creating a GLoMo for each lambda}
 \usage{
   fullDataEMLassoAndGLoMo(ds, out, dsconvprobs, lambdas,
-  betweenColAndLevel = "", showPlot = TRUE, type.measure =
-  "auc", repsNeededForFirstOccurrence = 3, minNumHigher =
-  20, minNumLower = 20, maxNumLower = 30, ..., verbosity =
-  0, logdir = "./", saveTempResults = TRUE)
+    betweenColAndLevel = "", showPlot = TRUE,
+    type.measure = "auc", repsNeededForFirstOccurrence = 3,
+    minNumHigher = 20, minNumLower = 20, maxNumLower = 30,
+    ..., verbosity = 0, logdir = "./",
+    saveTempResults = TRUE)
 }
 \arguments{
   \item{ds}{dataset with predictors}
@@ -94,9 +95,9 @@ sfLibrary(GLoMo)
 sfLibrary(EMLasso)
 iris.cpy<-randomNA(iris, n=0.1)
 iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,
-showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
-nrOfSamplesPerMDRow=10, verbosity=2,
-minIt=5, maxIt=150, precalcGuidData=FALSE)
+	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
+	nrOfSamplesPerMDRow=10, verbosity=2,
+	minIt=5, maxIt=150, precalcGuidData=FALSE)
 sfStop()
 }
 \author{

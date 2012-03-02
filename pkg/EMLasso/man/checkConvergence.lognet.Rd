@@ -2,8 +2,8 @@
 \alias{checkConvergence.lognet}
 \title{Check whether convergence has occurred in the zeroness of coefficients}
 \usage{
-  checkConvergence.lognet(coefs, minIt, maxIt, verbosity =
-  0)
+  checkConvergence.lognet(coefs, minIt, maxIt,
+    verbosity = 0)
 }
 \arguments{
   \item{coefs}{(sparse) matrix of coefficients
@@ -36,9 +36,9 @@ curset<-rbinom(11, 1, 0.5)
 ret<-matrix(curset, nrow=1)
 for(i in 1:10)
 {
-chg<-rbinom(11, 1, 0.05)
-curset[chg==1] <- 1-curset[chg==1]
-ret<-rbind(ret, curset)
+	chg<-rbinom(11, 1, 0.05)
+	curset[chg==1] <- 1-curset[chg==1]
+	ret<-rbind(ret, curset)
 }
 print(ret)
 checkConvergence.lognet(ret, 2, 20, verbosity = 2)

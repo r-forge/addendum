@@ -7,10 +7,10 @@
   validationOutAndPredProb(object, ...)
 
   \method{validationOutAndPredProb}{cvpart.emlasso}(object,
-  ...)
+    ...)
 
   \method{validationOutAndPredProb}{cv.1l.emlasso} (object,
-  ...)
+    ...)
 }
 \arguments{
   \item{object}{model fit}
@@ -38,9 +38,9 @@ data(emlcvfit, package="EMLasso")
 uniqueGroupNrs<-seq(10)
 groupNrPerRow<-similarSizeGroups(10, nobs=nrs, rand = TRUE)
 eml1ffit<-EMLasso.1l.lognet.onefold(1, groupNrPerRow, aDfr.MD, y, lambda=0.05,
-nrOfSamplesPerMDRow=7, maxIt=20, minIt=10, weightsName="weights", orgriName="orgri",
-precalcGuidData=FALSE, reuseDebugLevel=-1,
-nrOfSamplesForCriteria=7, calculateCriteria=calculateCriteria.EMLasso.1l.lognet,verbosity=10)}
+	nrOfSamplesPerMDRow=7, maxIt=20, minIt=10, weightsName="weights", orgriName="orgri",
+	precalcGuidData=FALSE, reuseDebugLevel=-1,
+	nrOfSamplesForCriteria=7, calculateCriteria=calculateCriteria.EMLasso.1l.lognet,verbosity=10)}
 eml1ffit<-eml17$actualfits[[1]]
 validationOutAndPredProb(eml1ffit)
 data(emlcvfit, package="EMLasso")

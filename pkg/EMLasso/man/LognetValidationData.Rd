@@ -3,7 +3,7 @@
 \title{Collect validation data for lognet}
 \usage{
   LognetValidationData(glmnetmodel, dfr,
-  betweenColAndLevel, outcomes, verbosity = 0)
+    betweenColAndLevel, outcomes, verbosity = 0)
 }
 \arguments{
   \item{glmnetmodel}{\code{\link{glmnet}} binomial model

@@ -39,6 +39,7 @@ fit.lognet<-function(dfr, resp, lambda, weights=(rep(1, dim(dfr)[1])),
 	catwif(verbosity > 0, "Actually fit glmnet")
 	if(!is.null(type.measure))
 	{
+		if(length(lambda)==1) lambda<-c(lambda, lambda+0.000001)
 		fit<-cv.glmnet(dfr.mat, resp, family="binomial", weights=weights, lambda=lambda,
 			standardize=standardize, type.measure=type.measure, ...)
 	}

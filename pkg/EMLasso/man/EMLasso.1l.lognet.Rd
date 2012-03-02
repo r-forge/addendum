@@ -4,10 +4,10 @@
 \title{Fit EMLasso for 1 lambda}
 \usage{
   EMLasso.1l.lognet(dfr, resp, lambda, nrOfSamplesPerMDRow,
-  rowsToUseForFit = seq(nrow(dfr)), maxIt = 20, minIt = 10,
-  weightsName = "weights", orgriName = "orgri",
-  precalcGuidData = TRUE, dfrconvprobs, verbosity = 0,
-  reuseDebugLevel = -1)
+    rowsToUseForFit = seq(nrow(dfr)), maxIt = 20,
+    minIt = 10, weightsName = "weights",
+    orgriName = "orgri", precalcGuidData = TRUE,
+    dfrconvprobs, verbosity = 0, reuseDebugLevel = -1)
 }
 \arguments{
   \item{dfr}{dataset (\code{\link{numdfr}} or
@@ -55,7 +55,7 @@
   glmnet object \item \code{glomo}: final predictor fit (of
   class GLoMo) \item \code{coefs}: coefs for all iterations
   (rows) and dummycoded columnames (columns), incl.
-  (intercept). \item \code{dfr}: original dataset passed
+  (intercept).  \item \code{dfr}: original dataset passed
   along \item \code{resp}: outcome variable (1 for each row
   in dfr) \item \code{lambda}: 1 lambda value \item
   \code{nrOfSamplesPerMDRow}: how many imputations per row

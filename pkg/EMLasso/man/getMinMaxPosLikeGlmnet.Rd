@@ -7,7 +7,7 @@
   getMinMaxPosLikeGlmnet(object, ...)
 
   \method{getMinMaxPosLikeGlmnet}{default}(object, cvm,
-  cvsd, type.measure,...)
+    cvsd, type.measure,...)
 
   \method{getMinMaxPosLikeGlmnet}{cv.glmnet} (object, ...)
 }

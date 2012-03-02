@@ -1,20 +1,20 @@
 \name{EMLasso.1l.lognet.cv.param}
-\alias{"[.EMLasso.1l.lognet.cv.param"}
 \alias{[.EMLasso.1l.lognet.cv.param}
 \alias{EMLasso.1l.lognet.cv.param}
 \alias{length.EMLasso.1l.lognet.cv.param}
 \title{Collect parameters to EMLasso.1l.lognet.cv into one list}
 \usage{
   EMLasso.1l.lognet.cv.param(dfr, resp, lambda,
-  nrOfSamplesPerMDRow, howManyFold = 10, groupNrPerRow =
-  NULL, maxIt = 20, minIt = 10, weightsName = "weights",
-  orgriName = "orgri", precalcGuidData = TRUE,
-  nrOfSamplesForCriteria = nrOfSamplesPerMDRow,
-  calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
-  verbosity = 0, reuseDebugLevel = -1, type.measure =
-  "auc", grouped = TRUE, maxFracZeroesAllowed = 0,
-  dfrconvprobs = dfrConversionProbs(dfr, betweenColAndLevel
-  = ""))
+    nrOfSamplesPerMDRow, howManyFold = 10,
+    groupNrPerRow = NULL, maxIt = 20, minIt = 10,
+    weightsName = "weights", orgriName = "orgri",
+    precalcGuidData = TRUE,
+    nrOfSamplesForCriteria = nrOfSamplesPerMDRow,
+    calculateCriteria = calculateCriteria.EMLasso.1l.lognet,
+    verbosity = 0, reuseDebugLevel = -1,
+    type.measure = "auc", grouped = TRUE,
+    maxFracZeroesAllowed = 0,
+    dfrconvprobs = dfrConversionProbs(dfr, betweenColAndLevel = ""))
 
   \method{[}{EMLasso.1l.lognet.cv.param}(x, i)
 

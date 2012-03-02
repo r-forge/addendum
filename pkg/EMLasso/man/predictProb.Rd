@@ -6,7 +6,7 @@
   predictProb(object, newdata, ...)
 
   \method{predictProb}{lognetProbWrapper} (object, newdata,
-  ..., verbosity = 0)
+    ..., verbosity = 0)
 }
 \arguments{
   \item{object}{object that is used to predict the

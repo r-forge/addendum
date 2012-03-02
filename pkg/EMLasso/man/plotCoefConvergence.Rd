@@ -2,9 +2,9 @@
 \alias{plotCoefConvergence}
 \title{Plot coefficient evolution of EMLasso.lognet objects}
 \usage{
-  plotCoefConvergence(cofs, skipForNZ = 5, zeroThres =
-  1e-04, colors = neatColorSet(), maxleg = 10, leg.cex =
-  0.5, verbosity = 0, ...)
+  plotCoefConvergence(cofs, skipForNZ = 5,
+    zeroThres = 1e-04, colors = neatColorSet(),
+    maxleg = 10, leg.cex = 0.5, verbosity = 0, ...)
 }
 \arguments{
   \item{cofs}{matrix (or (sparse) \code{\link{Matrix}}) of
@@ -51,9 +51,9 @@ sfLibrary(GLoMo)
 sfLibrary(EMLasso)
 iris.cpy<-randomNA(iris, n=0.1)
 iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,
-showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
-nrOfSamplesPerMDRow=10, verbosity=2,
-minIt=5, maxIt=150, precalcGuidData=FALSE)
+	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
+	nrOfSamplesPerMDRow=10, verbosity=2,
+	minIt=5, maxIt=150, precalcGuidData=FALSE)
 sfStop()
 plotCoefConvergence(iris.emlognet$result[[1]]$coefs, lty=1, xlab="iteration", ylab="coefficient")
 }
