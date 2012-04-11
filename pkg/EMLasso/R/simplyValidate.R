@@ -14,33 +14,33 @@ simplyValidate<-function(model, ..., verbosity=0) UseMethod("simplyValidate")
 
 #' @rdname simplyValidate
 #' 
-#' @aliases simplyValidate.EMLasso.1l.lognet sv.EMLasso.1l.lognet-class sv.EMLasso.1l.lognet
-#' @method simplyValidate EMLasso.1l.lognet
-#' @usage \method{simplyValidate}{EMLasso.1l.lognet}(model, ds=model$dfr, out=model$resp, wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc", ..., verbosity=0)
+#' @aliases simplyValidate.EMLasso1l sv.EMLasso1l-class sv.EMLasso1l
+#' @method simplyValidate.EMLasso1l
+#' @usage \method{simplyValidate}{EMLasso1l}(model, ds=model$dfr, out=model$resp, wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc", ..., verbosity=0)
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
 #' @param wts vector of weights (defaults to equal weights for all rows)
-#' @param dsconvprobs see \code{\link{dfrConversionProbs}}
+#' @param dsconvprobs see \code{\link{dfrConversionProps}}
 #' @param needPredict If \code{> 0}, the number of rows that is predicted from the \code{GLoMo}
 #' 	in \code{model} for rows with missing data in \code{ds}
-#' @param betweenColAndLevel see \code{\link{dfrConversionProbs}}
+#' @param betweenColAndLevel see \code{\link{dfrConversionProps}}
 #' @param type.measure see \code{\link{cv.glmnet}} - for now, only "auc"" is supported
-#' @return object of type "sv.EMLasso.1l.lognet":
+#' @return object of type "sv.EMLasso1l":
 #' \item{sv.logreg }{\code{\link{cv.glmnet}}-like objects} 
 #' \item{ds }{as passed in or reduced if predicted}
 #' \item{out }{as passed in or extended if predicted}
 #' \item{wts }{as passed in or extended if predicted}
 #' \item{fromLambda }{as passed in, the lambda that came from the original model}
-#' @seealso \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}}
+#' @seealso \code{\link{EMLasso.1l}}
 #' @keywords GLoMo EMLasso
-#' @export
-simplyValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp, 
+#' @S3method simplyValidate EMLasso1l
+simplyValidate.EMLasso1l<-function(model, ds=model$dfr, out=model$resp, 
 	wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc", ..., verbosity=0)
 {
 	if(missing(dsconvprobs))
 	{
 		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProbs(ds, betweenColAndLevel=betweenColAndLevel)
+		dsconvprobs<-dfrConversionProps(ds, betweenColAndLevel=betweenColAndLevel)
 	}
 	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
 	{
@@ -83,7 +83,7 @@ simplyValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp,
 	}
 	if(type.measure != "auc")
 	{
-		stop("Other measures than auc are not yet supported in simplyValidate.EMLasso.1l.lognet")
+		stop("Other measures than auc are not yet supported in simplyValidate.EMLasso1l")
 	}
 	mat<-factorsToDummyVariables(ds, dfrConvData=dsconvprobs)
 	#debug.tmp<<-list(mat=mat, wts=wts, out=out, ds=ds)
@@ -122,34 +122,34 @@ simplyValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp,
  		ds<-reduce(ds, orgdfr=orgds, repsperrow=newdta$numRepPerRow)
  	}
 	retval<-list(sv.logreg=result, ds=ds, out=out, wts=wts, fromLambda=model$lambda)
-	class(retval)<-"sv.EMLasso.1l.lognet"
+	class(retval)<-"sv.EMLasso1l"
 	return(retval)
 }
 
 		 
 #' @rdname simplyValidate
 #' 
-#' @aliases simplyValidate.EMLasso.lognet sv.EMLasso.lognet-class sv.EMLasso.lognet
-#' @method simplyValidate EMLasso.lognet
-#' @usage \method{simplyValidate}{EMLasso.lognet}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
+#' @aliases simplyValidate.EMLasso sv.EMLasso-class sv.EMLasso
+#' @method simplyValidate.EMLasso
+#' @usage \method{simplyValidate}{EMLasso}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
 #' @param keepResultPerLambda if \code{TRUE} (not the default), the individual results
-#' 	from the \code{simplyValidate.EMLasso.1l.lognet} are also returned in an extra item
+#' 	from the \code{simplyValidate.EMLasso1l} are also returned in an extra item
 #' 	\code{resultPerLambda}
-#' @return object of type "sv.EMLasso.lognet". This is mainly the same as a \code{\link{cv.glmnet}}.
+#' @return object of type "sv.EMLasso". This is mainly the same as a \code{\link{cv.glmnet}}.
 #' The added/altered items are:
-#' \item{glmnet.fit }{is now the model passed in, so of class "EMLasso.lognet", besides "glmnet"} 
-#' \item{resultPerLambda }{list of "sv.EMLasso.1l.lognet" objects per lambda. Not present if \code{keepResultPerLambda=FALSE}}
-#' @seealso \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}}, \code{\link{cv.glmnet}}
+#' \item{glmnet.fit }{is now the model passed in, so of class "EMLasso", besides "glmnet"} 
+#' \item{resultPerLambda }{list of "sv.EMLasso1l" objects per lambda. Not present if \code{keepResultPerLambda=FALSE}}
+#' @seealso \code{\link{EMLasso.1l}}, \code{\link{cv.glmnet}}
 #' @keywords GLoMo EMLasso
-#' @export
-simplyValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, 
+#' @S3method simplyValidate EMLasso
+simplyValidate.EMLasso<-function(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, 
 	wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", 
 	keepResultPerLambda=FALSE, verbosity=0)
 {
 	if(missing(dsconvprobs))
 	{
 		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProbs(ds, betweenColAndLevel=betweenColAndLevel)
+		dsconvprobs<-dfrConversionProps(ds, betweenColAndLevel=betweenColAndLevel)
 	}
 	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
 	{
@@ -183,6 +183,6 @@ simplyValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mod
 	{
 		obj<-c(obj, list(resultPerLambda=partres))
 	}
-	class(obj)<-c("sv.EMLasso.lognet", "cv.glmnet")
+	class(obj)<-c("sv.EMLasso", "cv.glmnet")
 	return(obj)
 }

@@ -44,10 +44,10 @@
 }
 \examples{
 y<-sample(0:1, nrow(iris), replace=TRUE)
-cvl<-fit.lognet(dfr=iris, resp=y, lambda=NULL, verbosity=10, type.measure="auc")
+cvl<-fit.lognet(ds=iris, out=y, lambda=NULL, verbosity=10, type.measure="auc")
 getMinMaxPosLikeGlmnet(cvl$lambda, cvl$cvm, cvl$cvsd, type.measure="auc")
 y<-sample(0:1, nrow(iris), replace=TRUE)
-cvl<-fit.lognet(dfr=iris, resp=y, lambda=NULL, verbosity=10, type.measure="auc")
+cvl<-fit.lognet(ds=iris, out=y, lambda=NULL, verbosity=10, type.measure="auc")
 getMinMaxPosLikeGlmnet(cvl)
 }
 \author{

@@ -1,29 +1,22 @@
 \name{crossValidate}
 \alias{crossValidate}
-\alias{crossValidate.EMLasso.1l.lognet}
-\alias{crossValidate.EMLasso.lognet}
-\alias{cv.EMLasso.1l.lognet}
-\alias{cv.EMLasso.1l.lognet-class}
+\alias{crossValidate.EMLassoGLoMo}
 \alias{cv.EMLasso.lognet}
-\alias{cv.EMLasso.lognet-class}
+\alias{cv.EMLassoGLoMo-class}
 \alias{cv.MI.logreg}
+\alias{cv.MI.logreg-class}
 \alias{repeatedlyPredictOut}
 \alias{repeatedPredictedProbAUC}
 \title{Crossvalidate a model}
 \usage{
   crossValidate(model, ..., verbosity = 0)
 
-  \method{crossValidate}{EMLasso.1l.lognet}(model,
-    ds=model$dfr, out=model$resp, glomo=model$glomo,wts,
-    dsconvprobs, needPredict=0, betweenColAndLevel="",
-    type.measure="auc",..., verbosity=0)
-
-  \method{crossValidate}{EMLasso.lognet}(model,
-    ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
-    wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
-    betweenColAndLevel="",..., type.measure="auc",
-    keepResultPerLambda=FALSE, simple=FALSE,
-    useCombinedGLoMo=simple, verbosity=0)
+  \method{crossValidate}{EMLassoGLoMo}(model,
+    ds=model$result[[1]]$ds, out=model$result[[1]]$out,
+    wts=rep(1, nrow(ds)),
+    imputeDs2FitDsProperties=model$imputeDs2FitDsProperties,
+    imputations=10, ..., type.measure="auc",
+    keepResultPerLambda=FALSE, verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
     nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
@@ -39,7 +32,9 @@
 \arguments{
   \item{model}{model fit}
 
-  \item{\dots}{for flexibility in 'derived' implementation}
+  \item{\dots}{for flexibility in 'derived' implementation
+  (passed on to \code{\link{collectImputationModels}} in
+  \code{crossValidate.EMLassoGLoMo})}
 
   \item{verbosity}{The higher this value, the more levels
   of progress and debug information is displayed (note: in
@@ -49,47 +44,34 @@
 
   \item{out}{vector (binary factor) of outcomes}
 
-  \item{glomo}{\code{\link{GLoMo}} object to use as
-  predictor model}
-
   \item{wts}{vector of weights (defaults to equal weights
   for all rows)}
 
-  \item{dsconvprobs}{see \code{\link{dfrConversionProbs}}}
+  \item{imputeDs2FitDsProperties}{see
+  \code{\link{imputeDs2FitDs}} object that will provide the
+  conversion from imputed dataset to one that is ready for
+  fitting the predictor model}
 
-  \item{needPredict}{If \code{> 0}, the number of rows that
-  is predicted from the \code{GLoMo} in \code{model} for
-  rows with missing data in \code{ds}. I \code{<0} then
-  crossvalidation happens in a multiple imputation fashion
-  (each time imputing only once, but doing so repeatedly)}
-
-  \item{betweenColAndLevel}{see
-  \code{\link{dfrConversionProbs}}}
+  \item{imputations}{Number of multiple imputations on the
+  complete dataset (defaults to 10)}
 
   \item{type.measure}{see \code{\link{cv.glmnet}}}
 
   \item{keepResultPerLambda}{if \code{TRUE} (not the
   default), the individual results from the
-  \code{crossValidate.EMLasso.1l.lognet} are also returned
-  in an extra item \code{resultPerLambda}}
+  \code{crossValidate.EMLasso1l} are also returned in an
+  extra item \code{resultPerLambda}}
 
-  \item{useCombinedGLoMo}{if \code{FALSE} (default), a
-  distinct GLoMo is used for every lambda.  Otherwise, the
-  combined GLoMo is used for all lambdas.}
-
-  \item{simple}{if \code{TRUE}, crossvalidation is done on
-  \code{needPredict} multiple imputed datasets, by simply
-  using cv.glmnet!!}
+  \item{glomo}{GLoMo model to predict from}
 
   \item{varsets}{list of character vectors holding the
   variables (names) to be checked}
 
-  \item{reps}{how many times does imputation have to be
-  repeated?}
+  \item{reps}{number of predictions}
 
   \item{nfolds}{number of folds for crossvalidation}
 
-  \item{dsconvprops}{see \code{dsconvprobs} (need to work
+  \item{dsconvprops}{see \code{dsconvprops} (need to work
   on universal and correct naming...)}
 
   \item{returnGroups}{if \code{TRUE}, a list is returned
@@ -129,20 +111,16 @@
   \code{glmnet.fit} item in the return value}
 }
 \value{
-  object of type "cv.EMLasso.1l.lognet": \item{cv.logreg
-  }{list of \code{\link{cv.1l.emlasso.reduced}} objects per
-  lambda} \item{ds }{as passed in or reduced if predicted}
-  \item{out }{as passed in or extended if predicted}
-  \item{wts }{as passed in or extended if predicted}
-  \item{fromLambda }{as passed in, the lambda that came
-  from the original model}
-
-  object of type "cv.EMLasso.lognet". This is mainly the
-  same as a \code{\link{cv.glmnet}}. The added/altered
-  items are: \item{glmnet.fit }{is now the model passed in,
-  so of class "EMLasso.lognet", besides "glmnet"}
-  \item{resultPerLambda }{list of "cv.EMLasso.1l.lognet"
-  objects per lambda. Not present if
+  object that has as class: "cv." pasted before the class
+  of \code{model}. Normally, \code{model} will will be the
+  return value of \code{\link{EMLasso}}, so this result is
+  mainly the same as a \code{\link{cv.glmnet}}. The
+  added/altered items are: \item{glmnet.fit}{is now the
+  \code{model} passed in, so has more classes besides
+  "glmnet" (e.g. "EMLasso")} \item{resultPerLambda }{matrix
+  with one column per imputation. The top rows are the
+  estimates for the criterion per lambda, below that are
+  their SD estimates. Not present if
   \code{keepResultPerLambda=FALSE}}
 
   List of the same length as \code{varsets} (unless it was
@@ -164,14 +142,30 @@
 \note{
   aids to generalize crossvalidation
 }
+\examples{
+y<-rbinom(nrow(iris), 1, 0.5)
+require(addendum)
+require(NumDfr)
+require(GLoMo)
+require(snowfall)
+require(EMLasso)
+sfInit(parallel = FALSE, cpus = 1)
+sfLibrary(addendum)
+sfLibrary(NumDfr)
+sfLibrary(GLoMo)
+sfLibrary(EMLasso)
+iris.cpy<-randomNA(iris, n=0.1)
+iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,
+	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
+sfStop()
+iris.cv.emlognet<-crossValidate(iris.emlognet, verbosity=2)
+}
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }
 \seealso{
-  \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}}
-
-  \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}},
-  \code{\link{cv.glmnet}}
+  \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 }
 \keyword{crossvalidate}
 \keyword{EMLasso}

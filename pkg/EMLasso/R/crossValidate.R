@@ -3,7 +3,8 @@
 #' Crossvalidate a model
 #' 
 #' @param model model fit
-#' @param \dots for flexibility in 'derived' implementation
+#' @param \dots for flexibility in 'derived' implementation (passed on to \code{\link{collectImputationModels}}
+#' 	in \code{crossValidate.EMLassoGLoMo})
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
 #' @note aids to generalize crossvalidation
@@ -11,223 +12,73 @@
 #' @keywords crossvalidate model
 #' @export
 crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
-
 #' @rdname crossValidate
 #' 
-#' @aliases crossValidate.EMLasso.1l.lognet cv.EMLasso.1l.lognet-class cv.EMLasso.1l.lognet
-#' @method crossValidate EMLasso.1l.lognet
-#' @usage \method{crossValidate}{EMLasso.1l.lognet}(model, ds=model$dfr, out=model$resp, glomo=model$glomo,wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc",..., verbosity=0)
+#' @aliases crossValidate.EMLassoGLoMo cv.EMLassoGLoMo-class cv.EMLasso.lognet
+#' @method crossValidate EMLassoGLoMo
+#' @usage \method{crossValidate}{EMLassoGLoMo}(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, ..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
-#' @param glomo \code{\link{GLoMo}} object to use as predictor model
 #' @param wts vector of weights (defaults to equal weights for all rows)
-#' @param dsconvprobs see \code{\link{dfrConversionProbs}}
-#' @param needPredict If \code{> 0}, the number of rows that is predicted from the \code{GLoMo}
-#' 	in \code{model} for rows with missing data in \code{ds}. I \code{<0} then crossvalidation
-#' 	happens in a multiple imputation fashion (each time imputing only once, but doing so 
-#' 	repeatedly)
-#' @param betweenColAndLevel see \code{\link{dfrConversionProbs}}
-#' @return object of type "cv.EMLasso.1l.lognet":
-#' \item{cv.logreg }{list of \code{\link{cv.1l.emlasso.reduced}} objects per lambda} 
-#' \item{ds }{as passed in or reduced if predicted}
-#' \item{out }{as passed in or extended if predicted}
-#' \item{wts }{as passed in or extended if predicted}
-#' \item{fromLambda }{as passed in, the lambda that came from the original model}
-#' @seealso \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}}
-#' @keywords GLoMo EMLasso
-#' @export
-crossValidate.EMLasso.1l.lognet<-function(model, ds=model$dfr, out=model$resp, 
-	glomo=model$glomo, wts, dsconvprobs, needPredict=0, betweenColAndLevel="",
-	type.measure="auc", ..., verbosity=0)
-{
-	if(missing(dsconvprobs))
-	{
-		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProbs(ds, betweenColAndLevel=betweenColAndLevel)
-	}
-	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
-	{
-		catwif(verbosity>0, "Passed along betweenColAndLevel does not match the one in dsconvprobs. This last one (", dsconvprobs$betweenColAndLevel, ") will be used.")
-		betweenColAndLevel<-dsconvprobs$betweenColAndLevel
-	}
-	useVarIndexes<-as.vector(unlist(predict(model$lasso.fit, type="nonzero")))
-	useVarNames<-rownames(model$lasso.fit$beta)[useVarIndexes]
-	catwif(verbosity > 0, "For lambda ", model$lambda, ", use variables: ", useVarNames)
-	
-	if(needPredict>0)
-	{
-		newdta<-predict(glomo, nobs=needPredict, newdata=ds, returnRepeats=TRUE, 
-			verbosity=verbosity-1)
-		orgds<-ds
-		ds<-newdta$predicted
-		if(verbosity >5)
-		{
-			catw("dim of predicted dataset: ", dim(ds))
-			catw("repeats (length=", length(newdta$numRepPerRow), "):")
-			print(newdta$numRepPerRow)
-			catw("length of out=", length(out))
-		}
-		out<-rep(out, newdta$numRepPerRow)
-		wtfct<-rep(1/newdta$numRepPerRow, newdta$numRepPerRow)
-		if(missing(wts))
-		{
-			catwif(verbosity >5, "no wts was passed in")
-			wts<-wtfct
-		}
-		else
-		{
-			catwif(verbosity >5, "length of wts passed in=", length(wts))
-			wts<-rep(wts, newdta$numRepPerRow)*wtfct
-		}
-	}
-	else if(needPredict==0)
-	{
-		if(missing(wts))
-		{
-			wts<-rep(1, nrow(ds))
-		}
-	}
-	
-	if(needPredict>=0)
-	{
-		logregres<-try(cv.logreg(dfr=ds, resp=out, wts=wts, verbosity=verbosity-1, useCols=useVarNames, 
-			dfrConvData=dsconvprobs, type.measure=type.measure, ...))
-		if(needPredict>0)
-		{
-			#make the predicted ds object less memory intensive
-			ds<-reduce(ds, orgdfr=orgds, repsperrow=newdta$numRepPerRow)
-		}
-	}
-	else
-	{
-		logregres<-try(cv.MI.logreg(glomo=glomo, ds=ds, out=out, useVarNames=useVarNames, 
-			reps=-needPredict, dsconvprops=dsconvprobs, lambda=model$lambda, 
-			useAsGlmnetFit=model$lasso.fit, ..., verbosity=verbosity-1))
-	}
-	retval<-list(cv.logreg=logregres, ds=ds, out=out, wts=wts, fromLambda=model$lambda)
-	class(retval)<-"cv.EMLasso.1l.lognet"
-	return(retval)
-}
-		 
-#' @rdname crossValidate
-#' 
-#' @aliases crossValidate.EMLasso.lognet cv.EMLasso.lognet-class cv.EMLasso.lognet
-#' @method crossValidate EMLasso.lognet
-#' @usage \method{crossValidate}{EMLasso.lognet}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, simple=FALSE, useCombinedGLoMo=simple, verbosity=0)
+#' @param imputeDs2FitDsProperties see \code{\link{imputeDs2FitDs}} object that will provide the conversion from imputed
+#' 	dataset to one that is ready for fitting the predictor model
+#' @param imputations Number of multiple imputations on the complete dataset (defaults to 10)
 #' @param type.measure see \code{\link{cv.glmnet}}
 #' @param keepResultPerLambda if \code{TRUE} (not the default), the individual results
-#' 	from the \code{crossValidate.EMLasso.1l.lognet} are also returned in an extra item
+#' 	from the \code{crossValidate.EMLasso1l} are also returned in an extra item
 #' 	\code{resultPerLambda}
-#' @param useCombinedGLoMo if \code{FALSE} (default), a distinct GLoMo is used for every lambda. 
-#' 	Otherwise, the combined GLoMo is used for all lambdas.
-#' @param simple if \code{TRUE}, crossvalidation is done on \code{needPredict} multiple imputed
-#' 	datasets, by simply using cv.glmnet!!
-#' @return object of type "cv.EMLasso.lognet". This is mainly the same as a \code{\link{cv.glmnet}}.
+#' @return object that has as class: "cv." pasted before the class of \code{model}. Normally, \code{model} will
+#' 	will be the return value of \code{\link{EMLasso}}, so this result is mainly the same as a \code{\link{cv.glmnet}}.
 #' The added/altered items are:
-#' \item{glmnet.fit }{is now the model passed in, so of class "EMLasso.lognet", besides "glmnet"} 
-#' \item{resultPerLambda }{list of "cv.EMLasso.1l.lognet" objects per lambda. Not present if \code{keepResultPerLambda=FALSE}}
-#' @seealso \code{\link{EMLasso.1l.lognet}}, \code{\link{cv.logreg}}, \code{\link{cv.glmnet}}
+#' \item{glmnet.fit}{is now the \code{model} passed in, so has more classes besides "glmnet" (e.g. "EMLasso")} 
+#' \item{resultPerLambda }{matrix with one column per imputation. The top rows are the estimates for the criterion per
+#' 	lambda, below that are their SD estimates. Not present if \code{keepResultPerLambda=FALSE}}
+#' @seealso \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 #' @keywords GLoMo EMLasso
+#' @examples y<-rbinom(nrow(iris), 1, 0.5)
+#' require(addendum)
+#' require(NumDfr)
+#' require(GLoMo)
+#' require(snowfall)
+#' require(EMLasso)
+#' sfInit(parallel = FALSE, cpus = 1)
+#' sfLibrary(addendum)
+#' sfLibrary(NumDfr)
+#' sfLibrary(GLoMo)
+#' sfLibrary(EMLasso)
+#' iris.cpy<-randomNA(iris, n=0.1)
+#' iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,  
+#' 	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+#' 	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
+#' sfStop()
+#' iris.cv.emlognet<-crossValidate(iris.emlognet, verbosity=2)
 #' @export
-crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, 
-	wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", 
-	keepResultPerLambda=FALSE, simple=FALSE, useCombinedGLoMo=simple, verbosity=0)
+crossValidate.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, 
+	wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, 
+	..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
 {
-	if(missing(dsconvprobs))
+	lambda<-model$lambda
+	impData<-collectImputationModels(model=model, ds=ds, ..., verbosity=verbosity-1)
+	partres<-vapply(seq(imputations), function(i){
+		catwif(verbosity > 1, "Imputation", i, "/", imputations)
+		predict(impData, newdata=ds, out=out, wts=wts, type.measure=type.measure, verbosity=verbosity-1)
+	}, rep(1.0, length(lambda)*2))
+	#one row per lambda, 1 col per repetition
+	cvms<-partres[seq_along(lambda),]
+	cvsds<-partres[-seq_along(lambda),]
+	#now use MI formulas per lambda
+	cvm<-rowMeans(cvms, na.rm = TRUE)
+	D<-imputations
+	cvsd<-cvm
+	cvwithinvar<-cvm
+	cvbetweenvar<-cvm
+	for(lami in seq_along(lambda))
 	{
-		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProbs(ds, betweenColAndLevel=betweenColAndLevel)
-	}
-	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
-	{
-		catwif(verbosity>0, "Passed along betweenColAndLevel does not match the one in dsconvprobs. This last one (", dsconvprobs$betweenColAndLevel, ") will be used.")
-		betweenColAndLevel<-dsconvprobs$betweenColAndLevel
-	}
-	if(useCombinedGLoMo)
-	{
-		if(exists("combinedGLoMo", model))
-		{
-			catwif(verbosity>0, "Reusing combined GLoMo across lambdas.")
-			combinedGLoMo<-model$combinedGLoMo
-		}
-		else
-		{
-			catwif(verbosity>0, "Combining GLoMos across lambdas.")
-			glomolist<-lapply(model$result, "[[", "glomo") #each item of model$result is of class "EMLasso.1l.lognet"
-			combinedGLoMo<-combineGLoMos(listOfGLoMos=glomolist, verbosity=verbosity-5)
-		}
-		reusabledata<-reusableDataForGLoMoSampling(glomo = combinedGLoMo, dfr = ds, verbosity = verbosity - 1)
-	}
-	if(simple)
-	{
-		lambda<-model$lambda
-		partres<-matrix(NA, nrow=length(lambda)*2, ncol=needPredict)
-		if(!useCombinedGLoMo)
-		{
-			reusableDatas<-lapply(lapply(model$result, "[[", "glomo"), reusableDataForGLoMoSampling, dfr = ds, verbosity = verbosity - 1)
-		}
-		for(i in seq(needPredict))
-		{
-			catwif(verbosity > 1, "Imputation", i, "/", needPredict)
-			if(useCombinedGLoMo)
-			{
-				catwif(verbosity > 2, "  with combined GLoMo")
-				curds<-predict(combinedGLoMo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-2)
-				curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda, weights=wts, verbosity=verbosity-2, 
-					type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
-				partres[,i]<-c(curcv$cvm, curcv$cvsd)
-			}
-			else
-			{
-				for(j in seq_along(lambda))
-				{
-					catwif(verbosity > 2, "  Lambda", j, "/", length(lambda))
-					curglomo<-model$result[[j]]$glomo
-					curds<-predict(curglomo, newdata=ds, reusabledata = reusableDatas[[j]], verbosity=verbosity-2)
-					curcv<-fit.lognet(dfr=curds, resp=out, lambda=lambda[j], weights=wts, verbosity=verbosity-2, 
-														type.measure=type.measure, dfrConvData=dsconvprobs, standardize=FALSE, ...)
-					partres[c(j, length(lambda)+j),i]<-c(curcv$cvm, curcv$cvsd)
-				}
-			}
-		}
-		#one row per lambda, 1 col per repetition
-		cvms<-partres[seq_along(lambda),]
-		cvsds<-partres[-seq_along(lambda),]
-		#now use MI formulas per lambda
-		cvm<-rowMeans(cvms, na.rm = TRUE)
-		D<-ncol(partres)
-		cvsd<-cvm
-		cvwithinvar<-cvm
-		cvbetweenvar<-cvm
-		for(lami in seq_along(lambda))
-		{
-			cvwithinvar[lami]<-mean((cvsds[lami,])^2, na.rm = TRUE)
-			cvbetweenvar[lami]<-var(cvms[lami,], na.rm = TRUE)
-		} #calculate variance so far
-		cvsd<-sqrt(cvwithinvar + (D+1)/D*cvbetweenvar)
-	}
-	else
-	{
-		if(useCombinedGLoMo)
-		{
-			partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
-				glomo=combinedGLoMo, wts=wts, dsconvprobs=dsconvprobs,
-				needPredict=needPredict, reusabledata=reusabledata, ..., type.measure=type.measure, verbosity=verbosity-1)
-		}
-		else
-		{
-			partres<-lapply(model$result, crossValidate, ds=ds, out=out, 
-				wts=wts, dsconvprobs=dsconvprobs,
-				needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
-		}
-		cvlogreglist<-lapply(partres, "[[", "cv.logreg")
-		
-		lambda<-model$lambda
-		cvm<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvm"))))
-		cvsd<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvsd"))))
-		cvwithinvar<-cvsd
-		cvbetweenvar<-rep(0, length(cvsd))
-	}
+		cvwithinvar[lami]<-mean((cvsds[lami,])^2, na.rm = TRUE)
+		cvbetweenvar[lami]<-var(cvms[lami,], na.rm = TRUE)
+	} #calculate variance so far
+	cvsd<-sqrt(cvwithinvar + (D+1)/D*cvbetweenvar)
+	
 	nz<-try(sapply(predict(model, type = "nonzero"), length))
 	out<-list(
 		lambda=lambda,
@@ -239,25 +90,25 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 		glmnet.fit=model,
 		cvwithinvar=cvwithinvar,
 		cvbetweenvar=cvbetweenvar
-	)
-  lamin<-try(if (type.measure == "auc") 
-      getmin(lambda, -cvm, cvsd)
-  else getmin(lambda, cvm, cvsd))
-  obj = c(out, as.list(lamin))
+		)
+	cvsgn<- -2*(type.measure == "auc")+1
+	lamin<-getmin(lambda, cvsgn*cvm, cvsd)
+	obj = c(out, as.list(lamin))
 	if(keepResultPerLambda)
 	{
 		obj<-c(obj, list(resultPerLambda=partres))
 	}
-	class(obj)<-c("cv.EMLasso.lognet", "cv.glmnet")
+	class(obj)<-paste("cv", class(model), sep=".")
 	return(obj)
 }
-
 #' @rdname crossValidate
 #' 
+#' @aliases repeatedlyPredictOut
+#' @param glomo GLoMo model to predict from
 #' @param varsets list of character vectors holding the variables (names) to be checked
-#' @param reps how many times does imputation have to be repeated?
+#' @param reps number of predictions
 #' @param nfolds number of folds for crossvalidation
-#' @param dsconvprops see \code{dsconvprobs} (need to work on universal and correct naming...)
+#' @param dsconvprops see \code{dsconvprops} (need to work on universal and correct naming...)
 #' @param returnGroups if \code{TRUE}, a list is returned with the normal result as its \code{result}
 #' 	item and a matrix holding the group assignment per repetition as the \code{groups} item.
 #' @param returnCoefs if \code{TRUE}, a list is returned with the normal result as its \code{result}
@@ -272,10 +123,14 @@ crossValidate.EMLasso.lognet<-function(model, ds=model$result[[1]]$dfr, out=mode
 repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsconvprops=NULL, 
 	returnGroups=FALSE, returnCoefs=FALSE, ..., reusabledata, verbosity=0)
 {
+	#IMPORTANT! Right now, this function is not adapted to the imputedDs style instead of dsconvprops
+	#It has to be adapted, because currently the call to fit.logreg will (probably) fail or have
+	#unexpected results
+	warning("repeatedlyPredictOut needs adjustment to imputedDs. Better not to use it for now")
 	if((missing(dsconvprops)) || (is.null(dsconvprops)))
 	{
 		catwif(verbosity > 0, "dsconvprops was not passed along, so needed to recalculate it")
-		dsconvprops<-dfrConversionProbs(dfr=ds, betweenColAndLevel="")
+		dsconvprops<-dfrConversionProps(dfr=ds, betweenColAndLevel="")
 	}
 	
 	if(missing(reusabledata))
@@ -307,7 +162,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 				catwif(verbosity > 3, "*****varset", vsi, "/", length(varsets))
 				curUseVars<-varsets[[vsi]]
 				try({#sometimes this goes wrong??
-					curfit<-fit.logreg(dfr=fitds, resp=fitout, verbosity=verbosity-5, useCols=curUseVars, dfrConvData=dsconvprops, ...)
+					curfit<-fit.logreg(ds=fitds, out=fitout, verbosity=verbosity-5, useCols=curUseVars, imputeDs2FitDsProperties=dsconvprops, ...)
 					if(returnCoefs)
 					{
 						curcoef<-coef(curfit)
@@ -344,6 +199,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 
 #' @rdname crossValidate
 #' 
+#' @aliases repeatedPredictedProbAUC
 #' @param reppredprob one of the matrices as return by \code{repeatedlyPredictOut}
 #' @param groups vector/matrix of fold membership assignment. If nor present, 10 
 #' 	random groups are created
@@ -399,6 +255,7 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0, groups, onlyre
 
 #' @rdname crossValidate
 #' 
+#' @aliases cv.MI.logreg cv.MI.logreg-class
 #' @param useVarNames names of columns to include in the model (character vector)
 #' @param lambda value to use as lambda in the return value (note: ignored for the rest)
 #' @param useAsGlmnetFit object that can be used for the \code{glmnet.fit} item in the return value

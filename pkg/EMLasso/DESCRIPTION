@@ -2,8 +2,8 @@ Package: EMLasso
 Type: Package
 Title: Fit (logistic) LASSO when there is missing data in
     the predictors
-Version: 1.1.3
-Date: 2012-03-02
+Version: 2.0.1
+Date: 2012-03-16
 Author: Nick Sabbe <nick.sabbe@ugent.be>
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: Fit (logistic) LASSO when there is missing
@@ -21,40 +21,29 @@ Depends:
     GLoMo
 Collate:
     'EMLasso-package.R'
-    'calculateCriteria.EMLasso.1l.lognet.R'
-    'checkConvergence.lognet.R'
-    'coef.cv.1l.emlasso.R'
-    'coef.cvpart.emlasso.R'
-    'EMLasso.1l.lognet.cv.param.R'
-    'EMLasso.1l.lognet.cv.R'
-    'EMLasso.1l.lognet.onefold.R'
-    'EMLasso.1l.lognet.R'
-    'EMLasso.lognet.cv.R'
     'findReasonableLambdaHelper.R'
     'fit.lognet.R'
     'fit.logreg.R'
-    'getBeta.cv.emlasso.R'
-    'getSortedReducedResultList.R'
-    'lognetProbWrapper.R'
-    'LognetValidationData.R'
-    'mimic_cv_lognet.R'
-    'postprocess.reduce.1l.emlasso.R'
-    'predictProb.R'
-    'reduce.cv.1l.emlasso.R'
-    'reduce.EMLasso.lognet.cv.R'
-    'refreshCriteria.R'
     'setDebugmodeEMLasso.R'
-    'simpleplot.cv.emlasso.R'
-    'sortReducedResultList.R'
-    'validateFunction.lognet.R'
-    'validationOutAndPredProb.R'
-    'cv.logreg.R'
-    'fullDataEMLassoAndGLoMo.R'
     'getMinMaxPosLikeGlmnet.R'
-    'EMLasso.1l.lognet.param.R'
     'crossValidate.R'
     'simplyValidate.R'
-    'EMLasso-datasets.R'
     'convergenceDiagnostics.R'
-    'differentModels.R'
     'plotCoefConvergence.R'
+    'checkConvergence.glmnet.R'
+    'EMLasso.1l.param.R'
+    'EMLasso.1l.R'
+    'EMLasso.R'
+    'fit.glmnet.R'
+    'imputeDs2FitDs.R'
+    'marginalCompleter.R'
+    'outcomeModelValidationReusables.R'
+    'postProcessEMLasso1l.R'
+    'predictorModelSamplingReusables.R'
+    'retrieveLambdas.R'
+    'sampleConditional.R'
+    'validateFunction.lognet.R'
+    'predictProb.R'
+    'postProcessEMLasso.R'
+    'lognetProbabilityReusable.R'
+    'collectImputationModels.R'

@@ -26,7 +26,7 @@ getMinMaxPosLikeGlmnet<-function(object,...) UseMethod("getMinMaxPosLikeGlmnet")
 #' @keywords cv.glmnet lambda
 #' @examples 
 #' y<-sample(0:1, nrow(iris), replace=TRUE)
-#' cvl<-fit.lognet(dfr=iris, resp=y, lambda=NULL, verbosity=10, type.measure="auc")
+#' cvl<-fit.lognet(ds=iris, out=y, lambda=NULL, verbosity=10, type.measure="auc")
 #' getMinMaxPosLikeGlmnet(cvl$lambda, cvl$cvm, cvl$cvsd, type.measure="auc")
 #' @export
 getMinMaxPosLikeGlmnet.default<-function(object, cvm, cvsd, type.measure,...)
@@ -82,7 +82,7 @@ getMinMaxPosLikeGlmnet.default<-function(object, cvm, cvsd, type.measure,...)
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @examples
 #' y<-sample(0:1, nrow(iris), replace=TRUE)
-#' cvl<-fit.lognet(dfr=iris, resp=y, lambda=NULL, verbosity=10, type.measure="auc")
+#' cvl<-fit.lognet(ds=iris, out=y, lambda=NULL, verbosity=10, type.measure="auc")
 #' getMinMaxPosLikeGlmnet(cvl)
 #' @export
 getMinMaxPosLikeGlmnet.cv.glmnet<-function(object,...)

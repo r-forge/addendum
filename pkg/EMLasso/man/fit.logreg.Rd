@@ -3,17 +3,19 @@
 \alias{logregLikeGlmnet}
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
-  fit.logreg(dfr, resp, wts = rep(1, nrow(dfr)),
-    verbosity = 0, useCols = NULL, dfrConvData, ...)
+  fit.logreg(ds, out, wts = rep(1, nrow(ds)),
+    verbosity = 0, useCols = NULL,
+    imputeDs2FitDsProperties = normalImputationConversion(),
+    ...)
 
   logregLikeGlmnet(x, y, useLambda = Inf, verbosity = 0,
     ...)
 }
 \arguments{
-  \item{dfr}{dataset (\code{\link{numdfr}} or
+  \item{ds}{dataset (\code{\link{numdfr}} or
   \code{\link{data.frame}})}
 
-  \item{resp}{outcome vector}
+  \item{out}{outcome vector}
 
   \item{wts}{weight vector per observation (does not have
   to sum to 1, and defaults to equal weights)}
@@ -25,9 +27,8 @@
   \item{useCols}{restrict the regression to only include
   these columns as predictors}
 
-  \item{dfrConvData}{premade return value of
-  \code{\link{dfrConversionProbs}} for that \code{glmnet}
-  and dataset}
+  \item{imputeDs2FitDsProperties}{see
+  \code{\link{imputeDs2FitDs}} and \code{\link{EMLasso}}}
 
   \item{\dots}{passed on to
   \code{\link{glmnet}}/\code{\link{glm.fit}}. Not allowed:

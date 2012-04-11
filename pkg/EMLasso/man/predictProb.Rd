@@ -1,12 +1,12 @@
 \name{predictProb}
 \alias{predictProb}
-\alias{predictProb.lognetProbWrapper}
+\alias{predictProb.lognetProbabilityReusable}
 \title{predict probabilities}
 \usage{
-  predictProb(object, newdata, ...)
+  predictProb(object, newdata, ..., verbosity = 0)
 
-  \method{predictProb}{lognetProbWrapper} (object, newdata,
-    ..., verbosity = 0)
+  \method{predictProb}{lognetProbabilityReusable} (object,
+    newdata, ..., verbosity = 0)
 }
 \arguments{
   \item{object}{object that is used to predict the
@@ -32,11 +32,19 @@
   predict probabilities
 }
 \examples{
-y<-rbinom(nrow(iris), 1, 0.5)
-irisdummy<-factorsToDummyVariables(iris, verbosity=10)
-lnet<-glmnet(irisdummy, y, family="binomial")
-lpw<-lognetProbWrapper(lnet, iris, betweenColAndLevel="", usecol=5, verbosity=1)
-predictProb(lpw, iris[seq(20),], verbosity=10)
+data(iris)
+	iris.nd2<-numdfr(iris)
+	y2<-rbinom(nrow(iris), 1, 0.5)
+	iris.nic2<-normalImputationConversion(
+		scalingParams=typicalScaleAndCenter(),
+		transformParams=typicalTransformations())
+	iris.cp2<-imputeDs2FitDsProps(iris.nic2,iris.nd2,verbosity=1)
+
+	iris.cvtd2<-imputeDs2FitDs(iris.cp2,ds=iris.nd2,verbosity=3)
+
+	lnet<-glmnet(iris.cvtd2, y2, family="binomial")
+	lpw<-lognetProbabilityReusable(lnet, imputeDs2FitDsProperties=iris.cp2, iris.nd2, usecol=5, verbosity=1)
+predictProb(lpw, iris.nd2[seq(20),], verbosity=10)
 }
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}

@@ -50,10 +50,9 @@ sfLibrary(NumDfr)
 sfLibrary(GLoMo)
 sfLibrary(EMLasso)
 iris.cpy<-randomNA(iris, n=0.1)
-iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,
-	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
-	nrOfSamplesPerMDRow=10, verbosity=2,
-	minIt=5, maxIt=150, precalcGuidData=FALSE)
+iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,
+	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
 sfStop()
 plotCoefConvergence(iris.emlognet$result[[1]]$coefs, lty=1, xlab="iteration", ylab="coefficient")
 }

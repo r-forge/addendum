@@ -36,15 +36,14 @@
   rows, otherwise (then otherData will likely only hold
   items only for every selected row) you need more info...
 
-  really only used internally from
-  \code{\link{EMLasso.1l.lognet}}
+  really only used internally from \code{\link{EMLasso.1l}}
 }
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }
 \seealso{
   \code{\link{predict.conditional.allrows.GLoMo}},
-  \code{\link{EMLasso.1l.lognet}}
+  \code{\link{EMLasso.1l}}
 }
 \keyword{GLoMo}
 \keyword{predict}

@@ -17,15 +17,15 @@
 #' otherwise (then otherData will likely only hold items only for every selected
 #' row) you need more info...
 #'
-#' really only used internally from \code{\link{EMLasso.1l.lognet}}
+#' really only used internally from \code{\link{EMLasso.1l}}
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
-#' @seealso \code{\link{predict.conditional.allrows.GLoMo}}, \code{\link{EMLasso.1l.lognet}}
+#' @seealso \code{\link{predict.conditional.allrows.GLoMo}}, \code{\link{EMLasso.1l}}
 #' @keywords GLoMo predict rejection sampling
 #' @export
 validateFunction.lognet<-function(attempts, otherData, forrow, verbosity=0)
 {
 	#ripped mostly from my old sample.conditional.predictor.fit.oneAttempt
-	stopifnot(inherits(otherData, "LognetValidationData"))
+	stopifnot(inherits(otherData, "SamplingReusablesLognet"))
 	#for now, assume otherData$outcomes has one item for each potental forrow
 	curOutcome<-otherData$outcomes[forrow]
 	catwif(verbosity > 0, "original outcome: ", curOutcome)

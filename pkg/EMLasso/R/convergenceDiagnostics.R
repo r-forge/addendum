@@ -2,9 +2,9 @@
 #' 
 #' Diagnose convergence of \code{\link{EMLasso.lognet}} objects
 #' 
-#' @param model model fit (should be the result of \code{\link{fullDataEMLassoAndGLoMo}})
+#' @param model model fit (should be the result of \code{\link{EMLasso}})
 #' @param minIt check convergence from this iteration on
-#' @param checkConvergence method, normally \code{\link{checkConvergence.lognet}}, that checks convergence.
+#' @param checkConvergence method, normally \code{\link{checkConvergence.glmnet}}, that checks convergence.
 #' @param \dots passed on to \code{checkConvergence}
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
@@ -27,14 +27,13 @@
 #' sfLibrary(GLoMo)
 #' sfLibrary(EMLasso)
 #' iris.cpy<-randomNA(iris, n=0.1)
-#' iris.emlognet<-fullDataEMLassoAndGLoMo(ds=numdfr(iris.cpy), out=y,  
-#' 	showPlot=FALSE, type.measure="auc", lambdas=c(0.03,0.002,0.0003),
-#' 	nrOfSamplesPerMDRow=10, verbosity=2,
-#' 	minIt=5, maxIt=150, precalcGuidData=FALSE)
+#' iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,  
+#' 	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+#' 	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
 #' sfStop()
 #' convergenceDiagnostics(iris.emlognet, minIt=2, verbosity=1)
 #' @export
-convergenceDiagnostics<-function(model, minIt=10, checkConvergence=checkConvergence.lognet, ..., verbosity=0)
+convergenceDiagnostics<-function(model, minIt=10, checkConvergence=checkConvergence.glmnet, ..., verbosity=0)
 {
 	retval<-lapply(model$result, function(curres)
 	{
@@ -44,7 +43,7 @@ convergenceDiagnostics<-function(model, minIt=10, checkConvergence=checkConverge
 		simpleconv<-sapply((minIt+1):numit, function(curit)
 		{
 			checkConvergence(coefs=cof[1:curit,,drop=FALSE], minIt=minIt, 
-															maxIt=numit+1, verbosity=verbosity-1, ...)
+															maxIt=numit+1, verbosity=verbosity-1, ...)$converged
 		})
 		if(sum(simpleconv) > 1)
 		{

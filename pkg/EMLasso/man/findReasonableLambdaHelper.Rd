@@ -6,10 +6,12 @@
 \alias{getLambdas.lambdaregion}
 \title{Function to run on a dataset with not too much missing data to identify a set of reasonable lambda values}
 \usage{
-  findReasonableLambdaHelper(ds, out, showFirst = 20,
-    showPlot = TRUE, type.measure = "auc",
+  findReasonableLambdaHelper(ds, out, family = "binomial",
+    showFirst = 20, showPlot = TRUE, type.measure = "auc",
     repsNeededForFirstOccurrence = 3, ..., verbosity = 0,
-    minNumHigher = 20, minNumLower = 20, maxNumLower = 30)
+    minNumHigher = 20, minNumLower = 20, maxNumLower = 30,
+    imputeDs2FitDsProperties = normalImputationConversion(),
+    standardize = FALSE)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
 
@@ -23,6 +25,9 @@
   \item{ds}{dataset to investigate}
 
   \item{out}{outcome vector}
+
+  \item{family}{see \code{\link{glmnet}}. Defaults to
+  "binomial" (i.e. lasso penalized logistic regression).}
 
   \item{showFirst}{show the top coefficients (first
   \code{showFirst} occurring)}
@@ -51,6 +56,12 @@
 
   \item{maxNumLower}{How many lambdas lower than the
   optimum do you maximally want}
+
+  \item{imputeDs2FitDsProperties}{see
+  \code{\link{imputeDs2FitDs}} and \code{\link{EMLasso}}}
+
+  \item{standardize}{see \code{\link{glmnet}}. Defaults to
+  FALSE.}
 
   \item{object}{\code{LambdaHelper}}
 
@@ -95,7 +106,13 @@
   non-interesting lambda values.
 }
 \examples{
-data(emlcvfit, package="EMLasso")
+aDfr<-generateTypicalIndependentDfr(numCat=10, numCnt=10, numObs=100, catProbs=rep(1/3,3),
+rcnt=typicalRandomNorm, doShuffle=TRUE, verbosity=1)
+
+outlins<- -mean(aDfr$cnt1)+aDfr$cnt1+2*(aDfr$cat1=="b")
+outprobs<-expit(outlins)
+y<-factor(sapply(outprobs, function(prob){sample(c("no", "yes"), 1, prob=c(1-prob,prob))}))
+
 rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
 data(emlcvfit, package="EMLasso")
 rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)

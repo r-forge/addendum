@@ -5,6 +5,7 @@
 #' 
 #' @param ds dataset to investigate
 #' @param out outcome vector
+#' @param family see \code{\link{glmnet}}. Defaults to "binomial" (i.e. lasso penalized logistic regression).
 #' @param showFirst show the top coefficients (first \code{showFirst} occurring)
 #' @param showPlot if \code{TRUE} (the default), visually supports the decision
 #' @param type.measure see \code{\link{cv.glmnet}}
@@ -16,6 +17,8 @@
 #' @param minNumHigher How many lambdas higher than the optimum do you minimally want (if available)
 #' @param minNumLower How many lambdas lower than the optimum do you minimally want (if available)
 #' @param maxNumLower How many lambdas lower than the optimum do you maximally want
+#' @param imputeDs2FitDsProperties see \code{\link{imputeDs2FitDs}} and \code{\link{EMLasso}}
+#' @param standardize see \code{\link{glmnet}}. Defaults to FALSE.
 #' @return list of class "LambdaHelper":
 #' \item{topres }{\code{data.frame} with \code{showFirst} rows, and columns: 
 #' \code{variable} (name), \code{lambda},\code{critl} (lower bound of criterion),
@@ -29,15 +32,23 @@
 #' non-interesting lambda values.
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @keywords glmnet lambda
-#' @examples data(emlcvfit, package="EMLasso")
+#' @examples aDfr<-generateTypicalIndependentDfr(numCat=10, numCnt=10, numObs=100, catProbs=rep(1/3,3),
+#' rcnt=typicalRandomNorm, doShuffle=TRUE, verbosity=1)
+#' 
+#' outlins<- -mean(aDfr$cnt1)+aDfr$cnt1+2*(aDfr$cat1=="b")
+#' outprobs<-expit(outlins)
+#' y<-factor(sapply(outprobs, function(prob){sample(c("no", "yes"), 1, prob=c(1-prob,prob))}))
+#' 
 #' rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
 #' @export
-findReasonableLambdaHelper<-function(ds, out, showFirst=20, showPlot=TRUE,
+findReasonableLambdaHelper<-function(ds, out, family="binomial", showFirst=20, showPlot=TRUE,
 	type.measure="auc", repsNeededForFirstOccurrence=3, ..., verbosity=0,
-	minNumHigher=20, minNumLower=20, maxNumLower=30)
+	minNumHigher=20, minNumLower=20, maxNumLower=30, 
+	imputeDs2FitDsProperties=normalImputationConversion(), standardize=FALSE)
 {
-	cv<-fit.lognet(dfr=ds, resp=out, lambda=NULL, verbosity=verbosity-1,
-		type.measure=type.measure)
+	cv<-fit.glmnet(ds=ds, out=out, lambda=NULL, verbosity=verbosity-1, 
+		standardize=standardize, type.measure=type.measure, 
+		imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
 	fit<-cv$glmnet.fit
 	if(showPlot)
 	{
