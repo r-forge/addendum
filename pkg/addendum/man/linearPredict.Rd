@@ -25,10 +25,10 @@ should be the one passed on in \verb{itcname}
 name within \code{coefs} of the intercept.
 }
   \item{dfrconv}{
-see \verb{\link{dfrConversionProbs}}. If not passed along, it is recreated through that function.
+see \verb{\link{dfrConversionProps}}. If not passed along, it is recreated through that function.
 }
   \item{betweenColAndLevel}{
-see \verb{\link{dfrConversionProbs}}.
+see \verb{\link{dfrConversionProps}}.
 }
   \item{verbosity}{
 The higher this value, the more levels of progress and debug information is

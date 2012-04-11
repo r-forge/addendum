@@ -11,7 +11,7 @@ on a real number (or a vector of them)
 }
 \usage{
 logit(p, adjust)
-expit(x)
+expit(x, underlim=-700, upperlim=16.81)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,12 @@ defaults to 0.025.
 }
   \item{x}{
 real number(s) to perform the expit transform on.
+}
+  \item{underlim}{
+due to numerical constraints, calculation below this value result in probability 0 or even \code{NaN}. On my own workstation, this is \code{-700}, the default.
+}
+  \item{upperlim}{
+due to numerical constraints, calculation above this value result in probability 1 or even \code{NaN}. On my own workstation, this is \code{16.81}, the default.
 }
 }
 \value{

@@ -819,7 +819,7 @@ allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
 	return(retval)
 }
 
-dfrConversionProbs<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, verbosity=0)
+dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, verbosity=0)
 {
 #	allcurfn<-curfnfinder(skipframes=0, retStack=TRUE, extraPrefPerLevel="|")
 #	catw(allcurfn, ": start. Avoid calling this is much as possible: reuse its result!")
@@ -869,7 +869,7 @@ dfrConversionProbs<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, ve
 			stringsAsFactors=FALSE
 		)
 	)
-	class(retval)<-"dfrConversionProbs"
+	class(retval)<-"dfrConversionProps"
 	return(retval)
 }
 
@@ -886,7 +886,7 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 	if(missing(dfrConvData))
 	{
 		catwif(verbosity>0, "Need to recalculate dfrConvData: avoid!")
-		dfrConvData<-dfrConversionProbs(dfr, betweenColAndLevel,..., verbosity=verbosity-1)
+		dfrConvData<-dfrConversionProps(dfr, betweenColAndLevel,..., verbosity=verbosity-1)
 	}
 
 	mat<-colsAsNumericMatrix(dfr)
@@ -2196,7 +2196,7 @@ findUnivariateSignificancePVal<-function(dfr, outcomecol, betweenColAndLevel="",
 		outcome<-dfr[[outcomecol]]
 		catw("length outcome:", length(outcome))
 		dfr[[outcomecol]]<-NULL
-		dfrConv<-dfrConversionProbs(dfr, betweenColAndLevel=betweenColAndLevel, includeBaseLevel=TRUE)
+		dfrConv<-dfrConversionProps(dfr, betweenColAndLevel=betweenColAndLevel, includeBaseLevel=TRUE)
 		catw("dim before:", dim(dfr))
 		catw("colnames before:", colnames(dfr))
 		dfr<-as.data.frame(factorsToDummyVariables(dfr, dfrConvData=dfrConv))
@@ -3177,18 +3177,55 @@ logit<-function(p, adjust)
 {
 	if(sum((p==0)|(p==1))>0)
 	{
-		if((missing(adjust)) || (adjust < 0) || (adjust > 1)) adjust<-0.025
+		warning("logit adjustment for numerical instability")
+		if((missing(adjust)) || (adjust < -1) || (adjust > 1)) adjust<-0.025
 		adjust<-abs(adjust)
 		p[p==0]<-adjust
 		p[p==1]<-1-adjust
 	}
-	log(p/(1-p))
+	return(log(p/(1-p)))
 }
 
-expit<-function(x)
+expit<-function(x, underlim=-700, upperlim=16.81)
 {
+	if(upperlim < underlim) stop("underlim should be smaller than upperlim")
+	if(any((x>upperlim) | (x<underlim)))
+	{
+		#We use the symmetry of expit ( 1-expit(-x) == expit(x) ) to get the best possible result
+		#Note: we expect that this will always work better for negative x's
+		tmpres<-exp(c(underlim, upperlim))
+		tmpres<-tmpres/(1+tmpres)
+		tmpres[2]<-1-tmpres[2]
+		if(tmpres[1] < tmpres[2])
+		{
+			#best precision probably obtained by using the negative values
+			correctNeeded<-x>0
+			x<- -abs(x)
+			if(any(x<underlim))
+			{
+				warning("expit correction for numerical instability")
+				x[x<underlim]<- underlim
+			}
+		}
+		else
+		{
+			correctNeeded<-x<0
+			x<- abs(x)
+			if(any(x>upperlim))
+			{
+				warning("expit correction for numerical instability")
+				x[x>upperlim]<- upperlim
+			}
+		}
+	}
+	else
+	{
+		correctNeeded<-rep(FALSE, length(x))
+	}
 	tmp<-exp(x)
-	tmp/(1+tmp)
+	tmp<-tmp/(1+tmp)
+	tmp[correctNeeded]<- 1-tmp[correctNeeded]
+	return(tmp)
 }
 
 invwhich<-function(indices, outlength, useNames = TRUE)
@@ -4187,7 +4224,7 @@ linearPredict<-function(dfr, coefs, itcname="(Intercept)", dfrconv, betweenColAn
 {
 	if(missing(dfrconv))
 	{
-		dfrconv<-dfrConversionProbs(dfr, "")
+		dfrconv<-dfrConversionProps(dfr, "")
 	}
 	dfr.mat<-factorsToDummyVariables(dfr, betweenColAndLevel = betweenColAndLevel, 
 																	 dfrConvData=dfrconv, verbosity=verbosity-1) #Some factors are only partially there!
@@ -4347,4 +4384,61 @@ AUCFromRepPredProb<-function(ROCFromRepPredProb)
 {
 	nthres<-dim(ROCFromRepPredProb)[1]
 	sum(diff(ROCFromRepPredProb[,3])*(diff(ROCFromRepPredProb[,2])/2 + ROCFromRepPredProb[-nthres,2]))	
+}
+
+safe2Numeric<-function(x)
+{
+	if(is.character(x))
+	{
+		newval<-suppressWarnings(as.numeric(x))
+		if(any(is.na(newval) & !is.na(x)))
+		{
+			#NA's introduced by coercion
+			x<-as.factor(x) #probably the best I can do in this case
+		}
+		else
+		{
+			x<-newval
+		}
+	}
+	if(is.factor(x)) x<-as.numeric(as.integer(x))
+	return(x)
+}
+
+findNextFreeNr<-function(nms, pattern="^\\.([[:digit:]]+)$", reppattern="\\1", default=0)
+{
+	mtchpat<-grepl(pattern, nms) #where does the pattern match
+	mtchpat<-nms[mtchpat] #get those names
+	mtchpat<-as.integer(sub(pattern, reppattern, mtchpat))
+	if(length(mtchpat)==0) mx<-default else mx<-max(mtchpat)
+	return(mx)
+}
+
+restrictForLambda<-function(fit, lambdaindices) UseMethod("restrictForLambda")
+restrictForLambda.glmnet<-function(fit, lambdaindices)
+{
+	fit$a0<-fit$a0[lambdaindices]
+	fit$beta<-fit$beta[,lambdaindices,drop=FALSE]
+	fit$df<-fit$df[lambdaindices]
+	fit$dim[2]<-length(lambdaindices)
+	fit$lambda<-fit$lambda[lambdaindices]
+	fit$dev.ratio<-fit$dev.ratio[lambdaindices]
+	return(fit)
+}
+restrictForLambda.cv.glmnet<-function(fit, lambdaindices)
+{
+	fit$lambda<-fit$lambda[lambdaindices]
+	fit$cvm<-fit$cvm[lambdaindices]
+	fit$cvsd<-fit$cvsd[lambdaindices]
+	fit$cvup<-fit$cvup[lambdaindices]
+	fit$cvlo<-fit$cvlo[lambdaindices]
+	fit$nzero<-fit$nzero[lambdaindices]
+	
+	cvsgn<- -2*(fit$name == "AUC")+1
+	lamin<-getmin(fit$lambda, cvsgn*fit$cvm, fit$cvsd)
+	
+	fit$lambda.min<-lamin$lambda.min
+	fit$lambda.1se<-lamin$lambda.1se
+	fit$glmnet.fit<-restrictForLambda(fit$glmnet.fit, lambdaindices)
+	return(fit)
 }

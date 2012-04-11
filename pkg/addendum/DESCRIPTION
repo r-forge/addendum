@@ -1,8 +1,8 @@
 Package: addendum
 Type: Package
 Title: Things that R needs for day to day use
-Version: 1.6.5
-Date: 2012-03-02
+Version: 1.6.6
+Date: 2012-03-16
 Author: Nick Sabbe
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: In essence this is a recap of things I've created over the last three years and found reusable to some extent.

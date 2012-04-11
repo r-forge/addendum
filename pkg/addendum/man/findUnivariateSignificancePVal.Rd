@@ -19,7 +19,7 @@ Dataset that holds several variables, among which the column \code{outcomecol}
 column name(/nr) that you want to relate the other variables to. Note: for now, this must be a binary factor!
 }
   \item{betweenColAndLevel}{
-see \code{\link{dfrConversionProbs}}
+see \code{\link{dfrConversionProps}}
 }
   \item{returnPValBelow}{
 only results where the p-value is below this boundary are returned

@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.6.5\cr
-Date: \tab 2012-03-02\cr
+Version: \tab 1.6.6\cr
+Date: \tab 2012-03-16\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -148,6 +148,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{logit}}
 		\item \code{\link{expit}}
 		\item \code{\link{invwhich}}
+		\item \code{\link{findNextFreeNr}}
 	}
 	\item Repeated data \enumerate{
 		\item \code{\link{reduce}}
