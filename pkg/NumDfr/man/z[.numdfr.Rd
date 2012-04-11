@@ -3,6 +3,8 @@
 \alias{[<-.numdfr}
 \alias{[[.numdfr}
 \alias{$.numdfr}
+\alias{[[<-.numdfr}
+\alias{$<-.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Extract or Replace Parts of an Object
@@ -15,6 +17,8 @@ Subset \code{\link{numdfr}} object.
 \method{[}{numdfr}(x, i, j) <- value
 \method{[[}{numdfr}(x, ..., exact=TRUE)
 \method{$}{numdfr}(x, name)
+\method{[[}{numdfr}(x, i)<-value
+\method{$}{numdfr}(x, name)<-value
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,6 +49,8 @@ Single column name
 }
 \details{
 Mostly designed to work similarly to \code{\link{[.data.frame}}, but needed to provide an extra parameter \code{returnAsMatrix}.
+
+There are still some cases unsupported in the assignment operators. The value is converted as best possible to the format of the column if it was an existing column.
 }
 \value{
 Depending on the logical parameters, a \code{\link{numdfr}}, a matrix (2-dimensional) or a vector.
@@ -64,6 +70,10 @@ iris.nd[1,1]
 iris.nd[1,1]<-8
 iris.nd[1,1]
 iris.nd[,"Sepal.Length"]<-iris.nd[,"Sepal.Length", drop=TRUE]*2
+
+iris.nd[["anewcol"]]<-rep(1, nrow(iris.nd))
+iris.nd[[15]]<-sample(letters[1:3], nrow(iris.nd), replace=TRUE)
+iris.nd[[14]]<-c(19,26)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

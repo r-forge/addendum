@@ -153,7 +153,7 @@ str.numdfr<-function(object,...){
 	lvls<-.getLevels(object)
 	ccns<-findCatColNums(object)
 	lvltxts<-sapply(ccns, function(ccn){paste(lvls[[ccn]], collapse=" ")})
-	ccoltxt<-paste("\t", names(lvls)[ccns], ":", lvltxts)
+	ccoltxt<-paste("\t", colnames(object)[ccns], ":", lvltxts, " ; ")
 	cat(ccoltxt, "\n", fill=TRUE)
 #	for(i in findCatColNums(object))
 #	{
@@ -303,10 +303,75 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	return(thecol)
 }
 
+"[[<-.numdfr"<-function(x, i, value)
+{
+	.debugtxt()
+	lvls<-.getLevels(x)
+	mat<-.getMatrix(x)
+	if(length(value) > nrow(mat)) stop("Cannot add more items than there are observations")
+	thecol<-i
+	therows<-nrow(mat)
+
+	if(is.character(thecol))
+	{
+		nm<-thecol
+		ci<-match(thecol, colnames(mat))
+		if(is.na(ci))
+		{
+			ci<-ncol(mat)+1
+			mat<-cbind(mat, NA)
+			lvls<-c(lvls, list(character()))
+		}
+	}
+	else
+	{
+		if(thecol > ncol(mat))
+		{
+			nfn<-findNextFreeNr(colnames(mat))
+			newnms<-paste(".", seq.int(nfn+1, length.out=thecol - ncol(mat)), sep="")
+			newcols<-length(newnms)
+			nm<-newnms[newcols]
+			newpos<-seq.int(ncol(mat)+1, length.out=newcols)
+			mat<-cbind(mat, matrix(NA, nrow=nrow(mat), ncol=newcols))
+			colnames(mat)[newpos]<-newnms
+			lvls<-c(lvls, lapply(newnms, function(nm){character()}))
+			names(lvls)[newpos]<-newnms
+			ci<-ncol(mat)
+		}
+		else
+		{
+			ci<-thecol
+			nm<-colnames(mat)[ci]
+		}
+	}
+	if(is.character(value)) value<-as.factor(value)
+	if(is.factor(value))
+	{
+		mat[,ci]<-as.numeric(as.integer(value))
+		lvls[[ci]]<-levels(value)
+	}
+	else
+	{
+		mat[,ci]<-value
+	}
+	colnames(mat)[ci]<-nm
+	names(lvls)[ci]<-nm
+	
+	retval<-list(mat=mat, lvls=lvls)
+	class(retval)<-"numdfr"
+	return(retval)
+}
+	
 "$.numdfr"<-function(x, name)
 {
 	.debugtxt()
 	return("[[.numdfr"(x, name, exact=TRUE))
+}
+
+"$<-.numdfr"<-function(x, name, value)
+{
+	.debugtxt()
+	return("[[<-.numdfr"(x=x, i=name, value=value))
 }
 
 .getMatrix<-function(x)
