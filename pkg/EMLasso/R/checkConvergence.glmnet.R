@@ -37,7 +37,7 @@ checkConvergence.glmnet<-function(coefs, minIt, maxIt, verbosity = 0)
 	}
 	else if(iterCount>= minIt)
 	{
-		#suggested criterion for convergence:
+		#suggested criterion for  convergence:
 		#use the fraction of zeros to predict zeros in each column (1/2 threshold)
 		#if the last row is the best match over all columns, we have convergence
 		fracZeroPerCol<-apply(coefs, 2, function(curcol){mean(curcol==0)})
