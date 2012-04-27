@@ -59,6 +59,7 @@
 # 	return(retval)
 # }
 
+
 .hasNA<-function(dfr)
 {
 	return(any(is.na(dfr)))
