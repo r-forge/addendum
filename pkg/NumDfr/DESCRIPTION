@@ -5,7 +5,7 @@ Version: 1.2.2
 Date: 2012-03-30
 Author: Nick Sabbe
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
-Description: This package is created with GLoMo as its main goal, but contains interesting options. For some applications, especially involving mostly numeric columns and some categorical ones, this will be a speedy alternative.
+Description: This package is created with GLoMo as its main goal, but contains interesting options. For some applications, especially involving mostly numeric columns and some categorical ones, this can be a speedy alternative.
 License: GPL (>= 2)
 LazyLoad: yes
 Depends: addendum
