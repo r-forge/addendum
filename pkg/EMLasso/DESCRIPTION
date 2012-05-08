@@ -7,7 +7,7 @@ Date: 2012-03-16
 Author: Nick Sabbe <nick.sabbe@ugent.be>
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: Fit (logistic) LASSO when there is missing
-    data in the predictors
+    data in the predictors/covariates
 License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
