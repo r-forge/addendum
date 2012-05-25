@@ -682,41 +682,47 @@ smartpairs<-function (truex, labels, panel = points, ..., lower.panel = panel,
 #   information on what error occurred anymore...
 tryRet<-function(expr, silent = FALSE, errRet = NULL)
 {
-  tryCatch(expr, error = function(e) {
-    call <- conditionCall(e)
-    if (!is.null(call)) {
-      if (identical(call[[1L]], quote(doTryCatch)))
-        call <- sys.call(-4L)
-      dcall <- deparse(call)[1L]
-      prefix <- paste("Error in", dcall, ": ")
-      LONG <- 75L
-      msg <- conditionMessage(e)
-      sm <- strsplit(msg, "\n")[[1L]]
-      w <- 14L + nchar(dcall, type = "w") + nchar(sm[1L],
-        type = "w")
-      if (is.na(w))
-        w <- 14L + nchar(dcall, type = "b") + nchar(sm[1L],
-          type = "b")
-      if (w > LONG)
-        prefix <- paste(prefix, "\n  ", sep = "")
-    }
-    else prefix <- "Error : "
-    msg <- paste(prefix, conditionMessage(e), "\n", sep = "")
-    .Internal(seterrmessage(msg[1L]))
-    if (!silent && identical(getOption("show.error.messages"),
-      TRUE)) {
-      cat(msg, file = stderr())
-      .Internal(printDeferredWarnings())
-    }
-    if(is.null(errRet))
-    {
-      invisible(structure(msg, class = "try-error"))
-    }
-    else
-    {
-      errRet
-    }
-  })
+	rv<-try(expr, silent = silent)
+	if((!is.null(errRet)) && (inherits(rv, "try-error")))
+	{
+		rv<-errRet
+	}
+	return(rv)
+#   tryCatch(expr, error = function(e) {
+#     call <- conditionCall(e)
+#     if (!is.null(call)) {
+#       if (identical(call[[1L]], quote(doTryCatch)))
+#         call <- sys.call(-4L)
+#       dcall <- deparse(call)[1L]
+#       prefix <- paste("Error in", dcall, ": ")
+#       LONG <- 75L
+#       msg <- conditionMessage(e)
+#       sm <- strsplit(msg, "\n")[[1L]]
+#       w <- 14L + nchar(dcall, type = "w") + nchar(sm[1L],
+#         type = "w")
+#       if (is.na(w))
+#         w <- 14L + nchar(dcall, type = "b") + nchar(sm[1L],
+#           type = "b")
+#       if (w > LONG)
+#         prefix <- paste(prefix, "\n  ", sep = "")
+#     }
+#     else prefix <- "Error : "
+#     msg <- paste(prefix, conditionMessage(e), "\n", sep = "")
+#     .Internal(seterrmessage(msg[1L]))
+#     if (!silent && identical(getOption("show.error.messages"),
+#       TRUE)) {
+#       cat(msg, file = stderr())
+#       .Internal(printDeferredWarnings())
+#     }
+#     if(is.null(errRet))
+#     {
+#       invisible(structure(msg, class = "try-error"))
+#     }
+#     else
+#     {
+#       errRet
+#     }
+#   })
 }
 
 #Given an outcome column name (outCol) and a set of predictor column names
@@ -2275,7 +2281,7 @@ addLamIndexAxis<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,...
 	useXforDF<-x[isofinterest]
 	useDF<-trunc(approx(x = x, y = cvobj$glmnet.fit$df, xout = useXforDF, rule = 2)$y)
 	#useDF<-cvobj$df[isofinterest]
-	axis(3, at = useXforDF, label = useDF, tcl = NA)
+	axis(3, at = useXforDF, labels = useDF, tcl = NA)
 	
 	if(addIdxAx)
 	{
