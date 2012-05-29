@@ -4449,3 +4449,17 @@ restrictForLambda.cv.glmnet<-function(fit, lambdaindices)
 	fit$glmnet.fit<-restrictForLambda(fit$glmnet.fit, lambdaindices)
 	return(fit)
 }
+
+subsetFirstDim<-function(object, ssExpr,drop=FALSE)
+{
+	if(is.null(dim(object))) return(object[ssExpr])
+	ndims<-length(dim(object))
+	#chose a very naive implementation for now - figure out better solution later
+	if(ndims==1) return(object[ssExpr,drop=drop])
+	else if(ndims==2) return(object[ssExpr,,drop=drop])
+	else if(ndims==3) return(object[ssExpr,,,drop=drop])
+	else if(ndims==4) return(object[ssExpr,,,,drop=drop])
+	else if(ndims==5) return(object[ssExpr,,,,,drop=drop])
+	else if(ndims==6) return(object[ssExpr,,,,,,drop=drop])
+	else stop("Number of dimensions > 6 not foreseen in subsetFirstDim")
+}
