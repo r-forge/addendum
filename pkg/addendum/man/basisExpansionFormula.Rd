@@ -63,7 +63,6 @@ Nick Sabbe
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-require(mgcv)
 n <- 100000  ## simulate n data
 dat <- gamSim(1,n=n,dist="binary",scale=.33)
 p <- binomial()$linkinv(dat$f-6) ## make 1's rare

@@ -61,7 +61,6 @@ Nick Sabbe (nick.sabbe@ugent.be)
 \code{\link{colorsForPlotEx}}, \code{\link{neatColorSet}}, \code{\link{plot.glmnet}}, \code{\link{legend}}
 }
 \examples{
-require(glmnet)
 set.seed(1010)
 n=1000;p=100
 nzc=trunc(p/10)

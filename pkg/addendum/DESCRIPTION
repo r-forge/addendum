@@ -8,6 +8,6 @@ Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: In essence this is a recap of things I've created over the last 3 years and found reusable to some extent.
 License: GPL (>= 2)
 LazyLoad: yes
-Depends: glmnet, rgl, Matrix, mgcv, snowfall
+Depends: glmnet, rgl, Matrix (>= 1.0-6), mgcv, snowfall
 Suggests: brglm
 Enhances: glmnet

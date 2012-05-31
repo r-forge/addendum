@@ -58,7 +58,6 @@ colnames(covs)<-paste("X", 1:20, sep="")
 lin<-5+10*covs[,1]
 probs<-exp(lin)/(1+exp(lin))
 y<-sapply(probs, function(pr){rbinom(1,1,pr)})
-require(glmnet)
 cvg<-cv.glmnet(covs, y, family="binomial")
 #to get nearly the same lambda as cvg$lambda.1se
 ind1se<-pickBestConservative(-cvg$cvm, cvg$cvsd^2, -cvg$lambda, verbosity=10)
@@ -66,6 +65,6 @@ cvg$lambda[ind1se]
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~knee }
-\keyword{ ~elbow }
-\keyword{ ~criterion }
+\keyword{ knee }
+\keyword{ elbow }
+\keyword{ criterion }

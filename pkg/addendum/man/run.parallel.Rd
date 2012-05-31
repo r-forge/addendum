@@ -129,7 +129,6 @@ wrt logging/saving: it is required that the folder exists.
 		catw("There, that's done. Let's return it as well.")
 		return(namethiswhatever)
 	}
-	require(snowfall)
 	sfInit(parallel = TRUE, cpus = 2)
 	sfExport(list=c("defparms", "defprocess"))
 	sfLibrary(addendum)

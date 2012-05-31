@@ -50,7 +50,6 @@ Nick Sabbe (nick.sabbe@ugent.be)
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-require(glmnet)
 set.seed(1010)
 n=1000;p=100
 nzc=trunc(p/10)

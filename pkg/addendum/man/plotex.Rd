@@ -135,7 +135,6 @@ Nick Sabbe
 \code{\link{addCVPlot}}
 }
 \examples{
-require(glmnet)
 set.seed(1010)
 n=1000;p=100
 nzc=trunc(p/10)
@@ -153,6 +152,6 @@ title("Gaussian Family",line=2.5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~glmnet }
-\keyword{ ~plot }
-\keyword{ ~crossvalidation }
+\keyword{ glmnet }
+\keyword{ plot }
+\keyword{ crossvalidation }
