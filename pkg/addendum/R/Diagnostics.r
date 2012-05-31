@@ -21,6 +21,7 @@ showMemoryUsage<-function(threshold, depth=1, forEnvironment=globalenv())
 		}))
 }
 
+
 showMemoryUsageList<-function(lst, threshold, depth=1, indent="  ")
 {
 	if(depth>0)
