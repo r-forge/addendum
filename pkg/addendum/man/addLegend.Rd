@@ -6,7 +6,7 @@
 Add legend to standard (cv.)glmnet plot
 }
 \description{
-Add legend to standard (cv.)glmnet plot, to show which variables occur at which lambda.
+Add legend to standard (cv.)glmnet plot, to show which variables occur at each lambda.
 }
 \usage{
 addLegend(cvobj, matplotCols=1:6, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL,
