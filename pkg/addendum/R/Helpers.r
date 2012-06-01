@@ -7,7 +7,6 @@ getListItemsAsColumn<-function(lst, name)
 		})
 }
 
-
 #returns a vector based on fromWhat, without the elements in removeWhat
 #verbose TRUE gives feedback on how many elements actually removed
 removeItems<-function(removeWhat,fromWhat, verbose=FALSE)
