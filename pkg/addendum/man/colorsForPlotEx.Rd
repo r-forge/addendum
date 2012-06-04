@@ -6,7 +6,7 @@ Colors information that works similar to plotex and plot.glmnet
 }
 \description{
 Returns how colors are used in \code{\link{plotex}} (and \code{\link{plot.glmnet}}). This is useful e.g. 
-for displaying a legend (as in \code{\link{addLegend}})
+for displaying a legend (as in \code{\link{addLegend}}) or adding other details
 }
 \usage{
 colorsForPlotEx(cvobj, matplotCols, repsNeededForFirstOccurrence=3, topHowMany=20, beta.type=NULL, altColNameIn=NULL, altColExpressionOut=NULL)
