@@ -4,7 +4,7 @@
 \alias{dfrConversionProps}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Quickly create design matrix for simple cases
+Quickly create a design matrix for simple cases
 }
 \description{
 \code{model.frame} is quite slow for simple cases and big datasets. this function
