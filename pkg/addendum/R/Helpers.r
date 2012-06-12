@@ -825,16 +825,30 @@ allLevels.data.frame<-function(x, onlyNonEmpty=FALSE){
 	return(retval)
 }
 
+allOrderedFacts<-function(x, onlyNonEmpty=FALSE) UseMethod("allOrderedFacts")
+allOrderedFacts.data.frame<-function(x, onlyNonEmpty=FALSE){
+	retval<-sapply(x, function(curcol){
+		return(sum(is.factor(curcol), is.ordered(curcol)))
+	})
+	if(onlyNonEmpty)
+	{
+		retval<-retval[retval>0]
+	}
+	return(retval==2)
+}
+
 dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, verbosity=0)
 {
 #	allcurfn<-curfnfinder(skipframes=0, retStack=TRUE, extraPrefPerLevel="|")
 #	catw(allcurfn, ": start. Avoid calling this is much as possible: reuse its result!")
 	lvls<-allLevels(dfr)
+	ords<-allOrderedFacts(dfr)
 	nc<-length(lvls)
 
 	add<-ifelse(includeBaseLevel, 0, 1)
 		
 	reps<-sapply(lvls, length)-add
+	ords[reps<1]<-FALSE
 	reps[reps<1]<-1
 
 	repcols<-rep(seq_along(reps), reps)
@@ -863,6 +877,7 @@ dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, ve
 	retval<-list(
 		lvls=lvls,
 		reps=reps,
+		ords=ords,
 		orgfactcols=orgfactcols,
 		startoforgcolinnewmat=startoforgcolinnewmat,
 		betweenColAndLevel=betweenColAndLevel,
@@ -872,6 +887,7 @@ dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, ve
 			coln=coln, #what was the original column name
 			newcoln=newcoln, #what is the extended column name
 			isfact=(coln!=newcoln),
+			isord=rep(ords, reps),
 			stringsAsFactors=FALSE
 		)
 	)
@@ -898,12 +914,19 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 	mat<-colsAsNumericMatrix(dfr)
 	nr<-dim(mat)[1]
 	retval<-mat[, dfrConvData$newformdata$repcols, drop=FALSE] #already the right size!
-	facts<-dfrConvData$newformdata$isfact
-	if(sum(facts) > 0)
+	ofacts<-dfrConvData$newformdata$isfact & dfrConvData$newformdata$isord
+	if(sum(ofacts) > 0)
 	{
-		catwif(verbosity > 0, "Categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[facts])
-		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[facts],nr),nr,byrow=TRUE)
-		retval[,facts]<-as.integer(retval[,facts]==tocomp)
+		catwif(verbosity > 0, "Ordered categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[ofacts])
+		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[ofacts],nr),nr,byrow=TRUE)
+		retval[,ofacts]<-as.integer(retval[,ofacts]>=tocomp)
+	}
+	nofacts<-dfrConvData$newformdata$isfact & (!dfrConvData$newformdata$isord)
+	if(sum(nofacts) > 0)
+	{
+		catwif(verbosity > 0, "Ordered categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[nofacts])
+		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[nofacts],nr),nr,byrow=TRUE)
+		retval[,nofacts]<-as.integer(retval[,nofacts]==tocomp)
 	}
 	colnames(retval)<-dfrConvData$newformdata$newcoln
 	return(retval)
@@ -2642,6 +2665,9 @@ randomFillDS<-function(ds)
 findCatColNums<-function(dfr) UseMethod("findCatColNums")
 findCatColNums.data.frame<-function(dfr) {which(sapply(dfr, is.factor))}
 
+findOrderedColNums<-function(dfr) UseMethod("findOrderedColNums")
+findOrderedColNums.data.frame<-function(dfr) {which(sapply(dfr, is.ordered))}
+
 colsAsNumericMatrix<-function(dfr) UseMethod("colsAsNumericMatrix")
 colsAsNumericMatrix.default<-function(dfr) {as.numeric(dfr)}
 colsAsNumericMatrix.data.frame<-function(dfr) {vapply(dfr, function(curcol){as.numeric(curcol)}, numeric(nrow(dfr)))}
@@ -2847,13 +2873,13 @@ toNumericCorrecting<-function(vr, crval="-9", replaceComma=TRUE)
   as.numeric(vr)
 }
 
-quickFactor<-function(x, labels)
+quickFactor<-function(x, labels, ordered=FALSE)
 {
 	#should only be used if you know for certain that:
 	#x holds integers between 1 and length(labels)
 	if(! is.integer(x)) x<-as.integer(x)
 	levels(x)<-labels
-	class(x)<-"factor"
+	if(ordered) class(x)<-c("ordered", "factor") else class(x)<-"factor"
 	x
 }
 
@@ -3408,6 +3434,12 @@ getAsFunction<-function(fnameOrFunction, returnIfNotFound=NULL, verbosity=0)
 	return(allLevels(dfr))
 }
 
+.getOrdered.rep<-function(x)
+{
+	dfr<-.getOrgData.rep(x)
+	return(allOrderedFacts(dfr))
+}
+
 .torepsperrow<-function(vals)
 {
 	matchespernewrow<-rle(vals)
@@ -3680,6 +3712,21 @@ allLevels.data.frame.rep<-function(x, onlyNonEmpty=FALSE)
 	}
 }
 
+allOrderedFacts.data.frame.rep<-function(x, onlyNonEmpty=FALSE)
+{
+	.debugtxt()
+	ord<-.getOrdered.rep(x)
+	if(! onlyNonEmpty)
+	{
+		return(ord)
+	}
+	else
+	{
+		keep<-sapply(.getLevels.rep(x), length) > 0
+		return(ord[keep])
+	}
+}
+
 "[[.data.frame.rep"<-function(x, ..., exact=TRUE)
 {
 	.debugtxt()
@@ -3715,9 +3762,10 @@ allLevels.data.frame.rep<-function(x, onlyNonEmpty=FALSE)
 	}
 
 	thelvls<-.getLevels.rep(x)[[colindex]]
+	theord<-.getOrdered.rep(x)[[colindex]]
 	if(length(thelvls) > 0)
 	{
-		return(quickFactor(thecol, labels=thelvls))
+		return(quickFactor(thecol, labels=thelvls, ordered=theord))
 	}
 	return(thecol)
 }

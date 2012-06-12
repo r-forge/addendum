@@ -8,7 +8,7 @@ Quickly turn an int vector into a factor
 Turns an integer vector into a factor with given levels - without safety checks!!.
 }
 \usage{
-quickFactor(x, labels)
+quickFactor(x, labels, ordered=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,6 +17,9 @@ vector of int
 }
   \item{labels}{
 character vector. Elements of x with value 1 will be turned into a level with the first label etc.
+}
+  \item{ordered}{
+logical indicating whether the factor is ordered.
 }
 }
 \details{
@@ -35,7 +38,9 @@ Nick Sabbe
 somevals<-sample.int(5, 100, replace=TRUE)
 somevalsasfactor<-quickFactor(somevals, letters[seq(max(somevals))])
 somevalsasfactor
+somevalsasordered<-quickFactor(somevals, letters[seq(max(somevals))], ordered=TRUE)
+somevalsasordered
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~factor }
+\keyword{ factor }

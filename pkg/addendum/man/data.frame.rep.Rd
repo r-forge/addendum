@@ -20,6 +20,7 @@
 \alias{display.data.frame.rep}
 \alias{as.matrix.data.frame.rep}
 \alias{allLevels.data.frame.rep}
+\alias{allOrderedFacts.data.frame.rep}
 \alias{[[.data.frame.rep}
 \alias{$.data.frame.rep}
 \alias{factorsToDummyVariables.data.frame.rep}
@@ -52,6 +53,7 @@ is.data.frame.rep(x)
 \method{display}{data.frame.rep}(dfr)
 \method{as.matrix}{data.frame.rep}(x, ...)
 \method{allLevels}{data.frame.rep}(x, onlyNonEmpty=FALSE)
+\method{allOrderedFacts}{data.frame.rep}(x, onlyNonEmpty=FALSE)
 \method{[[}{data.frame.rep}(x, ..., exact=TRUE)
 \method{$}{data.frame.rep}(x, name)
 \method{factorsToDummyVariables}{data.frame.rep}(dfr, ...)
