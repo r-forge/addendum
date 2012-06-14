@@ -10,9 +10,9 @@ Coerce a matrix (back) to \code{class} of some other object
 Coerce a matrix (back) to \code{class} of some other object
 }
 \usage{
-\method{matBack2OrgClass}{numdfr}(objWithClass, mat, catCols, levelList,
+\method{matBack2OrgClass}{numdfr}(objWithClass, mat, catCols, levelList, ord=rep(FALSE, ncol(mat)),
 	colnms=NULL, verbosity=0)
-\method{matBack2OrgClass}{data.frame}(objWithClass, mat, catCols, levelList,
+\method{matBack2OrgClass}{data.frame}(objWithClass, mat, catCols, levelList, ord=rep(FALSE, ncol(mat)),
 	colnms=NULL, verbosity=0)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -28,6 +28,9 @@ indices of categorical columns
 }
   \item{levelList}{
 list of character vectors holding the labels for categorical columns
+}
+  \item{ord}{
+logical vector indicating whether each column is an ordered factor
 }
   \item{colnms}{
 columnn names to use (if not the original ones - default is \code{NULL})

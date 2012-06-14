@@ -1,5 +1,6 @@
 \name{findCatColNums.numdfr}
 \alias{findCatColNums.numdfr}
+\alias{findOrderedColNums.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Which columns are categorical (factors)
@@ -9,6 +10,7 @@ Which columns are categorical (factors), implemented for \code{\link{numdfr}}.
 }
 \usage{
 \method{findCatColNums}{numdfr}(dfr)
+\method{findOrderedColNums}{numdfr}(dfr)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

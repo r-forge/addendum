@@ -1,5 +1,6 @@
 \name{allLevels.numdfr}
 \alias{allLevels.numdfr}
+\alias{allOrderedFacts.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 return a list holding all levels for all columns
@@ -9,6 +10,7 @@ return a list holding all levels for all columns
 }
 \usage{
 \method{allLevels}{numdfr}(x, onlyNonEmpty=FALSE)
+\method{allOrderedFacts}{numdfr}(x, onlyNonEmpty=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,6 +36,7 @@ Nick Sabbe
 iris.nd<-numdfr(iris)
 allLevels(iris.nd)
 allLevels(iris.nd, onlyNonEmpty=TRUE)
+allOrderedFacts(iris.nd)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

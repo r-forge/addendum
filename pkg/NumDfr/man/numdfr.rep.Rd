@@ -15,11 +15,13 @@
 \alias{as.list.numdfr.rep}
 \alias{as.data.frame.numdfr.rep}
 \alias{findCatColNums.numdfr.rep}
+\alias{findOrderedColNums.numdfr.rep}
 \alias{rbind.numdfr.rep}
 \alias{print.numdfr.rep}
 \alias{display.numdfr.rep}
 \alias{as.matrix.numdfr.rep}
 \alias{allLevels.numdfr.rep}
+\alias{allOrderedFacts.numdfr.rep}
 \alias{[[.numdfr.rep}
 \alias{$.numdfr.rep}
 \alias{factorsToDummyVariables.numdfr.rep}
@@ -48,11 +50,13 @@ is.numdfr.rep(x)
 \method{as.list}{numdfr.rep}(x, returnFactors=TRUE,...)
 \method{as.data.frame}{numdfr.rep}(x, row.names = NULL, optional = FALSE, ...)
 \method{findCatColNums}{numdfr.rep}(dfr)
+\method{findOrderedColNums}{numdfr.rep}(dfr)
 \method{rbind}{numdfr.rep}(..., original.data, ensure.unique.rownames=FALSE, separator=".", postfixcol=NULL, allowemptypostfix=TRUE, deparse.level = 1)
 \method{print}{numdfr.rep}(x, ..., digits = NULL, quote = FALSE, right = TRUE, row.names = TRUE)
 \method{display}{numdfr.rep}(dfr)
 \method{as.matrix}{numdfr.rep}(x, ...)
 \method{allLevels}{numdfr.rep}(x, onlyNonEmpty=FALSE)
+\method{allOrderedFacts}{numdfr.rep}(x, onlyNonEmpty=FALSE)
 \method{[[}{numdfr.rep}(x, ..., exact=TRUE)
 \method{$}{numdfr.rep}(x, name)
 \method{factorsToDummyVariables}{numdfr.rep}(dfr, ...)

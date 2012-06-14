@@ -1,10 +1,11 @@
 numdfr<-function(dfr)
 {
 	lvls<-lapply(dfr, function(cc){if(is.factor(cc)) return(levels(cc)) else return(character(0))})
+	ords<-allOrderedFacts(dfr, onlyNonEmpty=FALSE)
 	mat<-matrix(unlist(dfr), ncol=ncol(dfr))
 	colnames(mat)<-colnames(dfr)
 	rownames(mat)<-rownames(dfr)
-	retval<-list(mat=mat, lvls=lvls)
+	retval<-list(mat=mat, lvls=lvls, ord=ords)
 	class(retval)<-"numdfr"
 	return(retval)
 }
@@ -26,9 +27,13 @@ numdfr<-function(dfr)
 	}
 	if(missing(j) && is.matrix(i) && (length(dim(i))==2)  )
 	{
+		#NS 20120612: I think there are some errors in this case.
+		#Why would this function ever return a list ??
+		
 		rv<-.getMatrix(x)[i]#don't specify drop=FALSE or the wrong kind of getter is used...
 		usedcols<-unique(i[,2])
 		newlvls<-.getLevels(x)[usedcols]
+		neword<-.getOrdered(x)[usedcols]
 		factors<-!(sapply(newlvls, is.null))
 		if(sum(factors) > 0)
 		{
@@ -41,7 +46,7 @@ numdfr<-function(dfr)
 					wrv<-which(i[,2]==usedcols[lvli])
 					for(j in wrv)
 					{
-						rv[[j]]<-quickFactor(x=rv[[j]], labels=newlvls[[lvli]])
+						rv[[j]]<-quickFactor(x=rv[[j]], labels=newlvls[[lvli]], ordered=neword[lvli])
 					}
 				}
 			}
@@ -51,9 +56,10 @@ numdfr<-function(dfr)
 	else
 	{
 		newlvls<-if (missing(j)) .getLevels(x) else .getLevels(x)[j]
+		newords<-if (missing(j)) .getOrdered(x) else .getOrdered(x)[j]
 		newmat<-.getMatrix(x)[i,j, drop=FALSE]
 	}
-	retval<-list(mat=newmat, lvls=newlvls)
+	retval<-list(mat=newmat, lvls=newlvls, ord=newords)
 	class(retval)<-"numdfr"
 	return(retval)
 }
@@ -106,6 +112,7 @@ dimnames.numdfr<-function(x){
 	x<-unclass(x)
 	dimnames(x$mat)<-value
 	names(x$lvls)<-value[[2]]
+	names(x$ord)<-value[[2]]
 	class(x)<-oldclass
 	return(x)
 }
@@ -127,6 +134,7 @@ names.numdfr<-function(x){
 	x<-unclass(x)
 	colnames(x$mat)<-value
 	names(x$lvls)<-value
+	names(x$ord)<-value
 	class(x)<-oldclass
 	return(x)
 }
@@ -150,16 +158,13 @@ str.numdfr<-function(object,...){
 	cat("numdfr object with dimensions:", dim(object), "\n")
 	cat("->Rownames: ", rownames(object), "\n", fill=TRUE)
 	cat("->Colnames: ", colnames(object), "\n", fill=TRUE)
-	cat("\nThe following variables are factor-like:\n")
+	cat("\nThe following variables are factor-like (* is ordered):\n")
 	lvls<-.getLevels(object)
+	ords<-.getOrdered(object)
 	ccns<-findCatColNums(object)
 	lvltxts<-sapply(ccns, function(ccn){paste(lvls[[ccn]], collapse=" ")})
-	ccoltxt<-paste("\t", colnames(object)[ccns], ":", lvltxts, " ; ")
+	ccoltxt<-paste("\t", colnames(object)[ccns], ifelse(ords[ccns], "*", ""), ":", lvltxts, " ; ")
 	cat(ccoltxt, "\n", fill=TRUE)
-#	for(i in findCatColNums(object))
-#	{
-#		cat("\t", names(lvls)[i], ":", lvls[[i]], "\n")
-#	}
 	invisible()
 }
 
@@ -170,9 +175,10 @@ as.list.numdfr<-function(x, returnFactors=TRUE,...){
 	x<-unclass(x)
 	rv<-lapply(seq(ncol(x$mat)), function(cc){
 			lev<-x$lvls[[cc]]
-		  if((length(lev) > 0) & (returnFactors==TRUE))
+			ord<-x$ord[cc]
+			if((length(lev) > 0) & (returnFactors==TRUE))
 		  {
-			  quickFactor(x$mat[,cc], labels=lev)#really fast
+			  quickFactor(x$mat[,cc], labels=lev, ordered=ord)#really fast
 			}
 			else
 			{
@@ -207,12 +213,19 @@ findCatColNums.numdfr<-function(dfr){
 	which(sapply(.getLevels(dfr), length) > 0)
 }
 
+findOrderedColNums.numdfr<-function(dfr){
+	.debugtxt()
+	which(.getOrdered(dfr))
+}
+
 #note: _assumes_ all parameters are numdfr of the same structure!!
 #Will probably not fail if this is not the case, but results are unpredictable
 rbind.numdfr<-function(..., ensure.unique.rownames=FALSE, separator=".", postfixcol=NULL, allowemptypostfix=TRUE, deparse.level = 1)
 {
 	.debugtxt()
 	allparams<-list(...)
+	if(length(allparams)==0) return(NULL)
+	if(length(allparams)==1) return(allparams[[1]])
 	allmats<-lapply(allparams, .getMatrix)
 	newmat<-do.call(rbind, allmats)
 	if((ensure.unique.rownames) & (!is.null(rownames(newmat))))
@@ -220,7 +233,7 @@ rbind.numdfr<-function(..., ensure.unique.rownames=FALSE, separator=".", postfix
 		rownames(newmat)<-postfixToMakeUnique(rownames(newmat), separator=separator,
 			postfixcol=postfixcol, allowemptypostfix=allowemptypostfix)
 	}
-	retval<-list(mat=newmat, lvls=.getLevels((allparams[[1]])))
+	retval<-list(mat=newmat, lvls=.getLevels(allparams[[1]]), ord=.getOrdered(allparams[[1]]))
 	class(retval)<-"numdfr"
 	return(retval)
 }
@@ -277,6 +290,20 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	}
 }
 
+allOrderedFacts.numdfr<-function(x, onlyNonEmpty=FALSE){
+	.debugtxt()
+	ord<-.getOrdered(x)
+	if(! onlyNonEmpty)
+	{
+		return(ord)
+	}
+	else
+	{
+		keep<-sapply(.getLevels(x), length) > 0
+		return(ord[keep])
+	}
+}
+
 .findIndexOfColumnName<-function(x, name, exact=TRUE)
 {
 	.debugtxt()
@@ -296,10 +323,11 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	thecol<-unlist(as.list(...))
 	if(length(thecol) != 1) stop("Unsupported operation: passing more than one paramter to [[.numdfr")
 	thelvls<-.getLevels(x)[[thecol]]
+	theord<-.getOrdered(x)[thecol]
 	thecol<-.getMatrix(x)[,thecol]
 	if(length(thelvls) > 0)
 	{
-		return(quickFactor(thecol, labels=thelvls))
+		return(quickFactor(thecol, labels=thelvls, ordered=theord))
 	}
 	return(thecol)
 }
@@ -308,6 +336,7 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 {
 	.debugtxt()
 	lvls<-.getLevels(x)
+	ord<-.getOrdered(x)
 	mat<-.getMatrix(x)
 	if(length(value) > nrow(mat)) stop("Cannot add more items than there are observations")
 	thecol<-i
@@ -322,6 +351,7 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 			ci<-ncol(mat)+1
 			mat<-cbind(mat, NA)
 			lvls<-c(lvls, list(character()))
+			ord<-c(ord, FALSE)
 		}
 	}
 	else
@@ -336,7 +366,9 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 			mat<-cbind(mat, matrix(NA, nrow=nrow(mat), ncol=newcols))
 			colnames(mat)[newpos]<-newnms
 			lvls<-c(lvls, lapply(newnms, function(nm){character()}))
+			ord<-c(ord, rep(FALSE, newcols))
 			names(lvls)[newpos]<-newnms
+			names(ord)[newpos]<-newnms
 			ci<-ncol(mat)
 		}
 		else
@@ -350,6 +382,7 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	{
 		mat[,ci]<-as.numeric(as.integer(value))
 		lvls[[ci]]<-levels(value)
+		ord[[ci]]<-is.ordered(value)
 	}
 	else
 	{
@@ -357,8 +390,9 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 	}
 	colnames(mat)[ci]<-nm
 	names(lvls)[ci]<-nm
+	names(ord)[ci]<-nm
 	
-	retval<-list(mat=mat, lvls=lvls)
+	retval<-list(mat=mat, lvls=lvls, ord=ord)
 	class(retval)<-"numdfr"
 	return(retval)
 }
@@ -385,6 +419,20 @@ allLevels.numdfr<-function(x, onlyNonEmpty=FALSE){
 {
 	#.subset2 is like "[[" but without method dispatch!
 	return(.subset2(x, "lvls", exact=TRUE))
+}
+
+.getOrdered<-function(x)
+{
+	#.subset2 is like "[[" but without method dispatch!
+	#support for old versions: if ord is not present
+	rv<-.subset2(x, "ord", exact=TRUE)
+	if(is.null(rv))
+	{
+		warning("Ordered property for old instance of numdfr requested (no ord present). May render unexpected results.")
+		rv<-.getLevels(x)
+		return(rep(FALSE, length(rv)))
+	}
+	return(rv)
 }
 
 #if(FALSE)
@@ -686,6 +734,12 @@ as.numdfr.rep.numdfr<-function(object, orgdfr, ...)
 	return(.getLevels(dfr))
 }
 
+.getOrdered.rep<-function(x)
+{
+	dfr<-.getOrgData.rep(x)
+	return(.getOrdered(dfr))
+}
+
 .torepsperrow<-function(vals)
 {
 	matchespernewrow<-rle(vals)
@@ -815,6 +869,12 @@ findCatColNums.numdfr.rep<-function(dfr)
 {
 	.debugtxt()
 	which(sapply(.getLevels.rep(dfr), length) > 0)
+}
+
+findOrderedColNums.numdfr.rep<-function(dfr)
+{
+	.debugtxt()
+	which(.getOrdered.rep(dfr))
 }
 
 #note: assumes (original) rows with the same rowname are also exactly the same!
@@ -969,6 +1029,20 @@ allLevels.numdfr.rep<-function(x, onlyNonEmpty=FALSE)
 	}
 }
 
+allOrderedFacts.numdfr.rep<-function(x, onlyNonEmpty=FALSE)
+{
+	.debugtxt()
+	ord<-.getOrdered.rep(x)
+	if(! onlyNonEmpty)
+	{
+		return(ord)
+	}
+	else
+	{
+		keep<-sapply(.getLevels.rep(x), length) > 0
+		return(ord[keep])
+	}
+}
 "[[.numdfr.rep"<-function(x, ..., exact=TRUE)
 {
 	.debugtxt()
@@ -1004,9 +1078,10 @@ allLevels.numdfr.rep<-function(x, onlyNonEmpty=FALSE)
 	}
 
 	thelvls<-.getLevels.rep(x)[[colindex]]
+	theord<-.getOrdered.rep(x)[[colindex]]
 	if(length(thelvls) > 0)
 	{
-		return(quickFactor(thecol, labels=thelvls))
+		return(quickFactor(thecol, labels=thelvls, ordered=theord))
 	}
 	return(thecol)
 }
@@ -1036,7 +1111,7 @@ as.nummatrix.data.frame<-function(object){
 #catCols holds the integer indices of the columns that are really factors
 #levelList holds (in order) an item with the levels of each factor column
 #colnms holds _all_ the column names
-.mat2dfr<-function(mat, catCols, levelList, colnms=NULL, verbosity=0)
+.mat2dfr<-function(mat, catCols, levelList, ord=rep(FALSE, ncol(mat)), colnms=NULL, verbosity=0)
 {
 	result<-as.data.frame(mat)
 	catwif(verbosity>0, "resetting factors")
@@ -1044,7 +1119,7 @@ as.nummatrix.data.frame<-function(object){
 		catwif(verbosity>1, "resetting factor", i, "/", length(catCols))
 	  lev <- levelList[[i]]
 	  cl<-catCols[i]
-	  curfact<-quickFactor(result[[cl]], labels=lev)#really fast
+	  curfact<-quickFactor(result[[cl]], labels=lev, ordered=ord[i])#really fast
 	  result[[cl]] <- curfact #this takes a while -> room for improvement?
 #	  cat(ttxt(system.time(curfact<-quickFactor(result[[cl]], labels=lev))), "\n")
 #				->typically:user: 0.00, system: 0.00, elapsed: 0.00
@@ -1057,17 +1132,17 @@ as.nummatrix.data.frame<-function(object){
 	return(result)
 }
 
-matBack2OrgClass<-function(objWithClass, mat, catCols, levelList, colnms=NULL,
+matBack2OrgClass<-function(objWithClass, mat, catCols, levelList, ord=rep(FALSE, ncol(mat)), colnms=NULL,
 	verbosity=0) UseMethod("matBack2OrgClass")
 	
-matBack2OrgClass.data.frame<-function(objWithClass, mat, catCols, levelList,
+matBack2OrgClass.data.frame<-function(objWithClass, mat, catCols, levelList, ord=rep(FALSE, ncol(mat)),
 	colnms=NULL, verbosity=0)
 {
-	.mat2dfr(mat=mat, catCols=catCols, levelList=levelList, colnms=colnms,
+	.mat2dfr(mat=mat, catCols=catCols, levelList=levelList, ord=ord, colnms=colnms,
 		verbosity=verbosity)
 }
 
-matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList,
+matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList, ord=rep(FALSE, ncol(mat)),
 	colnms=NULL, verbosity=0)
 {
 	posInCatCols<-match(seq(ncol(mat)), catCols, nomatch=0)
@@ -1077,7 +1152,7 @@ matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList,
 	if(is.null(colnms)) colnms<-colnames(mat)
 	colnames(mat)<-colnms
 	names(allLevels)<-colnms
-	retval<-list(mat=mat, lvls=allLevels)
+	retval<-list(mat=mat, lvls=allLevels, ord=ord)
 	class(retval)<-"numdfr"
 	return(retval)
 }
