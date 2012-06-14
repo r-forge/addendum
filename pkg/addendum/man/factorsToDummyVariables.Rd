@@ -62,9 +62,14 @@ Typical use is for \code{\link[glmnet]{glmnet}}
 \code{\link{originalColumnNamesFromDummyVars}}
 }
 \examples{
-factorsToDummyVariables(iris, betweenColAndLevel="_")
+iristmp<-iris
+iristmp$tst<-factor(letters[sample.int(5, nrow(iris), replace=TRUE)], ordered=TRUE)
+
+irisdcp<-dfrConversionProps(dfr = iristmp, betweenColAndLevel = "", includeBaseLevel = FALSE, verbosity = 4)
+irismat<-factorsToDummyVariables(dfr=iristmp, dfrConvData=irisdcp, betweenColAndLevel="", verbosity=5)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ factor }
+\keyword{ dummy }% __ONLY ONE__ keyword per line
+\keyword{ coding }

@@ -919,14 +919,29 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 	{
 		catwif(verbosity > 0, "Ordered categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[ofacts])
 		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[ofacts],nr),nr,byrow=TRUE)
-		retval[,ofacts]<-as.integer(retval[,ofacts]>=tocomp)
+# 		catw("tocomp:")
+# 		print(tocomp[seq(min(10, nrow(tocomp) )),])
+# 		catw("retval part")
+# 		print(retval[seq(min(10, nrow(retval) )),ofacts])
+		res<-retval[,ofacts]>=tocomp
+		#not: in a factor w 5 levels, e.g. 3 will be scored as TRUE TRUE FALSE FALSE
+# 		catw("res part")
+# 		print(res[seq(min(10, nrow(res) )),])
+		retval[,ofacts]<-as.integer(res)
 	}
 	nofacts<-dfrConvData$newformdata$isfact & (!dfrConvData$newformdata$isord)
 	if(sum(nofacts) > 0)
 	{
-		catwif(verbosity > 0, "Ordered categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[nofacts])
+		catwif(verbosity > 0, "Categorical conversion needed for columns:", dfrConvData$newformdata$newcoln[nofacts])
 		tocomp<-matrix(rep.int(dfrConvData$newformdata$newlvls[nofacts],nr),nr,byrow=TRUE)
-		retval[,nofacts]<-as.integer(retval[,nofacts]==tocomp)
+# 		catw("tocomp:")
+# 		print(tocomp[seq(min(10, nrow(tocomp) )),])
+# 		catw("retval part")
+# 		print(retval[seq(min(10, nrow(retval) )),nofacts])
+		res<-retval[,nofacts]==tocomp
+# 		catw("res part")
+# 		print(res[seq(min(10, nrow(res) )),])
+		retval[,nofacts]<-as.integer(res)
 	}
 	colnames(retval)<-dfrConvData$newformdata$newcoln
 	return(retval)
