@@ -35,3 +35,4 @@ iris.nd<-numdfr(iris)
 % R documentation directory.
 \keyword{ data.frame }
 \keyword{ edit }
+\keyword{ view }
