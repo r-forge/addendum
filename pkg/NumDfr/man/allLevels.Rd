@@ -3,10 +3,10 @@
 \alias{allOrderedFacts.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-return a list holding all levels for all columns
+return a list holding all levels for all columns / which cols are ordered factors
 }
 \description{
-return a list holding all levels for all columns
+return a list holding all levels for all columns / which cols are ordered factors
 }
 \usage{
 \method{allLevels}{numdfr}(x, onlyNonEmpty=FALSE)
