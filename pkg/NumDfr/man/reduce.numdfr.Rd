@@ -15,7 +15,7 @@
 Create less memory-heavy version of an \code{\link{numdfr}} object, retaining all the information (!)
 }
 \description{
-When a \code{\link{numdfr}} is really a set of rows from another one, this
+When a \code{\link{numdfr}} is really a set of repeated rows from another one, this
 function can be used to make a new object (of class "numdfr.rep") that holds the same
 information in more condensed format. Disadvantage is that the data is less
 easily manipulated.
