@@ -5,7 +5,7 @@
 Go to new line in output
 }
 \description{
-Go to new line in output
+Go to new line in output - defined more for conformity with other languages.
 }
 \usage{
 newLine()
