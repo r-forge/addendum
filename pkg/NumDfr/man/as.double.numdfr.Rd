@@ -2,7 +2,7 @@
 \alias{as.double.numdfr}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Double-Precision Vectors
+Double-Precision Vectors (from numdfr)
 }
 \description{
 Coerce to double-precision vector from \code{\link{numdfr}}.
