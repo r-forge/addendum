@@ -10,7 +10,6 @@ Find for each variable the p-value for its univariate relevance to the outcome v
 \usage{
 findUnivariateSignificancePVal(dfr, outcomecol, betweenColAndLevel="", returnPValBelow=0.05, splitCats=TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{dfr}{
 Dataset that holds several variables, among which the column \code{outcomecol}
