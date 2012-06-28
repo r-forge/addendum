@@ -16,7 +16,7 @@ display the contents of a \code{\link{numdfr}}.
 The \code{\link{numdfr}} to display
 }}
 \value{
-invisible \code{\link{data.frame}} (!) with potential changes during 'edit' incorporated.
+invisible \code{\link{data.frame}}(!) with potential changes during 'edit' incorporated.
 }
 \author{
 Nick Sabbe
