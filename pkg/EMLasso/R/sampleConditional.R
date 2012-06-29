@@ -46,7 +46,7 @@ sampleConditional.GLoMo<-function(predictorModel, outcomeModel, nrOfSamplesPerMD
 	curOut<-rep(out, tmp$repsperrow)
 	curOrgri<-rep(seq_along(out), tmp$repsperrow)
 	curUseForFit<-curOrgri %in% rowsToUseForFit
-	curUseOut<-(out[curOrgri])[curUseForFit]
+	curUseOut<-subsetFirstDim(subsetFirstDim(out,curOrgri),curUseForFit)
 	retval<-list(
 		ds=curData,
 		out=curOut,

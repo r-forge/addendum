@@ -11,6 +11,7 @@
 #' @param type.measure see \code{\link{cv.glmnet}}
 #' @param repsNeededForFirstOccurrence How many times (i.e. for how many lambda values)
 #' must a coefficient be consecutively nonzero before we count it as "occurring"
+#' @param weights vector with weight to be assigned to each row of \code{ds}
 #' @param \dots passed on to \code{\link{plotex}} (if relevant)
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
@@ -42,11 +43,11 @@
 #' rlh<-findReasonableLambdaHelper(aDfr, y, verbosity=10)
 #' @export
 findReasonableLambdaHelper<-function(ds, out, family="binomial", showFirst=20, showPlot=TRUE,
-	type.measure="auc", repsNeededForFirstOccurrence=3, ..., verbosity=0,
+	type.measure="auc", repsNeededForFirstOccurrence=3, weights=rep(1, nrow(ds)), ..., verbosity=0,
 	minNumHigher=20, minNumLower=20, maxNumLower=30, 
 	imputeDs2FitDsProperties=normalImputationConversion(), standardize=FALSE)
 {
-	cv<-fit.glmnet(ds=ds, out=out, lambda=NULL, verbosity=verbosity-1, 
+	cv<-fit.glmnet(ds=ds, out=out, lambda=NULL, weights=weights, verbosity=verbosity-1, 
 		standardize=standardize, type.measure=type.measure, 
 		imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
 	fit<-cv$glmnet.fit

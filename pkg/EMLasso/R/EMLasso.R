@@ -110,7 +110,7 @@ EMLasso<-function(ds, out, family=c("gaussian","binomial","poisson","multinomial
 	completedOrgri<-completedData[[orgriName]]
 	rmColsPos<-match(c(weightsName, orgriName), colnames(completedData))
 	completedData<-completedData[,-rmColsPos]
-	completedUseOut<-out[completedOrgri]
+	completedUseOut<-subsetFirstDim(out,completedOrgri)
 	
 	lambdas<-retrieveLambdas(lambdas, ds=completedData, out=completedUseOut,...)
 	

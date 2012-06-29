@@ -154,7 +154,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 		{
 			catwif(verbosity > 2, "****fold", curfld, "/", nfolds)
 			fitds<-curds[grps!=curfld,]
-			fitout<-out[grps!=curfld]
+			fitout<-subsetFirstDim(out,grps!=curfld)
 			valrows<-grps==curfld
 			valds<-factorsToDummyVariables(curds[valrows,], dfrConvData=dsconvprops)
 			for(vsi in seq_along(varsets))

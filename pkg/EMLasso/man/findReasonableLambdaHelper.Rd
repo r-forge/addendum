@@ -8,7 +8,8 @@
 \usage{
   findReasonableLambdaHelper(ds, out, family = "binomial",
     showFirst = 20, showPlot = TRUE, type.measure = "auc",
-    repsNeededForFirstOccurrence = 3, ..., verbosity = 0,
+    repsNeededForFirstOccurrence = 3,
+    weights = rep(1, nrow(ds)), ..., verbosity = 0,
     minNumHigher = 20, minNumLower = 20, maxNumLower = 30,
     imputeDs2FitDsProperties = normalImputationConversion(),
     standardize = FALSE)
@@ -40,6 +41,9 @@
   \item{repsNeededForFirstOccurrence}{How many times (i.e.
   for how many lambda values) must a coefficient be
   consecutively nonzero before we count it as "occurring"}
+
+  \item{weights}{vector with weight to be assigned to each
+  row of \code{ds}}
 
   \item{\dots}{passed on to \code{\link{plotex}} (if
   relevant)}

@@ -27,7 +27,7 @@ marginalCompleter<-function(weightsName="weights", orgriName="orgri", maxFullNAC
 		rmColsPos<-match(c(weightsName, orgriName), colnames(completedData))
 		completedData<-completedData[,-rmColsPos]
 		completedUse<-completedOrgri %in% rowsToUse
-		completedOut<-out[completedOrgri]
+		completedOut<-subsetFirstDim(out,completedOrgri)
 		rv<-list(ds=completedData, out=completedOut, weights=completedWeights, 
 						 completedUse=completedUse)
 		class(rv)<-"marginalCompleted"

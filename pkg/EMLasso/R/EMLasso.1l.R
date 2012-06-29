@@ -84,7 +84,7 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	#get an initial estimate of the lasso parameters
 	#only the rows that correspond to rowsToUseForFit are to be used
 	catwif(verbosity > 0, "First Lasso fit.") #takes _a lot_ of time
-	lasso.fit<-fit.glmnet(ds=imputedData$ds[imputedData$completedUse,], out=imputedData$out[imputedData$completedUse], 
+	lasso.fit<-fit.glmnet(ds=imputedData$ds[imputedData$completedUse,], out=subsetFirstDim(imputedData$out,imputedData$completedUse), 
 		lambda=lambda, weights=imputedData$weights[imputedData$completedUse],
 		verbosity=verbosity-1, imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
 	coefs<-coef(lasso.fit)
