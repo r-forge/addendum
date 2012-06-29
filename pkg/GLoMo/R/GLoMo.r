@@ -86,6 +86,8 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	reweightPerRow=FALSE, verbosity=0,...)
 {
 	catCols<-findCatColNums(dfr)
+	ordCols<-rep(FALSE, ncol(dfr))
+	ordCols[findOrderedColNums(dfr)]<-TRUE
 	dfrl<-dfr[,catCols, drop=FALSE]
 	if(onlyCategorical)
 	{
@@ -149,6 +151,14 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 						sample.int(length(naLevels[[ci]]), howManyIfTooMany, replace=TRUE,
 							prob=probs[[ci]])
 					})
+				if(length(curnas)==1)
+				{
+					catvals<-matrix(catvals, ncol=1)
+				}
+				else if(howManyIfTooMany==1)
+				{
+					catvals<-matrix(catvals, nrow=1)
+				}
 				catCombProbs<-rep(1, howManyIfTooMany)
 			}
 			else
@@ -162,6 +172,16 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 					})
 				catvals<-sapply(catAll, '[[', "val")
 				catMargprobs<-sapply(catAll, '[[', "pr")
+				if(length(curnas)==1)
+				{
+					catvals<-matrix(catvals, ncol=1)
+					catMargprobs<-matrix(catMargprobs, ncol=1)
+				}
+				else if(howManyIfTooMany==1)
+				{
+					catvals<-matrix(catvals, nrow=1)
+					catMargprobs<-matrix(catMargprobs, nrow=1)
+				}
 				catCombProbs<-unlist(apply(catMargprobs, 1, prod))
 				if(reweightPerRow)
 				{
@@ -223,8 +243,8 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	resmat<-do.call(rbind, newrows)
 	
 	catwif(verbosity>1, "turn resulting matrix into ", class(dfrl), " again")
-	result<-matBack2OrgClass(dfrl, mat=resmat, catCols=catCols, 
-		levelList=naLevels, colnms=c(orgnames, toAddCols), verbosity=verbosity-1)
+	result<-matBack2OrgClass(dfrl, mat=resmat, catCols=catCols, levelList=naLevels,
+		ord=ordCols, colnms=c(orgnames, toAddCols), verbosity=verbosity-1)
 	return(result)
 }
 
