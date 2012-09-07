@@ -1152,6 +1152,7 @@ matBack2OrgClass.numdfr<-function(objWithClass, mat, catCols, levelList, ord=rep
 	if(is.null(colnms)) colnms<-colnames(mat)
 	colnames(mat)<-colnms
 	names(allLevels)<-colnms
+	names(ord)<-colnms
 	retval<-list(mat=mat, lvls=allLevels, ord=ord)
 	class(retval)<-"numdfr"
 	return(retval)
