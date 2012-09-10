@@ -244,7 +244,7 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 	
 	catwif(verbosity>1, "turn resulting matrix into ", class(dfrl), " again")
 	result<-matBack2OrgClass(dfrl, mat=resmat, catCols=catCols, levelList=naLevels,
-		ord=ordCols, colnms=c(orgnames, toAddCols), verbosity=verbosity-1)
+		ord=c(ordCols, rep(FALSE, length(toAddCols))), colnms=c(orgnames, toAddCols), verbosity=verbosity-1)
 	return(result)
 }
 
