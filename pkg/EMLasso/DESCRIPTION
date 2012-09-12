@@ -2,8 +2,8 @@ Package: EMLasso
 Type: Package
 Title: Fit (logistic) LASSO when there is missing data in
     the predictors
-Version: 2.0.1
-Date: 2012-03-16
+Version: 2.0.2
+Date: 2012-09-10
 Author: Nick Sabbe <nick.sabbe@ugent.be>
 Maintainer: Nick Sabbe <nick.sabbe@ugent.be>
 Description: Fit (logistic) LASSO when there is missing
@@ -47,3 +47,4 @@ Collate:
     'postProcessEMLasso.R'
     'lognetProbabilityReusable.R'
     'collectImputationModels.R'
+    'EMLassoFromDir.R'

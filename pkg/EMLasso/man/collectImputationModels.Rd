@@ -1,8 +1,8 @@
 \name{collectImputationModels}
-\alias{collectImputationModels}
-\alias{collectImputationModels.EMLassoGLoMo}
 \alias{EMLassoGLoMoImputationData}
 \alias{EMLassoGLoMoImputationData-class}
+\alias{collectImputationModels}
+\alias{collectImputationModels.EMLassoGLoMo}
 \alias{predict.EMLassoGLoMoImputationData}
 \title{Collect data from a model, needed for multiple imputation based on this model}
 \usage{
@@ -87,9 +87,9 @@
 
   \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 }
-\keyword{crossvalidate}
 \keyword{EMLasso}
 \keyword{GLoMo}
+\keyword{crossvalidate}
 \keyword{imputation}
 \keyword{model}
 

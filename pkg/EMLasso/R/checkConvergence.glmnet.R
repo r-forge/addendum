@@ -5,9 +5,18 @@
 #' @param coefs (sparse) matrix of coefficients (cols=variables, rows=iterations)
 #' @param minIt minimum number of iterations before convergence is possible
 #' @param maxIt maximum number of iterations before convergence is automatically assumed
+#' @param burnIn number of iterations that will be skipped for convergence checking
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
-#' @return a single logical (\code{TRUE} is convergence has happened or maxIt passed)
+#' @return a list holding items: 
+#' \enumerate{
+#' 	\item \code{converged}: a single logical (\code{TRUE} if convergence has happened or maxIt passed)
+#' 	\item \code{minIt}: as passed in
+#' 	\item \code{maxIt}: as passed in
+#' 	\item \code{burnIn}: as passed in
+#' 	\item \code{iterCount}: number of iterations that have already occurred
+#' 	\item \code{usedFunction}: characters, holding "checkConvergence.glmnet"
+#' }
 #' @note the first row (initial estimates) and column (intercept) are skipped in the checks
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
 #' @keywords convergence zeroness
@@ -22,7 +31,7 @@
 #' print(ret)
 #' checkConvergence.glmnet(ret, 2, 20, verbosity = 2)
 #' @export checkConvergence.glmnet
-checkConvergence.glmnet<-function(coefs, minIt, maxIt, verbosity = 0)
+checkConvergence.glmnet<-function(coefs, minIt, maxIt, burnIn=0, verbosity = 0)
 {
 	#used to be full.glmnet.EM.fit.convergence
 	converged<-FALSE
@@ -40,6 +49,10 @@ checkConvergence.glmnet<-function(coefs, minIt, maxIt, verbosity = 0)
 		#suggested criterion for  convergence:
 		#use the fraction of zeros to predict zeros in each column (1/2 threshold)
 		#if the last row is the best match over all columns, we have convergence
+		if(burnIn > 0)
+		{
+			coefs<-coefs[-1, -1]
+		}
 		fracZeroPerCol<-apply(coefs, 2, function(curcol){mean(curcol==0)})
 		bestZeroPerCol<-(fracZeroPerCol >= 0.5)
 		if(verbosity > 0)
@@ -67,26 +80,27 @@ checkConvergence.glmnet<-function(coefs, minIt, maxIt, verbosity = 0)
 	{
 		catwif(verbosity > 0, "Haven't reached minimum nr of iterations (", minIt, ") yet.")
 	}
-	retval<-list(converged=converged, minIt=minIt, maxIt=maxIt, iterCount=iterCount, usedFunction="checkConvergence.glmnet")
+	retval<-list(converged=converged, minIt=minIt, maxIt=maxIt, burnIn=burnIn, iterCount=iterCount, usedFunction="checkConvergence.glmnet")
 	return(retval)
 }
 #' @rdname checkConvergence.glmnet
 #' 
 #' @aliases convergenceCheckCreator
 #' @method convergenceCheckCreator
-#' @usage convergenceCheckCreator(minIt, maxIt, basicCheckFunction=checkConvergence.glmnet)
+#' @usage convergenceCheckCreator(minIt=20, maxIt=30, burnIn=0, basicCheckFunction=checkConvergence.glmnet)
 #' @param basicCheckFunction function (like \code{checkConvergence.glmnet}) that will do the actual work
 #' @return the result of \code{basicCheckFunction}
 #' @seealso \code{\link{EMLasso}}
 #' @export convergenceCheckCreator
-convergenceCheckCreator<-function(minIt=20, maxIt=30, basicCheckFunction=checkConvergence.glmnet)
+convergenceCheckCreator<-function(minIt=20, maxIt=30, burnIn=0, basicCheckFunction=checkConvergence.glmnet)
 {
 	force(minIt)
 	force(maxIt)
+	force(burnIn)
 	force(basicCheckFunction)
 	retval<-function(coefs, verbosity=0)
 	{
-		basicCheckFunction(coefs, minIt, maxIt, verbosity = verbosity)
+		basicCheckFunction(coefs, minIt, maxIt, burnIn, verbosity = verbosity)
 	}
 	return(retval)
 }

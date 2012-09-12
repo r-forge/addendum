@@ -9,10 +9,9 @@
 #' @param ds dataset for which prediction needs to occur
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
-#' @return a single logical (\code{TRUE} is convergence has happened or maxIt passed)
-#' @note the first row (initial estimates) and column (intercept) are skipped in the checks
+#' @return for the generic method: depending on the implementation.
 #' @author Nick Sabbe \email{nick.sabbe@@ugent.be}
-#' @keywords predictor model rejection sampling
+#' @keywords predictor model rejection sampling guid
 #' @export predictorModelSamplingReusables
 predictorModelSamplingReusables<-function(predictorModel, iterCount, previousReusables=NULL, ds, verbosity=0) UseMethod("predictorModelSamplingReusables")
 #' @rdname predictorModelSamplingReusables
@@ -29,6 +28,10 @@ predictorModelSamplingReusables<-function(predictorModel, iterCount, previousReu
 #' @S3method predictorModelSamplingReusables GLoMo
 predictorModelSamplingReusables.GLoMo<-function(predictorModel, iterCount, previousReusables=NULL, ds, verbosity=0)
 {
+	#note: ds should always be the dataset that needs completion (so holds missing data) - in EMLasso this
+	#is simply always the same. Normally, if a SamplingReusablesGLoMo has already been made for this 
+	#dataset, the uidsPerRowOfOriginalDfr can simply be reused.
+	#uidsPerRowOfOriginalDfr's member possibleGlomoGuidPerObs maps rows of 'ds' to cells  of the GLoMo
 	if(is.null(previousReusables))
 	{
 		guidDataOfOriginalDfr<-getGuidData(glomo=predictorModel, dfr=ds, guidPerObservation=NULL, verbosity=verbosity-1)
@@ -37,9 +40,16 @@ predictorModelSamplingReusables.GLoMo<-function(predictorModel, iterCount, previ
 		class(rv)<-"SamplingReusablesGLoMo"
 		return(rv)
 	}
-	if(iterCount==1)
+	else
 	{
-		previousReusables$guidDataOfOriginalDfr<-previousReusables$uidsPerRowOfOriginalDfr
+		previousReusables$guidDataOfOriginalDfr <- getGuidData(glomo = predictorModel, dfr = ds, 
+																													 guidPerObservation = previousReusables$uidsPerRowOfOriginalDfr, 
+																													 verbosity = verbosity - 1)
+		return(previousReusables)
 	}
-	return(previousReusables)
+# 	if(iterCount==1)
+# 	{
+# 		previousReusables$guidDataOfOriginalDfr<-previousReusables$uidsPerRowOfOriginalDfr
+# 	}
+# 	return(previousReusables)
 }

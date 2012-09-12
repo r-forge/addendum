@@ -21,6 +21,8 @@
 #' 	work before returning the result of \code{EMLasso.1l}
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
+#' @param extraLog A function (by default one that does nothing) that will be used in 
+#' each iteration to perform extra logging
 #' @return An object of class EMLasso1l. This is a list with the following items:
 #' \itemize{
 #' 	\item \code{lasso.fit}: glmnet object
@@ -58,7 +60,7 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	imputeDs2FitDsProperties=normalImputationConversion(),	
 	fitPredictor=GLoMo, #GLoMo(dfr, weights, verbosity)
 	family="binomial", convergenceChecker=convergenceCheckCreator(),
-	postProcess=postProcessEMLasso1l, verbosity=0)
+	postProcess=postProcessEMLasso1l, verbosity=0, extraLog=function(...){})
 {
 	if(is.data.frame(ds))
 	{
@@ -77,7 +79,7 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	#get an initial estimate of the GLoMo parameters:
 	#First, 'randomly' complete the dataset:
 	catwif(verbosity > 0, "random fill the dataset, dims before:", dim(ds))
-	imputedData<-completeMarginal(object=firstTimeCompleter,ds=ds, out=out, rowsToUse=rowsToUseForFit, verbosity=verbosity-1)
+	imputedData<-completeMarginal(object=firstTimeCompleter,ds=ds, out=out, rowsToUse=rowsToUseForFit, verbosity=verbosity-2)
 	
 	catwif(verbosity > 0, "random fill the dataset, dims after:", dim(imputedData$ds))
 	
@@ -98,6 +100,7 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 
 	reusableForSampling<-predictorModelSamplingReusables(predictorModel=predictorModel, iterCount=0, 
 		previousReusables=NULL, ds=ds, verbosity=verbosity-1)
+	extraLog(reusableForSampling)
 	
 	#Here starts the actual EM
 	convergence<-list(converged=FALSE) #make this similar in form to convergenceChecker result
@@ -118,8 +121,11 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 			reusableForSampling=reusableForSampling, 
 			reusableForvalidation=reusableForvalidation, verbosity=verbosity-2)
 		
+		extraLog(curData, "Imputed data", ds, out)
+		
 		reusableForSampling<-predictorModelSamplingReusables(predictorModel=predictorModel, iterCount=iterCount, 
 			previousReusables=reusableForSampling, ds=ds, verbosity=verbosity-1)
+		extraLog(reusableForSampling)
 
 		#Given this data, fit
 		#a) The lasso
@@ -127,11 +133,13 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 		lasso.fit<-fit.glmnet(ds=curData$ds[curData$useForFit,], out=curData$useOut, 
 			lambda=lambda, weights=curData$weights[curData$useForFit],
 			verbosity=verbosity-2, imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
+		extraLog(lasso.fit)
 		
 		#b) The Predictor Model
 		catwif(verbosity > 1, "->Fitting predictors model")
 		predictorModel<-fitPredictor(dfr=curData$ds, weights=curData$weights, verbosity=verbosity-2)
-
+		extraLog(predictorModel)
+		
 		catwif(verbosity > 1, "->Checking convergence")
 		newcoefs<-coef(lasso.fit)
 		newcoefs<-as.data.frame(as.matrix(t(newcoefs)))

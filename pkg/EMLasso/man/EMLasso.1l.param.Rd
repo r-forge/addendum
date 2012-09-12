@@ -1,6 +1,6 @@
 \name{EMLasso.1l.param}
-\alias{[.EMLasso.1l.param}
 \alias{EMLasso.1l.param}
+\alias{[.EMLasso.1l.param}
 \alias{length.EMLasso.1l.param}
 \title{Collect parameters to EMLasso.1l into one list}
 \usage{
@@ -11,7 +11,8 @@
     imputeDs2FitDsProperties = normalImputationConversion(),
     fitPredictor = GLoMo, family = "binomial",
     convergenceChecker = convergenceCheckCreator(),
-    postProcess = postProcessEMLasso1l, verbosity = 0)
+    postProcess = postProcessEMLasso1l, verbosity = 0,
+    extraLog = function(...) { })
 
   \method{[}{EMLasso.1l.param}(x, i)
 
@@ -44,6 +45,8 @@
   \item{verbosity}{The higher this value, the more levels
   of progress and debug information is displayed (note: in
   R for Windows, turn off buffered output)}
+
+  \item{extraLog}{see \code{\link{EMLasso.1l}}}
 
   \item{x}{\code{EMLasso.1l.param} object}
 

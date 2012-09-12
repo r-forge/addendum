@@ -1,8 +1,8 @@
 \name{predictorModelSamplingReusables}
-\alias{predictorModelSamplingReusables}
-\alias{predictorModelSamplingReusables.GLoMo}
 \alias{SamplingReusablesGLoMo}
 \alias{SamplingReusablesGLoMo-class}
+\alias{predictorModelSamplingReusables}
+\alias{predictorModelSamplingReusables.GLoMo}
 \title{Create reusable part of prediction for repeated sampling}
 \usage{
   predictorModelSamplingReusables(predictorModel,
@@ -28,8 +28,7 @@
   R for Windows, turn off buffered output)}
 }
 \value{
-  a single logical (\code{TRUE} is convergence has happened
-  or maxIt passed)
+  for the generic method: depending on the implementation.
 
   (in the \code{\link{GLoMo}} implementation) an object of
   class "SamplingReusablesGLoMo", i.e. a list with items:
@@ -42,16 +41,13 @@
 \description{
   Create reusable part of prediction for repeated sampling
 }
-\note{
-  the first row (initial estimates) and column (intercept)
-  are skipped in the checks
-}
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }
 \seealso{
   \code{\link{EMLasso.1l}}
 }
+\keyword{guid}
 \keyword{model}
 \keyword{predictor}
 \keyword{rejection}

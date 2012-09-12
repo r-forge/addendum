@@ -5,8 +5,8 @@
 \alias{cv.EMLassoGLoMo-class}
 \alias{cv.MI.logreg}
 \alias{cv.MI.logreg-class}
-\alias{repeatedlyPredictOut}
 \alias{repeatedPredictedProbAUC}
+\alias{repeatedlyPredictOut}
 \title{Crossvalidate a model}
 \usage{
   crossValidate(model, ..., verbosity = 0)
@@ -167,8 +167,8 @@ iris.cv.emlognet<-crossValidate(iris.emlognet, verbosity=2)
 \seealso{
   \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 }
-\keyword{crossvalidate}
 \keyword{EMLasso}
 \keyword{GLoMo}
+\keyword{crossvalidate}
 \keyword{model}
 

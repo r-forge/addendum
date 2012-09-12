@@ -10,7 +10,8 @@
     imputeDs2FitDsProperties = normalImputationConversion(),
     fitPredictor = GLoMo, family = "binomial",
     convergenceChecker = convergenceCheckCreator(),
-    postProcess = postProcessEMLasso1l, verbosity = 0)
+    postProcess = postProcessEMLasso1l, verbosity = 0,
+    extraLog = function(...) { })
 }
 \arguments{
   \item{ds}{dataset (\code{\link{numdfr}} or
@@ -60,6 +61,10 @@
   \item{verbosity}{The higher this value, the more levels
   of progress and debug information is displayed (note: in
   R for Windows, turn off buffered output)}
+
+  \item{extraLog}{A function (by default one that does
+  nothing) that will be used in each iteration to perform
+  extra logging}
 }
 \value{
   An object of class EMLasso1l. This is a list with the

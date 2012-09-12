@@ -15,6 +15,7 @@
 #' @param postProcess see \code{\link{EMLasso.1l}}
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
+#' @param extraLog see \code{\link{EMLasso.1l}}
 #' @return object of class "EMLasso.1l.param" having all these
 #' parameters as named members
 #' @note created for use in \code{\link{run.parallel}}
@@ -36,14 +37,14 @@ EMLasso.1l.param<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	imputeDs2FitDsProperties=normalImputationConversion(),	
 	fitPredictor=GLoMo,
 	family="binomial", convergenceChecker=convergenceCheckCreator(),
-	postProcess=postProcessEMLasso1l, verbosity=0)
+	postProcess=postProcessEMLasso1l, verbosity=0, extraLog=function(...){})
 {
 	imputeDs2FitDsProperties<-imputeDs2FitDsProps(object=imputeDs2FitDsProperties,ds=ds,verbosity=verbosity)
 	rv<-list(ds=ds, out=out, lambda=lambda,
 		nrOfSamplesPerMDRow=nrOfSamplesPerMDRow, rowsToUseForFit=rowsToUseForFit,
 		firstTimeCompleter=firstTimeCompleter, imputeDs2FitDsProperties=imputeDs2FitDsProperties, 
 		fitPredictor=fitPredictor, family=family, convergenceChecker=convergenceChecker,
-		postProcess=postProcess, verbosity=verbosity)
+		postProcess=postProcess, verbosity=verbosity, extraLog=extraLog)
 	class(rv)<-"EMLasso.1l.param"
 	return(rv)
 }
