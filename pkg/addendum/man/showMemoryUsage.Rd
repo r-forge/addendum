@@ -1,9 +1,11 @@
 \name{showMemoryUsage}
 \alias{showMemoryUsage}
 \alias{showMemoryUsageList}
+\alias{showMemoryUsageList.default}
+\alias{showMemoryUsageList.environment}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Memory sizes of all non-function objects present in global environment
+Memory sizes of all non-function objects present in global environment/other objects
 }
 \description{
 Show the names and sizes of all objects taking more than \code{threshold} Kb.
@@ -12,7 +14,7 @@ If any of these objects have sub-items (e.g. lists), they are also shown up to t
 }
 \usage{
 showMemoryUsage(threshold, depth = 1, forEnvironment=globalenv())
-showMemoryUsageList(lst, threshold, depth=1, indent="  ")
+\method{showMemoryUsageList}{environment}(lst, threshold, depth=1, indent="  ")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -13,8 +13,8 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.6.8\cr
-Date: \tab 2012-06-26\cr
+Version: \tab 1.6.9\cr
+Date: \tab 2012-09-13\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
@@ -121,6 +121,7 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{randomRandomNorm}}
 		\item \code{\link{typicalRandomNorm}}
 		\item \code{\link{generateTypicalIndependentDfr}}
+		\item \code{\link{sampleOrdered}}
 	}
 	\item Data manipulation \enumerate{
 		\item \code{\link{combineSimilarDfrList}}

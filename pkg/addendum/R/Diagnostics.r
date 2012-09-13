@@ -3,46 +3,67 @@
 	#threshold<-100
 showMemoryUsage<-function(threshold, depth=1, forEnvironment=globalenv())
 {
-	if(is.null(forEnvironment)) forEnvironment<-parent.frame()
-	invisible(sapply(objects(forEnvironment), function(curobname){
-			curob<-get(curobname, envir=forEnvironment)
-			if(!is.function(curob))
-			{
-				msize<-round(object.size(curob)/1024, 1L)
-				if(msize >= threshold)
-				{
-					cat(curobname, ":", msize, "Kb\n")
-					if(is.list(curob))
-					{
-						showMemoryUsageList(curob, threshold, depth=depth-1, indent="  ")
-					}
-				}
-			}
-		}))
+	if(is.null(forEnvironment))
+	{
+		forEnvironment<-parent.frame()
+		cat("Memory usage: explicitly use parent frame\n")
+	}
+	showMemoryUsageList(forEnvironment, threshold=threshold, depth=depth)
+# 	invisible(sapply(objects(forEnvironment), function(curobname){
+# 			curob<-get(curobname, envir=forEnvironment)
+# 			.showMemoryUsageRec(curob, curobname, threshold, depth, indent)
+# 		}))
 }
 
-
-showMemoryUsageList<-function(lst, threshold, depth=1, indent="  ")
+showMemoryUsageList<-function(lst, threshold, depth=1, indent="  ") UseMethod("showMemoryUsageList")
+	
+showMemoryUsageList.default<-function(lst, threshold, depth=1, indent="  ")
 {
 	if(depth>0)
 	{
+		#try to safely unclass lst so its real members are shown...
+		#note: if unclass fails, lst is probably an external pointer (see docs for unclass)
+		if(!inherits(lst, "try-error"))
+		{
+			nlst<-try(unclass(lst))
+			if(!inherits(nlst, "try-error"))
+			{
+				lst<-nlst
+			}
+		}
 		invisible(sapply(seq_along(lst), function(curlsti){
 				curob<-lst[[curlsti]]
-				if(!is.function(curob))
-				{
-					msize<-round(object.size(curob)/1024, 1L)
-					if(msize >= threshold)
-					{
-						curobname<-names(lst)[curlsti]
-						if(is.null(curobname)) curobname<-curlsti
-						cat(indent, "$", curobname, ":", msize, "Kb\n")
-						if(is.list(curob))
-						{
-							showMemoryUsageList(curob, threshold, depth=depth-1, indent=paste(indent, "  ", sep=""))
-						}
-					}
-				}
+				curobname<-names(lst)[curlsti]
+				if(is.null(curobname)) curobname<-curlsti
+				.showMemoryUsageRec(curob, curobname, threshold, depth, indent)
 			}))
+	}
+}
+showMemoryUsageList.environment<-function(lst, threshold, depth=1, indent="  ")
+{
+	if(depth>0)
+	{
+		invisible(sapply(objects(lst), function(curobname){
+			curob<-get(curobname, envir=lst)
+			.showMemoryUsageRec(curob, curobname, threshold, depth, indent)
+		}))
+	}
+}
+	
+
+.showMemoryUsageRec<-function(curob, curobname, threshold, depth=1, indent="  ")
+{
+	if(!is.function(curob))
+	{
+		msize<-round(object.size(curob)/1024, 1L)
+		if(msize >= threshold)
+		{
+			cat(indent, "$", curobname, ":", msize, "Kb\n")
+			if(is.list(curob))
+			{
+				showMemoryUsageList(curob, threshold, depth=depth-1, indent=paste(indent, indent, sep=""))
+			}
+		}
 	}
 }
 

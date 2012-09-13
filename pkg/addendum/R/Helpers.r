@@ -4525,3 +4525,16 @@ subsetFirstDim<-function(object, ssExpr,drop=FALSE)
 	else if(ndims==6) return(object[ssExpr,,,,,,drop=drop])
 	else stop("Number of dimensions > 6 not foreseen in subsetFirstDim")
 }
+
+sampleOrdered<-function(x, size, replace = FALSE, prob = NULL)
+{
+	if (length(x) == 1L && is.numeric(x) && x >= 1)
+	{
+		#simply sample ints then, so we can order them afterwards
+		sort(sample(x=x, size=size, replace = replace, prob = prob))
+	}
+	else
+	{
+		x[sample.int(length(x), size=size, replace = replace, prob = prob)]
+	}
+}
