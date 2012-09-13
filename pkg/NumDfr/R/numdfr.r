@@ -154,16 +154,51 @@ is.na.numdfr<-function(x){
 	is.na(.getMatrix(x))
 }
 
-str.numdfr<-function(object,...){
+str.numdfr<-function(object, short=TRUE,...){
 	cat("numdfr object with dimensions:", dim(object), "\n")
-	cat("->Rownames: ", rownames(object), "\n", fill=TRUE)
-	cat("->Colnames: ", colnames(object), "\n", fill=TRUE)
-	cat("\nThe following variables are factor-like (* is ordered):\n")
+	rn<-rownames(object)
+	nrn<-length(rn)
+	cn<-colnames(object)
+	ncn<-length(cn)
+	shortMaxRN<-10
+	shortMaxCN<-10
+	rntxt<-"->Rownames: "
+	cntxt<-"->Colnames: "
+	if(short)
+	{
+		if(nrn > shortMaxRN)
+		{
+			rntxt<-"->Some rownames: "
+			rn<-c(rn[1:2], rn[sort(2+sample.int(nrn-4, shortMaxRN-4))], rn[nrn-c(1,0)])
+		}
+		if(ncn > shortMaxCN)
+		{
+			cntxt<-"->Some colnames: "
+			cn<-c(cn[1:2], cn[sort(2+sample.int(ncn-4, shortMaxRN-4))], cn[ncn-c(1,0)])
+		}
+	}
+	cat(rntxt, rn, "\n", fill=TRUE)
+	cat(cntxt, cn, "\n", fill=TRUE)
+
+	shortMaxFN<-10
 	lvls<-.getLevels(object)
 	ords<-.getOrdered(object)
 	ccns<-findCatColNums(object)
+	lccns<-length(ccns)
+	if(short && (lccns > shortMaxFN))
+	{
+		ccns<-c(ccns[1:2], ccns[sort(2+sample.int(lccns-4, shortMaxFN-4))], ccns[lccns-c(1,0)])
+		cat("\nThe following variables are some of the factor-like (* is ordered):\n")
+	}
+	else
+	{
+		cat("\nThe following variables are factor-like (* is ordered):\n")
+	}
+	
 	lvltxts<-sapply(ccns, function(ccn){paste(lvls[[ccn]], collapse=" ")})
+	
 	ccoltxt<-paste("\t", colnames(object)[ccns], ifelse(ords[ccns], "*", ""), ":", lvltxts, " ; ")
+	
 	cat(ccoltxt, "\n", fill=TRUE)
 	invisible()
 }

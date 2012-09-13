@@ -9,7 +9,7 @@ Display contents/structure of a \code{\link{numdfr}} object
 Display contents of a \code{\link{numdfr}} object
 }
 \usage{
-\method{str}{numdfr}(object, ...)
+\method{str}{numdfr}(object, short=TRUE, ...)
 \method{print}{numdfr}(x, ..., digits = NULL, quote = FALSE, right = TRUE,
     row.names = TRUE)
 }
@@ -17,6 +17,9 @@ Display contents of a \code{\link{numdfr}} object
 \arguments{
   \item{object}{
 \code{\link{numdfr}} object
+}
+  \item{short}{
+if \code{TRUE} (the default), only max 10 rownames, colnames and factors are displayed
 }
   \item{\dots}{
 ignored for now for \code{str}. Passed on to printing the matrix in \code{print}
@@ -43,6 +46,7 @@ Nick Sabbe
 \examples{
 iris.nd<-numdfr(iris)
 str(iris.nd)
+str(iris.nd, short=FALSE)
 print(iris.nd[1:5,])
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
