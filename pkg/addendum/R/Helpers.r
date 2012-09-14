@@ -894,6 +894,9 @@ dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, ve
 	reps<-sapply(lvls, length)-add
 	ords[reps<1]<-FALSE
 	reps[reps<1]<-1
+	
+	ccns<-findCatColNums(dfr)
+	trueorgfact<-rep(seq(nc) %in% ccns, reps)
 
 	repcols<-rep(seq_along(reps), reps)
 	newlvls<-do.call(c, lapply(reps, function(currep){
@@ -932,6 +935,7 @@ dfrConversionProps<-function(dfr, betweenColAndLevel, includeBaseLevel=FALSE, ve
 			newcoln=newcoln, #what is the extended column name
 			isfact=(coln!=newcoln),
 			isord=rep(ords, reps),
+			orgfact=trueorgfact,
 			stringsAsFactors=FALSE
 		)
 	)
