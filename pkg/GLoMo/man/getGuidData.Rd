@@ -2,10 +2,10 @@
 \alias{getGuidData}
 \alias{GuidData}%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Unique identifiers for all rows of dfr and their matches in glomo
+Unique identifiers for all rows of dfr and their matches in a GLoMo
 }
 \description{
-Unique identifiers for all rows of dfr and their matches in glomo
+Unique identifiers for all rows of dfr and their matches in \code{glomo}
 }
 \usage{
 getGuidData(glomo, dfr, guidPerObservation = NULL, whichHaveMissingCat, verbosity=0)
