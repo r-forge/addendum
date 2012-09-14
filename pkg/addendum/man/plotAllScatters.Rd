@@ -12,7 +12,7 @@ boxplots per category are drawn, and if both are categorical, a sunflowerplot is
 For the reference column, a barplot or histogram with density is plotted.
 }
 \usage{
-plotAllScatters(comparingColName, dfr, ylab, markCols = c(), onlyMarkCols = FALSE, indicateObs = c(), excludeOrg = FALSE, avoidUnivariateOutliers=FALSE)
+plotAllScatters(comparingColName, dfr, ylab, markCols = c(), onlyMarkCols = FALSE, indicateObs = c(), excludeOrg = FALSE, avoidUnivariateOutliers=FALSE, sunFlower2Cat=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -29,17 +29,20 @@ y-label for plots
 Set of columns you want to accentuate (in green)
 }
   \item{onlyMarkCols}{
-If TRUE, plot only the comparisons for the columns in markCols
+If \code{TRUE}, plot only the comparisons for the columns in markCols
 }
   \item{indicateObs}{
 rownumber in \code{dfr} of observations you want to indicate (in orange)
 }
   \item{excludeOrg}{
-if TRUE, don't include the barplot/histogram for \code{comparingColName}
+if \code{TRUE}, don't include the barplot/histogram for \code{comparingColName}
 }
   \item{avoidUnivariateOutliers}{
-if TRUE, before drawing, the univariate outliers (see \code{\link{outlierIndices}})
+if \code{TRUE}, before drawing, the univariate outliers (see \code{\link{outlierIndices}})
 are set to \code{NA} so they don't distort the graphs.
+}
+  \item{sunFlower2Cat}{
+if \code{TRUE}, for 2 categoricals, use a sunflower plot, otherwise a heatmap-like plot (the default) is used.
 }
 }
 \details{

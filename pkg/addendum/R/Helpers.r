@@ -150,7 +150,7 @@ squareLikeLayoutForNGraphs<-function(n, useLayout=TRUE, traceRes=FALSE)
 #Decides which type of graph is most appropriate.
 plotAllScatters<-function(comparingColName, dfr, ylab, markCols=c(),
 	onlyMarkCols=FALSE, indicateObs=c(), excludeOrg=FALSE,
-	avoidUnivariateOutliers=FALSE)
+	avoidUnivariateOutliers=FALSE, sunFlower2Cat=FALSE)
 {
 	markColor<-"green"
 	indicateColor<-"orange"
@@ -206,22 +206,66 @@ plotAllScatters<-function(comparingColName, dfr, ylab, markCols=c(),
       {
         if(is.factor(comparingCol))
         {
-          ttt<-table(data.frame(curcol,comparingCol))
-          tt<-data.frame(ttt)
-          colnames(tt)<-c(colnm, comparingColName, "Freq")
-          #print(names(tt))
-          tt[,colnm]<-as.factor(tt[,colnm])
-          tt[,comparingColName]<-as.factor(tt[,comparingColName])
-
-          ppin <- par("pin")
-          xsize<-ppin[1] / (length(levels(curcol)) + 1)
-          ysize<-ppin[2] / (length(levels(comparingCol)) + 1)
-          sunflowerplot(tt[,colnm],tt[,comparingColName], number=tt$Freq,
-            xlim = c(0.5,length(levels(curcol)) + 0.5),
-            ylim = c(0.5,length(levels(comparingCol)) + 0.5),
-            xlab = colnm, size=min(xsize,ysize)/2, main="", xaxt="n", yaxt="n")
-          axis(1, at=seq_along(levels(curcol)), labels=levels(curcol))
-          axis(2, at=seq_along(levels(comparingCol)), labels=levels(comparingCol))
+        	if(sunFlower2Cat)
+        	{
+	          ttt<-table(data.frame(curcol,comparingCol))
+	          tt<-data.frame(ttt)
+	          colnames(tt)<-c(colnm, comparingColName, "Freq")
+	          #print(names(tt))
+	          tt[,colnm]<-as.factor(tt[,colnm])
+	          tt[,comparingColName]<-as.factor(tt[,comparingColName])
+	
+	          ppin <- par("pin")
+	          xsize<-ppin[1] / (length(levels(curcol)) + 1)
+	          ysize<-ppin[2] / (length(levels(comparingCol)) + 1)
+	          sunflowerplot(tt[,colnm],tt[,comparingColName], number=tt$Freq,
+	            xlim = c(0.5,length(levels(curcol)) + 0.5),
+	            ylim = c(0.5,length(levels(comparingCol)) + 0.5),
+	            xlab = colnm, size=min(xsize,ysize)/2, main="", xaxt="n", yaxt="n")
+	          axis(1, at=seq_along(levels(curcol)), labels=levels(curcol))
+	          axis(2, at=seq_along(levels(comparingCol)), labels=levels(comparingCol))
+        	}
+        	else
+        	{
+        		ttt<-table(data.frame(curcol,comparingCol))
+        		tt<-data.frame(ttt)
+        		colnames(tt)<-c("x", "y", "Freq")
+        		#print(names(tt))
+        		tt$x<-as.factor(tt$x)
+        		tt$y<-as.factor(tt$y)
+        		#str(tt)
+        		
+        		minFreq<-min(tt$Freq)
+        		maxFreq<-max(tt$Freq)
+        		numX<-length(levels(tt$x))
+        		numY<-length(levels(tt$y))
+        		
+        		ppin <- par("pin")
+        		xsize<-ppin[1] / (length(levels(tt$x)) + 1)
+        		ysize<-ppin[2] / (length(levels(tt$y)) + 1)
+        		plot(as.numeric(tt$x),as.numeric(tt$y),
+        				 xlim=c(0.5,length(levels(tt$x)) + 0.5),
+        				 ylim=c(0.5,length(levels(tt$y)) + 0.5),
+        				 xlab = colnm, main="", xaxt="n", yaxt="n")
+        		axis(1, at=seq_along(levels(curcol)), labels=levels(curcol))
+        		axis(2, at=seq_along(levels(comparingCol)), labels=levels(comparingCol))
+        		
+        		
+        		sapply(seq(numX), function(xi){
+        			sapply(seq(numY), function(yi){
+        				#catw("xi=", xi, ", yi=", yi)
+        				frq<-tt$Freq[(as.numeric(tt$x)==xi) & (as.numeric(tt$y)==yi)]
+        				#catw("frq=", frq)
+        				freqpct<-(frq-minFreq)/(maxFreq-minFreq)
+        				clr<-rgb(freqpct, 1-freqpct, 0, 1)
+        				rect(-0.5+xi, -0.5+yi, 0.5+xi, 0.5+yi, col=clr)
+        				text(xi, yi, labels=frq)
+        				invisible()
+        			})
+        			invisible()
+        		})
+        		invisible()
+        	}
         }
         else
         {
