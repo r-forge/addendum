@@ -37,6 +37,7 @@ Add list of functions here later on (similar to addendum)
 	}
 	\item Properties/utility \enumerate{
 		\item \code{\link{dim.numdfr}}
+		\item \code{\link{str.numdfr}}
 		\item \code{\link{dimnames.numdfr}}
 		\item \code{\link{factorsToDummyVariables.numdfr}}
 		\item \code{\link{findCatColNums.numdfr}}
