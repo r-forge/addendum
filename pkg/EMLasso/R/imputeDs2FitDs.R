@@ -149,6 +149,7 @@ imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
 			}
 			if(exists("toAddTransformChecker", object$transformParams))
 			{
+				catwif(verbosity > 1, "Using passed along toAddTransformChecker")
 				toAddTransformChecker<-object$transformParams$toAddTransformChecker
 				object$transformParams$toAddTransformChecker<-NULL
 			}
@@ -159,7 +160,10 @@ imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
 				#This may change in later implementations
 				catwif(verbosity > 1, "adding transformations for all non-factor columns")
 				anf<-object$transformParams[["_AllNonFact"]]
-				nfactcols<-unique(retval$newformdata$coln[!retval$newformdata$isfact])
+				#printif(verbosity > 1,retval$newformdata)
+				#nfactcols<-unique(retval$newformdata$coln[!retval$newformdata$isfact])
+				nfactcols<-unique(retval$newformdata$coln[!retval$newformdata$orgfact])
+				catwif(verbosity > 1, "this is for columns: ", nfactcols)
 				object$transformParams<-lapply(nfactcols, function(nfc){anf})
 				names(object$transformParams)<-nfactcols
 			}
@@ -170,7 +174,8 @@ imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
 				{
 					orgname<-names(object$transformParams)[coli]
 					curob<-object$transformParams[[coli]]
-					useThese<-sapply(curob, toAddTransformChecker, orgname, mat[,orgname], verbosity=verbosity-1, simplify=FALSE)
+					useThese<-sapply(curob, toAddTransformChecker, orgname, mat[,orgname], verbosity=verbosity-5, simplify=FALSE)
+					#stop()
 					areNull<-sapply(useThese, is.null)
 					if(any(areNull))
 					{
@@ -247,9 +252,11 @@ imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
 		}
 		if(!is.null(object$scalingParams))
 		{
-			nfactcols<-unique(retval$newformdata$newcoln[!retval$newformdata$isfact])
+			#nfactcols<-unique(retval$newformdata$newcoln[!retval$newformdata$isfact])
+			nfactcols<-unique(retval$newformdata$newcoln[!retval$newformdata$orgfact])
 			catwif(verbosity > 10, "nfactcols:", nfactcols)
-			factcols<-unique(retval$newformdata$newcoln[retval$newformdata$isfact])
+			#factcols<-unique(retval$newformdata$newcoln[retval$newformdata$isfact])
+			factcols<-unique(retval$newformdata$newcoln[retval$newformdata$orgfact])
 			catwif(verbosity > 10, "factcols:", factcols)
 			extracols<-extranames
 			catwif(verbosity > 10, "extracols:", extracols)
