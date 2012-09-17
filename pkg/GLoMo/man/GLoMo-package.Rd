@@ -28,6 +28,7 @@ Main class: \code{\link{GLoMo-class}}
 		\item \code{\link{rCatsAndCntInDfr}}
 		\item \code{\link{rCatsInDfr}}
 		\item \code{\link{reusableDataForGLoMoSampling}}
+		\item \code{\link{combineGLoMos}}
 	}
 	\item Fitting \enumerate{
 		\item \code{\link{GLoMo}}
