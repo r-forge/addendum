@@ -3176,6 +3176,12 @@ do.parallel<-function(i, functionname, paramname, logdir, savedir=logdir,
 		#retval<-reduce.cv.1l.emlasso(retval, param, orgdfr, ..., verbosity=verbosity-2)
 	}
 
+	#try to make sure memory gets freed up as soon as possible...
+	toRem<-objects()
+	toRem<-toRem[toRem!="retval"]
+	rm(list=toRem)
+	rm(toRem)
+	gc()
 	return(retval)
 }
 
@@ -4585,4 +4591,11 @@ sampleOrdered<-function(x, size, replace = FALSE, prob = NULL)
 	{
 		x[sample.int(length(x), size=size, replace = replace, prob = prob)]
 	}
+}
+
+sourceAllRFilesInDir<-function(dir="./", fileForm=".*\\.r")
+{
+	fls <- list.files(dir, fileForm, ignore.case=TRUE, full.names=TRUE)
+	sapply(fls, source)
+	invisible()
 }
