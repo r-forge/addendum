@@ -24,6 +24,7 @@
 #' @export
 validateFunction.lognet<-function(attempts, otherData, forrow, verbosity=0)
 {
+	#verbosity<-100
 	#ripped mostly from my old sample.conditional.predictor.fit.oneAttempt
 	stopifnot(inherits(otherData, "SamplingReusablesLognet"))
 	#for now, assume otherData$outcomes has one item for each potental forrow
@@ -32,10 +33,23 @@ validateFunction.lognet<-function(attempts, otherData, forrow, verbosity=0)
 	if(is.factor(curOutcome)) curOutcome<-as.integer(curOutcome)-1 #makes the first level the reference
 	probYPos<-predictProb(otherData$valModelWrapper, newdata=attempts$predicted,
 		verbosity=verbosity-1)
-	if(curOutcome)
+	if(!curOutcome)
 	{
 		probYPos<-1-probYPos
 	}
 	#rejection sampling:
-	return(which(runif(nrow(attempts$predicted)) <= probYPos))
+	unifsamp<-runif(nrow(attempts$predicted))
+	keep<-unifsamp <= probYPos
+# 	#TMPNS
+# 	if(forrow %in% c(4, 41, 60, 67, 77, 83, 87, 99))
+# 	{
+# 		catw("Predicted probabilities per sampled value of cat1 for row", forrow, "(true outcome is", curOutcome, "):")
+# 		print(tapply(probYPos, attempts$predicted$cat1, summary))
+# 	}
+# 	#TMPNS
+# 	#TMPNS
+# 	catwif(verbosity > 10, "Numerical outcome was: ", curOutcome)
+# 	printif(verbosity > 10,table(cat1=attempts$predicted$cat1, accepted=keep))
+# 	#TMPNS
+	return(which(keep))
 }

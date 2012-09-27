@@ -100,6 +100,27 @@ EMLasso<-function(ds, out, family=c("gaussian","binomial","poisson","multinomial
 			family<-match.arg(family)
 		}
 	}
+	if(family=="binomial")
+	{
+		if(! is.factor(out))
+		{
+			catw("Family is binomial, so converting the outcome to factor.")
+			out<-factor(out)
+			if(length(levels(out)) != 2)
+			{
+				stop("The outcome should have exactly 2 levels")
+			}
+		}
+	}
+	else if(family=="multinomial")
+	{
+		if(! is.factor(out))
+		{
+			catw("Family is binomial, so converting the outcome to factor.")
+			out<-factor(out)
+		}
+	}
+	if(any(is.na(out))) stop("No missing values allowed in the outcome for EMLasso.")
 	imputeDs2FitDsProperties<-imputeDs2FitDsProps(object=imputeDs2FitDsProperties,ds=ds,verbosity=verbosity)
 	catwif(verbosity > 0, "Complete the data once ")
 	weightsName<-"EMLasso_weights"

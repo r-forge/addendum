@@ -57,7 +57,8 @@ lognetProbabilityReusable<-function(lognet, ds, imputeDs2FitDsProperties=normalI
 	
 	retval<-list(imputeDs2FitDsProperties = imputeDs2FitDsProperties,
 							 betas=betas,
-							 a0=lognet$a0[usecol])
+							 a0=lognet$a0[usecol],
+							 penalty=(lognet$lambda[usecol])*(sum(abs(betas))))
 	class(retval)<-"lognetProbabilityReusable"
 	return(retval)
 }

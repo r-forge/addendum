@@ -34,6 +34,8 @@ predictProb<-function(object, newdata, ..., verbosity=0) UseMethod("predictProb"
 #' @export
 predictProb.lognetProbabilityReusable<-function(object, newdata, ..., verbosity=0)
 {
+	catwif(verbosity > 10, "The betas are:")
+	printif(verbosity > 10, object$betas)
 	mat<-imputeDs2FitDs(object$imputeDs2FitDsProperties,newdata,verbosity=verbosity-1)
 	mat<-mat[,names(object$betas),drop=FALSE]
 	catwif(verbosity > 5, "Structure of converted and column-reduced matrix:")
@@ -42,8 +44,18 @@ predictProb.lognetProbabilityReusable<-function(object, newdata, ..., verbosity=
 	tmpres<-as.vector(mat %*% object$betas)
 	catwif(verbosity > 5, "Result after matrix multiplication:")
 	printif(verbosity > 5, tmpres)
-	linval<-as.vector(tmpres) + object$a0
+	linval<-as.vector(tmpres) + object$a0 - object$penalty
+# 	rvnopen<-expit(linval)
+# 	catwif(verbosity > 5, "Linear values without penalty:")
+# 	printif(verbosity > 5, linval)
+	linval<- linval - object$penalty
 	catwif(verbosity > 5, "Linear values:")
 	printif(verbosity > 5, linval)
-	return(expit(linval))
+	rv<-expit(linval)
+	
+# 	catwif(verbosity > 5, "Unpenalized probability:")
+# 	printif(verbosity > 5, rvnopen)
+	catwif(verbosity > 5, "Penalized probability:")
+	printif(verbosity > 5, rv)
+	return(rv)
 }

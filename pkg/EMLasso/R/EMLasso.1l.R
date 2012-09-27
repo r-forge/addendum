@@ -62,6 +62,26 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	family="binomial", convergenceChecker=convergenceCheckCreator(),
 	postProcess=postProcessEMLasso1l, verbosity=0, extraLog=function(...){})
 {
+	if(family=="binomial")
+	{
+		if(! is.factor(out))
+		{
+			catw("Family is binomial, so converting the outcome to factor.")
+			out<-factor(out)
+			if(length(levels(out)) != 2)
+			{
+				stop("The outcome should have exactly 2 levels")
+			}
+		}
+	}
+	else if(family=="multinomial")
+	{
+		if(! is.factor(out))
+		{
+			catw("Family is binomial, so converting the outcome to factor.")
+			out<-factor(out)
+		}
+	}
 	if(is.data.frame(ds))
 	{
 		catwif(verbosity > 0, "ds was passed in as a data.frame. For performance reasons, it will now be converted to numdfr first!")
@@ -81,6 +101,10 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	catwif(verbosity > 0, "random fill the dataset, dims before:", dim(ds))
 	imputedData<-completeMarginal(object=firstTimeCompleter,ds=ds, out=out, rowsToUse=rowsToUseForFit, verbosity=verbosity-2)
 	
+# 	#NSTMP
+# 	d_imputedData<<-imputedData
+# 	#NSTMP
+	
 	catwif(verbosity > 0, "random fill the dataset, dims after:", dim(imputedData$ds))
 	
 	#get an initial estimate of the lasso parameters
@@ -92,15 +116,27 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 	coefs<-coef(lasso.fit)
 	#apparently, this holds a sparse matrix with 1 column
 	coefs<-as.data.frame(as.matrix(t(coefs)))
-
+	
+# 	#NSTMP
+# 	d_lasso.fit<<-lasso.fit
+# 	#NSTMP
+	
 	catwif(verbosity > 0, "First predictor model fit.")
 	#actually fit the predictor model on this adjusted dataset
 	#(would it make sense to calculate the uniqueIdentifiersPerRow up front? Probably not?)
 	predictorModel<-fitPredictor(dfr=imputedData$ds, weights=imputedData$weights, verbosity=verbosity-1)
 
+# 	#NSTMP
+# 	d_predictorModel<<-predictorModel
+# 	#NSTMP
+	
 	reusableForSampling<-predictorModelSamplingReusables(predictorModel=predictorModel, iterCount=0, 
 		previousReusables=NULL, ds=ds, verbosity=verbosity-1)
 	extraLog(reusableForSampling)
+	
+# 	#NSTMP
+# 	d_reusableForSampling<<-reusableForSampling
+# 	#NSTMP
 	
 	#Here starts the actual EM
 	convergence<-list(converged=FALSE) #make this similar in form to convergenceChecker result
@@ -116,17 +152,29 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 			imputeDs2FitDsProperties=imputeDs2FitDsProperties, verbosity=verbosity-2)
 		catwif(verbosity > 1, "->Before predict call")
 		
+# 		#NSTMP
+# 		d_reusableForvalidation<<-reusableForvalidation
+# 		#NSTMP
+		
 		curData<-sampleConditional(predictorModel=predictorModel, outcomeModel=lasso.fit, 
 			nrOfSamplesPerMDRow=nrOfSamplesPerMDRow, ds=ds, out=out, rowsToUseForFit=rowsToUseForFit,
 			reusableForSampling=reusableForSampling, 
 			reusableForvalidation=reusableForvalidation, verbosity=verbosity-2)
+		
+# 		#NSTMP
+# 		d_curData<<-curData
+# 		#NSTMP
 		
 		extraLog(curData, "Imputed data", ds, out)
 		
 		reusableForSampling<-predictorModelSamplingReusables(predictorModel=predictorModel, iterCount=iterCount, 
 			previousReusables=reusableForSampling, ds=ds, verbosity=verbosity-1)
 		extraLog(reusableForSampling)
-
+		
+# 		#NSTMP
+# 		d_reusableForSampling2<<-reusableForSampling
+# 		#NSTMP
+		
 		#Given this data, fit
 		#a) The lasso
 		catwif(verbosity > 1, "->Fitting lasso")
@@ -135,10 +183,18 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 			verbosity=verbosity-2, imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
 		extraLog(lasso.fit)
 		
+# 		#NSTMP
+# 		d_lasso.fit2<<-lasso.fit
+# 		#NSTMP
+		
 		#b) The Predictor Model
 		catwif(verbosity > 1, "->Fitting predictors model")
 		predictorModel<-fitPredictor(dfr=curData$ds, weights=curData$weights, verbosity=verbosity-2)
 		extraLog(predictorModel)
+		
+# 		#NSTMP
+# 		d_predictorModel2<<-predictorModel
+# 		#NSTMP
 		
 		catwif(verbosity > 1, "->Checking convergence")
 		newcoefs<-coef(lasso.fit)
@@ -148,7 +204,16 @@ EMLasso.1l<-function(ds, out, lambda, nrOfSamplesPerMDRow=10,
 		convergence<-convergenceChecker(coefs, verbosity = verbosity-2)
 		#converged<-checkConvergence.lognet(coefs, minIt, maxIt, verbosity = verbosity-2)
 		
+# 		#NSTMP
+# 		d_convergence<<-convergence
+# 		#NSTMP
+		
 		if((verbosity > 1) & (convergence$converged)) catt("****Convergence in iteration", iterCount)
+		gc()
+# 		#NSTMP
+# 		catw("Will act like we converged anyway, to get things over with...")
+# 		convergence$converged<-TRUE
+# 		#NSTMP
 	}
 	retval<-list(
 		lasso.fit=lasso.fit,
