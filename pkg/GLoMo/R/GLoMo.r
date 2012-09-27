@@ -198,6 +198,7 @@ rCatsInDfr<-function(dfr, maxFullNACatCols=6, howManyIfTooMany=1000,
 			{
 				catwif(verbosity>1, "needed to calculate weights")
 				catMargprobs<-expand.grid(probs[curnas])
+				catwif(verbosity>1, "will generate", nrow(catMargprobs), "observations")
 				catCombProbs<-apply(catMargprobs, 1, prod)
 			}
 		}
@@ -541,6 +542,11 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 							pi.c<-glomo$pihat[curcatrow]
 							relvMus<-matrix(unlist(glomo$uniqueFactorCombinationsAndContinuousMeans[
 								curcatrow,presentCntColsInDfr,drop=TRUE]), ncol=1)
+							#relvMus contains for each relevant cell and for each continuous column with missing data
+							# the mean value.
+							#Note: typically, in the first iteration of an EMLasso, these will all be equal, as the 
+							#missing values are imputed with the marginal mean
+							
 # 							if(verbosity > 5)
 # 							{
 # 								catw("dimension and class of invSig22:", dim(invSig22), "->", class(invSig22))
@@ -566,10 +572,15 @@ reusableDataForGLoMoSampling<-function(glomo, dfr, forrows=seq(nrow(dfr)),
 						subtr<-maxd-100
 						deltas<-deltas - subtr
 					}
+					#Note: if all relvMus were equal, then so will all part1 and part2,
+					#so: every individual delta is really a constant times pi.c
 					deltas<-exp(deltas) #p349 in Analysis of Incomplete Multivariate Data
 				}
 				deltasum<-sum(deltas)
 				probs<-deltas/deltasum
+				#Note if all relvMus were equal, then the common factor is divided away
+				#so probs are simply rescaled versions of pi.c (the cell probabilities)
+				#so that they sum to 1
 			}
 			else
 			{
@@ -786,8 +797,13 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 						length(glomorowsforcurrow))
 					curglomorowi<-glomorowsforcurrow[i]
 					howmanysamplesforcurglomorow<-howofteniseachglomorowsampled[i]
+					catwif(verbosity > 5, "Need", howmanysamplesforcurglomorow, "samples")
 					useMu<-unlist(glomo$uniqueFactorCombinationsAndContinuousMeans[
 						curglomorowi,cntcols, drop=TRUE])
+# 					#TMPNS
+# 					catw("Original useMu:")
+# 					print(useMu)
+# 					#TMPNS
 					if(length(curreusabledata$whichCntColNA) != length(cntcols))
 					{
 						#so part of the continuous data is already present
@@ -796,11 +812,28 @@ predict.GLoMo<-function(object, nobs=1, newdata=NULL, forrows=seq(nrow(newdata))
 						mu2<-useMu[curreusabledata$whichCntColNotNA]
 						useMu<-unlist(mu1 + as.vector(curreusabledata$sigLeft %*%
 							matrix(unlist(curreusabledata$a - mu2), ncol=1)))
+# 						#TMPNS
+# 						catw("sigleft:")
+# 						print(curreusabledata$sigLeft)
+# 						catw("a-mu2:")
+# 						print(matrix(unlist(curreusabledata$a - mu2), ncol=1))
+# 						#TMPNS
+						#note: a is the value in the row, mu2 is the mean from the GLoMo. It is common in the 
+						#first iteration of an EMLasso that these are the same (as missing values are imputed
+						#with the mean).
+# 						#TMPNS
+# 						catw("Adapted useMu (to already present continuous data):")
+# 						print(useMu)
+# 						#TMPNS
 					}
 					catwif(verbosity > 2,
 						"Past parameter calculation. Will now generate conditional normal.")
 					gen<-qrmvnorm(howmanysamplesforcurglomorow, mean=useMu,
 						sigma=curreusabledata$useSigma) #normal, each row = one simulation
+# 					#TMPNS
+# 					catw("Generated normal data")
+# 					print(gen)
+# 					#TMPNS
 					allposinresforcurglomorow<-seq(from=firstposofeachglomorowinresult[i],
 						to=lastposofeachglomorowinresult[i])
 					retval[allposinresforcurglomorow,
@@ -960,6 +993,7 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrows,
 		{
 			#we had sworn that this would be the last loop, so 'accept' randomly
 			#what is still needed.
+			catwif(verbosity > 0, "Emergency break: randomly accepting some observations because convergence did not occur yet", howManyLoops)
 			stillOpen<-seq(tryAtATime)
 			if(newlyAccepted > 0) stillOpen<-stillOpen[-newAttemptValidity]
 			fakeAccepted<-sample(stillOpen, nobs - successes - newlyAccepted)
@@ -970,7 +1004,9 @@ predict.conditional.GLoMo<-function(object, nobs=1, dfr, forrows,
 		{
 			if(newlyAccepted > nobs - successes)
 			{
-				newAttemptValidity<-newAttemptValidity[seq(nobs - successes)]
+				#note: there used to be seq instead of sample.int here, but the attempts 
+				#are grouped per glomorow, so in some cases this is a bad idea...
+				newAttemptValidity<-newAttemptValidity[sample.int(newlyAccepted, nobs - successes, replace=FALSE) ]
 				newlyAccepted<-nobs - successes
 			}
 			successes<-successes+newlyAccepted
