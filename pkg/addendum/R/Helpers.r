@@ -4599,3 +4599,163 @@ sourceAllRFilesInDir<-function(dir="./", fileForm=".*\\.r")
 	sapply(fls, source)
 	invisible()
 }
+
+plotGeneralDistr<-function(DPQfuncs=list(d=dnorm, p=pnorm, q=qnorm), params=list(mean=0, sd=1), minQuant=0.01, maxQuant=0.99, 
+													 topmult=1.1, numpts=1001, legendPos=rep(c("topleft", "topright", "bottomleft", "bottomright"), length.out=length(params)),
+													 main="", cumulative=FALSE, trueMaxY)
+{
+	npar<-length(params)
+	if((npar < 1) || (npar > 2)) stop("For now, this function only works with 1 or 2 params")
+	
+	for(i in npar)
+	{
+		params[[i]]<-sort(unique(params[[i]]))
+	}
+	
+	tobedrawn<-expand.grid(params)
+	cols<-rep(seq_along(palette()), length.out=length(params[[1]]))
+	ltps<-1
+	if(npar > 1)
+	{
+		ltps<-rep(1:6, length.out=length(params[[2]]))
+	}
+	plotparms<-list(col=cols, lty=ltps) #used further on so don't skip creating it
+	drawparams<-expand.grid(plotparms)
+	
+	nex<-nrow(tobedrawn)
+	
+	quants<-sapply(seq(nex), function(i){
+		curpar<-unclass(tobedrawn[i,])
+		curpar<-c(list(c(minQuant, maxQuant)), curpar)
+		do.call(what=DPQfuncs$q, args=curpar)
+	})
+	xlim<-range(quants)
+	
+	xs<-seq(xlim[1], xlim[2], length.out=numpts)
+	
+	ys<-sapply(seq(nex), function(i){
+		curpar<-unclass(tobedrawn[i,])
+		curpar<-c(list(xs), curpar)
+		if(cumulative)
+		{
+			do.call(what=DPQfuncs$p, args=curpar)
+		}
+		else
+		{
+			do.call(what=DPQfuncs$d, args=curpar)
+		}
+	})
+	
+	if(cumulative)
+	{
+		ylim<-c(0, 1)
+	}
+	else
+	{
+		top<-max(ys)
+		ylim<-c(0, topmult * top)
+	}
+	if(!missing(trueMaxY))
+	{
+		if(trueMaxY < ylim[2])
+		{
+			ylim[2]<-trueMaxY
+		}
+	}
+	
+	for(i in seq(nex))
+	{
+		curpar<-unclass(drawparams[i,])
+		curpar<-c(list(xs, ys[,i]), curpar)
+		if(i==1)
+		{
+			curpar$type<-"l"
+			curpar$xlim<-xlim
+			curpar$ylim<-ylim
+			curpar$main<-main
+			curpar$xlab<-"value"
+			curpar$ylab<-"density"
+			do.call(what=plot, args=curpar)
+		}
+		else
+		{
+			do.call(what=lines, args=curpar)
+		}
+	}
+	
+	legparmsnames<-c("text.col", "lty")
+	plotparmsnames<-c("col", "lty")
+	
+	if(length(legendPos) > 0)
+	{
+		for(i in seq(npar))
+		{
+			if(length(params[[i]]) > 1)
+			{
+				curpar<-list(x=legendPos[i], y=NULL, legend=params[[i]], title=names(params)[i])
+				curpar[[legparmsnames[i]]]<-plotparms[[plotparmsnames[i]]]
+				do.call(what=legend, args=curpar)
+			}
+		}
+	}
+	invisible()
+}
+
+plotNormal<-function(means=0, sds=1, main="normals", ...)
+{
+	plotGeneralDistr(DPQfuncs=list(d=dnorm, p=pnorm, q=qnorm), params=list(mean=means, sd=sds), main=main, ...)
+}
+
+plotChiSquare<-function(dfs=1, ncps=0, main="Chisquares", ..., cumulative=FALSE)
+{
+	parms<-list(...)
+	if("trueMaxY" %in% names(parms))
+	{
+		trueMaxY<-parms$trueMaxY
+		parms$DPQfuncs<-list(d=dchisq, p=pchisq, q=qchisq)
+		parms$params<-list(df=dfs, ncp=ncps)
+		parms$main<-main
+		do.call(what=plotGeneralDistr, parms)
+	}
+	else
+	{
+		if(! cumulative)
+		{
+			plotGeneralDistr(DPQfuncs=list(d=dchisq, p=pchisq, q=qchisq), params=list(df=dfs, ncp=ncps), main=main, ..., cumulative=FALSE, trueMaxY=1.5)
+		}
+		else
+		{
+			plotGeneralDistr(DPQfuncs=list(d=dchisq, p=pchisq, q=qchisq), params=list(df=dfs, ncp=ncps), main=main, ..., cumulative=TRUE)
+		}
+	}
+}
+
+plotT<-function(dfs=1, ncps=0, main="Ts", ...)
+{
+	plotGeneralDistr(DPQfuncs=list(d=dt, p=pt, q=qt), params=list(df=dfs, ncp=ncps), main=main, ...)
+}
+
+plotF<-function(df1s=2, df2s=2, main="Fs", ..., cumulative=FALSE, maxQuant=0.70)
+{
+	parms<-list(...)
+	if("trueMaxY" %in% names(parms))
+	{
+		trueMaxY<-parms$trueMaxY
+		parms$DPQfuncs<-list(d=df, p=pf, q=qf)
+		parms$params<-list(df1=df1s, df2=df2s)
+		parms$main<-main
+		parms$maxQuant<-maxQuant
+		do.call(what=plotGeneralDistr, parms)
+	}
+	else
+	{
+		if(! cumulative)
+		{
+			plotGeneralDistr(DPQfuncs=list(d=df, p=pf, q=qf), params=list(df1=df1s, df2=df2s), main=main, ..., cumulative=FALSE, maxQuant=maxQuant, trueMaxY=1.5)
+		}
+		else
+		{
+			plotGeneralDistr(DPQfuncs=list(d=df, p=pf, q=qf), params=list(df1=df1s, df2=df2s), main=main, ..., cumulative=TRUE, maxQuant=maxQuant)
+		}
+	}
+}

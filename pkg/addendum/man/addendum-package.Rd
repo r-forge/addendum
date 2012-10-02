@@ -13,7 +13,7 @@ functions.
 \tabular{ll}{
 Package: \tab addendum\cr
 Type: \tab Package\cr
-Version: \tab 1.7.0\cr
+Version: \tab 1.7.1\cr
 Date: \tab 2012-09-26\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
@@ -50,6 +50,11 @@ LazyLoad: \tab yes\cr
 		\item \code{\link{sdcolinfo}}
 		\item \code{\link{matplotsd}}
 		\item \code{\link{plotWSD}}
+		\item \code{\link{plotGeneralDistr}}
+		\item \code{\link{plotNormal}}
+		\item \code{\link{plotChiSquare}}
+		\item \code{\link{plotT}}
+		\item \code{\link{plotF}}
 	}
 	\item formulas \enumerate{
 		\item \code{\link{basisExpansionFormula}}
