@@ -180,3 +180,29 @@ getLambdas.LambdaHelper<-function(x,...)
 {
 	getLambdas(x$regionOfInterestData, ...)
 }
+
+
+#' @rdname findReasonableLambdaHelper
+#' 
+#' @inheritParams getLambdas
+#' @param s integer index in the set of lambdas or an explicit value of lambda. 
+#' 	For cv.glmnet can also be "lambda.min" or "lambda.1se"
+#' @method getLambdas glmnet
+#' @usage \method{getLambdas}{glmnet}(x, s=1, ...)
+#' @export
+#' @examples x=matrix(rnorm(100*20),100,20)
+#' g2=sample(1:2,100,replace=TRUE)
+#' fit2=glmnet(x,g2,family="binomial")
+#' getLambdas(fit2)
+
+
+#' @rdname findReasonableLambdaHelper
+#' 
+#' @inheritParams getLambdas
+#' @method getLambdas cv.glmnet
+#' @usage \method{getLambdas}{cv.glmnet}(x, s=c("lambda.1se","lambda.min"), ...)
+#' @export
+#' @examples x=matrix(rnorm(100*20),100,20)
+#' g2=sample(1:2,100,replace=TRUE)
+#' cv.fit2=cv.glmnet(x,g2,family="binomial")
+#' getLambdas(cv.fit2)

@@ -36,16 +36,6 @@ crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
 #' @seealso \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 #' @keywords GLoMo EMLasso
 #' @examples y<-rbinom(nrow(iris), 1, 0.5)
-#' require(addendum)
-#' require(NumDfr)
-#' require(GLoMo)
-#' require(snowfall)
-#' require(EMLasso)
-#' sfInit(parallel = FALSE, cpus = 1)
-#' sfLibrary(addendum)
-#' sfLibrary(NumDfr)
-#' sfLibrary(GLoMo)
-#' sfLibrary(EMLasso)
 #' iris.cpy<-randomNA(iris, n=0.1)
 #' iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,  
 #' 	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
@@ -108,30 +98,32 @@ crossValidate.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, out=model$r
 #' @param varsets list of character vectors holding the variables (names) to be checked
 #' @param reps number of predictions
 #' @param nfolds number of folds for crossvalidation
-#' @param dsconvprops see \code{dsconvprops} (need to work on universal and correct naming...)
 #' @param returnGroups if \code{TRUE}, a list is returned with the normal result as its \code{result}
 #' 	item and a matrix holding the group assignment per repetition as the \code{groups} item.
 #' @param returnCoefs if \code{TRUE}, a list is returned with the normal result as its \code{result}
 #' 	item and a list of matrices holding the coefficient values per repetition and per fold as the 
 #' 	\code{coefs} item.
 #' @param reusabledata optional premade result of \code{\link{reusableDataForGLoMoSampling}}
+#' @param noScaling if \code{TRUE} (the default) the data is not scaled upon conversion
 #' @return List of the same length as \code{varsets} (unless it was length 1, then the first 
 #' 	object is simply returned). Each item is a matrix with one row for each row in \code{ds}
 #' 	and one column per \code{reps}, and holds the predicted probability in a crossvalidation.
 #' @keywords GLoMo EMLasso crossvalidate
 #' @export
-repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsconvprops=NULL, 
-	returnGroups=FALSE, returnCoefs=FALSE, ..., reusabledata, verbosity=0)
+repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, imputeDs2FitDsProperties=normalImputationConversion(), 
+	returnGroups=FALSE, returnCoefs=FALSE, ..., reusabledata, noScaling=TRUE, verbosity=0)
 {
-	#IMPORTANT! Right now, this function is not adapted to the imputedDs style instead of dsconvprops
-	#It has to be adapted, because currently the call to fit.logreg will (probably) fail or have
-	#unexpected results
-	warning("repeatedlyPredictOut needs adjustment to imputedDs. Better not to use it for now")
-	if((missing(dsconvprops)) || (is.null(dsconvprops)))
-	{
-		catwif(verbosity > 0, "dsconvprops was not passed along, so needed to recalculate it")
-		dsconvprops<-dfrConversionProps(dfr=ds, betweenColAndLevel="")
-	}
+# 	#IMPORTANT! Right now, this function is not adapted to the imputedDs style instead of dsconvprops
+# 	#It has to be adapted, because currently the call to fit.logreg will (probably) fail or have
+# 	#unexpected results
+# 	warning("repeatedlyPredictOut needs adjustment to imputedDs. Better not to use it for now")
+# 	if((missing(dsconvprops)) || (is.null(dsconvprops)))
+# 	{
+# 		catwif(verbosity > 0, "dsconvprops was not passed along, so needed to recalculate it")
+# 		dsconvprops<-dfrConversionProps(dfr=ds, betweenColAndLevel="")
+# 	}
+	imputeDs2FitDsProperties<-imputeDs2FitDsProps(object=imputeDs2FitDsProperties,ds=ds,verbosity=verbosity-1)
+	if(noScaling) imputeDs2FitDsProperties<-removeScaling(object=imputeDs2FitDsProperties,verbosity=verbosity-1)
 	
 	if(missing(reusabledata))
 	{
@@ -149,20 +141,22 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 		catwif(verbosity > 1, "***repeat", currep, "/", reps)
 		grps<-similarSizeGroups(ngroups=nfolds, nobs=nrow(ds), rand=TRUE)
 		if(returnGroups) allgrps[,currep]<-grps
+		catwif(verbosity > 1, "Complete the dataset")
 		curds<-predict(glomo, newdata=ds, reusabledata = reusabledata, verbosity=verbosity-5)
 		for(curfld in seq(nfolds))
 		{
 			catwif(verbosity > 2, "****fold", curfld, "/", nfolds)
+			valrows<-grps==curfld
+			valmat<-imputeDs2FitDs(imputeDs2FitDsProperties, ds=curds[valrows,], verbosity=verbosity-1)
+
 			fitds<-curds[grps!=curfld,]
 			fitout<-subsetFirstDim(out,grps!=curfld)
-			valrows<-grps==curfld
-			valds<-factorsToDummyVariables(curds[valrows,], dfrConvData=dsconvprops)
 			for(vsi in seq_along(varsets))
 			{
 				catwif(verbosity > 3, "*****varset", vsi, "/", length(varsets))
 				curUseVars<-varsets[[vsi]]
 				try({#sometimes this goes wrong??
-					curfit<-fit.logreg(ds=fitds, out=fitout, verbosity=verbosity-5, useCols=curUseVars, imputeDs2FitDsProperties=dsconvprops, ...)
+					curfit<-fit.logreg(ds=fitds, out=fitout, verbosity=verbosity-5, useCols=curUseVars, imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
 					if(returnCoefs)
 					{
 						curcoef<-coef(curfit)
@@ -172,7 +166,7 @@ repeatedlyPredictOut<-function(glomo, ds, out, varsets, reps=10, nfolds=10, dsco
 					}
 					useCols<-rownames(curfit$beta)
 					#catwif(verbosity > 3, "Effectively used columns:", useCols)
-					valdscurvarset<-valds[,useCols]
+					valdscurvarset<-valmat[,useCols]
 					curpreds<-predict(curfit, newx=valdscurvarset, type="response") #predicted probability
 					result[[vsi]][valrows,currep]<-curpreds
 				})
@@ -263,10 +257,10 @@ repeatedPredictedProbAUC<-function(reppredprob, out, verbosity=0, groups, onlyre
 #' 	a \code{\link{cv.glmnet}} object
 #' @keywords GLoMo EMLasso crossvalidate
 #' @export
-cv.MI.logreg<-function(glomo, ds, out, useVarNames, reps, dsconvprops, lambda, useAsGlmnetFit, ..., verbosity=0)
+cv.MI.logreg<-function(glomo, ds, out, useVarNames, reps, imputeDs2FitDsProperties=normalImputationConversion(), lambda, useAsGlmnetFit, ..., verbosity=0)
 {
 	preds<-repeatedlyPredictOut(glomo=glomo, ds=ds, out=out, varsets=list(useVarNames), reps=reps, 
-		..., dsconvprops=dsconvprops, returnGroups=TRUE, verbosity=verbosity-1)
+		..., imputeDs2FitDsProperties=imputeDs2FitDsProperties, returnGroups=TRUE, verbosity=verbosity-1)
 	groups<-preds$groups
 	preds<-preds$result
 	

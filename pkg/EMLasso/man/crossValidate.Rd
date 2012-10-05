@@ -19,15 +19,17 @@
     keepResultPerLambda=FALSE, verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
-    nfolds = 10, dsconvprops = NULL, returnGroups = FALSE,
-    returnCoefs = FALSE, ..., reusabledata, verbosity = 0)
+    nfolds = 10,
+    imputeDs2FitDsProperties = normalImputationConversion(),
+    returnGroups = FALSE, returnCoefs = FALSE, ...,
+    reusabledata, noScaling = TRUE, verbosity = 0)
 
   repeatedPredictedProbAUC(reppredprob, out, verbosity = 0,
     groups, onlyresult = TRUE, glmnetlike = TRUE)
 
   cv.MI.logreg(glomo, ds, out, useVarNames, reps,
-    dsconvprops, lambda, useAsGlmnetFit, ...,
-    verbosity = 0)
+    imputeDs2FitDsProperties = normalImputationConversion(),
+    lambda, useAsGlmnetFit, ..., verbosity = 0)
 }
 \arguments{
   \item{model}{model fit}
@@ -71,9 +73,6 @@
 
   \item{nfolds}{number of folds for crossvalidation}
 
-  \item{dsconvprops}{see \code{dsconvprops} (need to work
-  on universal and correct naming...)}
-
   \item{returnGroups}{if \code{TRUE}, a list is returned
   with the normal result as its \code{result} item and a
   matrix holding the group assignment per repetition as the
@@ -86,6 +85,9 @@
 
   \item{reusabledata}{optional premade result of
   \code{\link{reusableDataForGLoMoSampling}}}
+
+  \item{noScaling}{if \code{TRUE} (the default) the data is
+  not scaled upon conversion}
 
   \item{reppredprob}{one of the matrices as return by
   \code{repeatedlyPredictOut}}
@@ -144,16 +146,6 @@
 }
 \examples{
 y<-rbinom(nrow(iris), 1, 0.5)
-require(addendum)
-require(NumDfr)
-require(GLoMo)
-require(snowfall)
-require(EMLasso)
-sfInit(parallel = FALSE, cpus = 1)
-sfLibrary(addendum)
-sfLibrary(NumDfr)
-sfLibrary(GLoMo)
-sfLibrary(EMLasso)
 iris.cpy<-randomNA(iris, n=0.1)
 iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,
 	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,

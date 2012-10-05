@@ -23,6 +23,9 @@
 \alias{normalImputationConversion-class}
 \alias{print.unsafefunction}
 \alias{removeIllegals}
+\alias{removeScaling}
+\alias{removeScaling.default}
+\alias{removeScaling.dfrConversionPropsEx}
 \alias{specialLegalX}
 \alias{typicalScaleAndCenter}
 \alias{typicalTransformations}
@@ -43,6 +46,12 @@
   \method{imputeDs2FitDsProps}{default}(object,ds,verbosity=0)
 
   \method{imputeDs2FitDsProps}{normalImputationConversion}(object,ds,verbosity=0)
+
+  removeScaling(object,verbosity=0)
+
+  \method{removeScaling}{default}(object,verbosity=0)
+
+  \method{removeScaling}{dfrConversionPropsEx}(object,verbosity=0)
 
   normalImputationConversion(betweenColAndLevel = "",
     includeBaseLevel=FALSE, scalingParams=NULL,
@@ -175,7 +184,16 @@
   passed in (\code{object})
 
   In this (default) implementation, creat a
-  \code{\link{dfrConversionProps}}
+  \code{\link{dfrConversionProps}(Ex)}
+
+  object that will still perform the other data
+  conversions, but not scaling
+
+  In this (default) implementation, return whatever was
+  passed in (\code{object})
+
+  \code{\link{dfrConversionProps}(Ex)} object like
+  \code{object} but without scaling
 
   object of class \code{normalImputationConversion}
 
@@ -280,6 +298,12 @@ removeIllegals(c(1,NA,3,1/0,Inf))
   \code{\link{EMLasso}}
 
   \code{\link{EMLasso}}
+
+  \code{\link{repeatedlyPredictOut}}
+
+  \code{\link{repeatedlyPredictOut}}
+
+  \code{\link{repeatedlyPredictOut}}
 
   \code{\link{EMLasso}}
 }

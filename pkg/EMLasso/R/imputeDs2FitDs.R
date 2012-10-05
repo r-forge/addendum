@@ -110,7 +110,7 @@ imputeDs2FitDsProps.default<-function(object,ds,verbosity=0)
 #' @aliases imputeDs2FitDsProps imputeDs2FitDsProps.normalImputationConversion
 #' @method imputeDs2FitDsProps.normalImputationConversion
 #' @usage \method{imputeDs2FitDsProps}{normalImputationConversion}(object,ds,verbosity=0)
-#' @return In this (default) implementation, creat a \code{\link{dfrConversionProps}}
+#' @return In this (default) implementation, creat a \code{\link{dfrConversionProps}(Ex)}
 #' @seealso \code{\link{EMLasso}}
 #' @S3method imputeDs2FitDsProps normalImputationConversion
 imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
@@ -356,6 +356,45 @@ imputeDs2FitDsProps.normalImputationConversion<-function(object,ds,verbosity=0)
 	}
 	return(retval)
 }
+
+#' @rdname imputeDs2FitDs
+#' 
+#' @aliases imputeDs2FitDsProps
+#' @method removeScaling
+#' @usage removeScaling(object,verbosity=0)
+#' @return object that will still perform the other data conversions, but not scaling
+#' @seealso \code{\link{repeatedlyPredictOut}}
+#' @export removeScaling
+removeScaling<-function(object,verbosity=0) UseMethod("removeScaling")
+#' @rdname imputeDs2FitDs
+#' 
+#' @aliases removeScaling removeScaling.default
+#' @method removeScaling.default
+#' @usage \method{removeScaling}{default}(object,verbosity=0)
+#' @return In this (default) implementation, return whatever was passed in (\code{object})
+#' @seealso \code{\link{repeatedlyPredictOut}}
+#' @S3method removeScaling default
+removeScaling.default<-function(object,verbosity=0)
+{
+	return(object)
+}
+#' @rdname imputeDs2FitDs
+#' 
+#' @aliases removeScaling removeScaling.dfrConversionPropsEx
+#' @method removeScaling.dfrConversionPropsEx
+#' @usage \method{removeScaling}{dfrConversionPropsEx}(object,verbosity=0)
+#' @return \code{\link{dfrConversionProps}(Ex)} object like \code{object} but without scaling
+#' @seealso \code{\link{repeatedlyPredictOut}}
+#' @S3method removeScaling dfrConversionPropsEx
+removeScaling.dfrConversionPropsEx<-function(object,verbosity=0)
+{
+	object$usedCenters<-NULL
+	object$usedScales<-NULL
+	object$scaleFunc<-NULL
+	object$scaleBackFunc<-NULL
+	return(object)
+}
+
 #' @rdname imputeDs2FitDs
 #' 
 #' @aliases normalImputationConversion normalImputationConversion-class
