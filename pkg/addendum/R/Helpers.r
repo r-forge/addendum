@@ -991,6 +991,12 @@ factorsToDummyVariables.default<-function(dfr, betweenColAndLevel="", dfrConvDat
 # 		print(res[seq(min(10, nrow(res) )),])
 		retval[,nofacts]<-as.integer(res)
 	}
+	binfacts<-dfrConvData$newformdata$orgfact & (!dfrConvData$newformdata$isfact)
+	if(sum(binfacts) > 0)
+	{
+		catwif(verbosity > 0, "Categorical conversion needed for binary factor columns:", dfrConvData$newformdata$newcoln[binfacts])
+		retval[, binfacts]<-retval[, binfacts]-1
+	}
 	colnames(retval)<-dfrConvData$newformdata$newcoln
 	return(retval)
 }
