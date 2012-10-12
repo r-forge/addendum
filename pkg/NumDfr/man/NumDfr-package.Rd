@@ -14,8 +14,8 @@ some categorical ones, this will be a speedy alternative.
 \tabular{ll}{
 Package: \tab NumDfr\cr
 Type: \tab Package\cr
-Version: \tab 1.7.0\cr
-Date: \tab 2012-09-26\cr
+Version: \tab 1.7.2\cr
+Date: \tab 2012-10-11\cr
 License: \tab GNU\cr
 LazyLoad: \tab yes\cr
 }
