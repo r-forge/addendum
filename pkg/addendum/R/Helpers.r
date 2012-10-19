@@ -4418,7 +4418,7 @@ sfInitEx<-function (parallel = NULL, cpus = NULL, type = NULL, socketHosts = NUL
 		restore = restore, slaveOutfile = slaveOutfile, nostart = nostart, useRscript = useRscript)
 }
 
-plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, showEquiDistThres=10, verbosity=0)
+plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, showThres=10, verbosity=0)
 {
 	if (is.factor(out)) {
 		out <- as.integer(out)
@@ -4484,20 +4484,39 @@ plotROCFromRepPredProb<-function(obsrepprob, out, thres=seq(0,1, length.out=roun
 		lines(thresFPRtl, thresTPRtl, lty="dashed")
 		lines(thresFPRbr, thresTPRbr, lty="dashed")
 		lines(c(0,1), c(0,1), col="red")
-		if(showEquiDistThres > 0)
+		useThresPos<-NULL
+		if(length(showThres)==1)
 		{
-			if(nthres > showEquiDistThres)
+			showEquiDistThres<-showThres
+			if(showEquiDistThres > 0)
 			{
-				catwif(verbosity>0, "Will plot threshold points for", showEquiDistThres, "points.")
-				stps<-as.integer(nthres/showEquiDistThres)#always rounded down
-				strt<-max(as.integer((nthres%%showEquiDistThres)/2), 1)
-				useThresPos<-strt+(0:(showEquiDistThres-1))*stps
+				if(nthres > showEquiDistThres)
+				{
+					catwif(verbosity>0, "Will plot threshold points for", showEquiDistThres, "points.")
+					stps<-as.integer(nthres/showEquiDistThres)#always rounded down
+					strt<-max(as.integer((nthres%%showEquiDistThres)/2), 1)
+					useThresPos<-strt+(0:(showEquiDistThres-1))*stps
+				}
+				else
+				{
+					catwif(verbosity>0, "Will plot threshold points for", nthres, "points.")
+					useThresPos<-seq_along(thres)
+				}
+			}
+		}
+		else if(length(showThres)>1)
+		{
+			if(is.logical(showThres))
+			{
+				useThresPos<-rep(showThres, length.out=thres)
 			}
 			else
 			{
-				catwif(verbosity>0, "Will plot threshold points for", nthres, "points.")
-				useThresPos<-seq_along(thres)
+				useThresPos<-intersect(showThres, seq_along(thres))
 			}
+		}
+		if(length(useThresPos) > 0)
+		{
 			catwif(verbosity>0, "Plotted threshold points should be:", useThresPos)
 			points(thresFPR[useThresPos], thresTPR[useThresPos])
 			text(thresFPR[useThresPos], thresTPR[useThresPos], labels=paste("t=", format(thres[useThresPos], nsmall=2) ), pos=4)
@@ -4599,9 +4618,11 @@ sampleOrdered<-function(x, size, replace = FALSE, prob = NULL)
 	}
 }
 
-sourceAllRFilesInDir<-function(dir="./", fileForm=".*\\.r")
+sourceAllRFilesInDir<-function(dir="./", fileForm=".*\\.r", verbosity=0)
 {
 	fls <- list.files(dir, fileForm, ignore.case=TRUE, full.names=TRUE)
+	catwif(verbosity>0, "Files that will be sourced:")
+	printif(verbosity>0, fls)
 	sapply(fls, source)
 	invisible()
 }
@@ -4765,3 +4786,189 @@ plotF<-function(df1s=2, df2s=2, main="Fs", ..., cumulative=FALSE, maxQuant=0.70)
 		}
 	}
 }
+
+combineGlmnets<-function(mdls, allVarNames, lambdas, useCall, verbosity=0)
+{
+	thisCall<-match.call()
+	safeMemberListForAllModels<-function(nm, nullval=NULL){lapply(mdls, function(curmdl){if(is.null(curmdl)) nullval else curmdl[[nm]]} )}
+	if(missing(allVarNames))
+	{
+		allVarNames<-unique(do.call(c, lapply(mdls, function(curmdl){if(is.null(curmdl)) character() else  rownames(curmdl$beta)})))
+	}
+	if(missing(lambdas))
+	{
+		lambdas<-do.call(c, safeMemberListForAllModels("lambda", nullval=0))
+	}
+	if(missing(useCall))
+	{
+		useCall<-thisCall
+	}
+	firstNonNullModelIndex<-match(TRUE, !sapply(mdls, is.null))
+	
+	#construct the new beta matrix
+	lamsPerMdl<-sapply(mdls, function(curmdl){if(is.null(curmdl)) 1 else ncol(curmdl$beta)})
+	startColNr<-cumsum(c(1, lamsPerMdl))
+	#note: this should be a sparse matrix, but it should suffice...
+	beta<-matrix(0, nrow=length(allVarNames), ncol=length(mdls))
+	rownames(beta)<-allVarNames
+	colnames(beta)<-paste("s", seq(ncol(beta))-1, sep="")
+	for(i in seq_along(mdls))
+	{
+		if(!is.null(mdls[[i]]))
+		{
+			curbeta<-mdls[[i]]$beta
+			rownbrs<-match(rownames(curbeta), allVarNames)
+			colnbrs<-(startColNr[i]):(startColNr[i+1]-1)
+			beta[rownbrs, colnbrs]<-as.matrix(curbeta)
+		}
+	}
+	
+	rv<-list(call=useCall, 
+					 a0=do.call(c, safeMemberListForAllModels("a0", nullval=0)), 
+					 beta=beta, 
+					 lambda=lambdas, 
+					 dev.ratio=do.call(c, safeMemberListForAllModels("dev.ratio", nullval=0)),
+					 nulldev=do.call(c, safeMemberListForAllModels("nulldev", nullval=0)), 
+					 df=do.call(c, safeMemberListForAllModels("df", nullval=0)), 
+					 dim=dim(coef), 
+					 nobs=max(unlist(safeMemberListForAllModels("nobs", nullval=0)), na.rm=TRUE), 
+					 npasses=sum(unlist(safeMemberListForAllModels("npasses", nullval=0)), na.rm=TRUE), 
+					 offset=any(unlist(safeMemberListForAllModels("offset", nullval=FALSE))),
+					 jerr=max(unlist(safeMemberListForAllModels("jerr", nullval=0))) )
+	class(rv)<-class(mdls[[firstNonNullModelIndex]]) #simplification, but should work mostly
+	return(rv)
+}
+
+aucLikeLognet<-function(predictedprobabilities, out, wts=rep(1, length(out)))
+{
+	#nicked these lines from cv.lognet, simplified for 1 "fold" and 1 lambda
+	predmat<-matrix(predictedprobabilities, ncol=1)
+	y<-out #to be able to copy code from cv.lognet
+	nc<-dim(y)
+	if (is.null(nc)) {
+		y = as.factor(y)
+		ntab = table(y)
+		nc = as.integer(length(ntab))
+		y = diag(nc)[as.numeric(y), ]
+	}
+	cvraw<-auc.mat(y, predmat[, 1, drop=FALSE], wts)
+	#cvraw<-matrix(auc.mat(y, predmat[, 1, drop=FALSE], wts))
+	N<-1 #?? I think this is the right translation of the if (type.measure == "auc") part in cv.lognet
+	#it signifies the number of calculated crossvalidated aucs for each lambda, there (note: = count
+	#of the folds where this lambda is used)
+	
+	#Here is the original code, but we can greatly simplify because we only got 1 value!
+	# 	weights<-sum(wts) #yikes!
+	# 	
+	# 	cvm<-apply(cvraw, 2, weighted.mean, w = weights, na.rm = TRUE)
+	# 	cvsd<-sqrt(apply(scale(cvraw, cvm, FALSE)^2, 2, weighted.mean, 
+	# 									 w = weights, na.rm = TRUE)/(N - 1)) #oops, this will surely fail...?
+	cvm<-cvraw
+	cvsd<-Inf #well, maybe not ideal, but it should do for now
+	
+	
+	list(cvm=cvm, cvsd=cvsd)
+}
+
+glmnetNoPredictors<-function(y, xvarnames, family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"), weights, lambda)
+{
+	thisCall<-match.call()
+	if(missing(lambda))
+	{
+		stop("You need to specify the lambda(s) for glmnetNoPredictors.")
+	}
+	if(missing(xvarnames) || length(xvarnames) == 0)
+	{
+		stop("You need to specify at least one variable name for glmnetNoPredictors.")
+	}
+	family<-match.arg(family)
+	if(family %in% c("multinomial","mgaussian"))
+	{
+		stop("Some families ar not supported yet in glmnetNoPredictors...")
+	}
+	#let's ensure that the same kind of output variables conversions are performed
+	y<-drop(y)
+	if((family=="binomial") || (family=="multinomial"))
+	{
+		nc<-dim(y)
+		if (is.null(nc)) {
+			y<-as.factor(y)
+			ntab<-table(y)
+			classnames<-names(ntab)
+			nc<-as.integer(length(ntab))
+			y<-diag(nc)[as.numeric(y), ]
+		}
+		else {
+			nc = as.integer(nc[2])
+			classnames = colnames(y)
+		}
+		if (family == "binomial") {
+			if (nc > 2) 
+				stop("More than two classes; use multinomial family instead in call to glmnet", 
+						 call. = FALSE)
+			nc = as.integer(1)
+		}
+		#The above was from glmnet / lognet, now convert it back to  a factor fro glm to work...
+		y<-apply(y, 1, function(curyrow){match(1, curyrow)})
+		y<-factor(y, levels=seq_along(classnames), labels=classnames)
+	}
+
+	dfr<-data.frame(y=y)
+	if(missing(weights))
+	{
+		unpenalizedfit<-glm(y~1, data=dfr, family=family)
+	}
+	else
+	{
+		unpenalizedfit<-glm(y~1, data=dfr, family=family, weights=weights)
+	}
+	
+	colnms<-paste("s", seq_along(lambda)-1, sep="")
+	
+	a0<-rep(unpenalizedfit$coefficients[1], length(colnms)) #intercept
+	
+	beta<-Matrix(0, nrow=length(xvarnames), ncol=length(colnms), dimnames=list(xvarnames, colnms), sparse=TRUE)
+
+	dev.ratio<-(1-unpenalizedfit$deviance )/unpenalizedfit$null.deviance
+	#glmnet:
+	#The fraction of (null) deviance explained (for "elnet", this is the R-square). 
+	#The deviance calculations incorporate weights if present in the model. The 
+	#deviance is defined to be -2*(loglike_sat - loglike), where loglike_sat is the 
+	#log-likelihood for the saturated model (a model with a free parameter per 
+	#observation). Hence dev.fraction=1-dev/nulldev.
+	#glm
+	#up to a constant, minus twice the maximized log-likelihood. Where sensible, the 
+	#constant is chosen so that a saturated model has deviance zero.
+	nulldev<-unpenalizedfit$null.deviance 
+	#glmnet:
+	#Null deviance (per observation). This is defined to be -2*(loglike_sat -loglike(Null)); 
+	#The NULL model refers to the intercept model, except for the Cox, where it is the 0 model.
+	#glm
+	#The deviance for the null model, comparable with deviance. The null model will 
+	#include the offset, and an intercept if there is one in the model. Note that this 
+	#will be incorrect if the link function depends on the data other than through the 
+	#fitted mean: specify a zero offset to force a correct calculation.
+	df<-0
+	dim<-c(length(xvarnames), length(colnms))
+	nobs<-length(y)
+	npasses<-1
+	offset<-FALSE
+	jerr<-0
+	rv<-list(call=thisCall, a0=a0, beta=beta, lambda=lambda, dev.ratio=dev.ratio,
+					 nulldev=nulldev, df=df, dim=dim, nobs=nobs, npasses=npasses, offset=offset,
+					 jerr=jerr)
+	
+	extraname<-switch(family, 
+										gaussian = "elnet", 
+										poisson = "fishnet", 
+										binomial = "lognet", 
+										multinomial = "multnet", 
+										cox = "coxnet", 
+										mgaussian = "mrelnet")
+	
+	
+	class(rv)<-c(extraname, "glmnet")
+
+	return(rv)
+}
+

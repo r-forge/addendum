@@ -10,7 +10,7 @@ Plot the ROC from a matrix of predicted probabilities for several observations (
 and repeats (cols), given the true outcome for the observations.
 }
 \usage{
-plotROCFromRepPredProb(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, showEquiDistThres=10, verbosity=0)
+plotROCFromRepPredProb(obsrepprob, out, thres=seq(0,1, length.out=round(min(dim(obsrepprob))/2, 1)), doPlot=TRUE, showThres=10, verbosity=0)
 AUCFromRepPredProb(ROCFromRepPredProb)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -29,9 +29,10 @@ contains 0 and 1 and is sorted.
   \item{doPlot}{
 if \code{TRUE} (default), a plot is produced, otherwise only the result is returned.
 }
-  \item{showEquiDistThres}{
+  \item{showThres}{
 show at some points the value of the threshold. This number (default 10) indicates at how many equidistant
-(within the used/given thresholds) points this happens.
+(within the used/given thresholds) points this happens. Can also (as a logical or integer vector)
+tell which of the thresholds (in \code{thres}) are shown.
 }
   \item{verbosity}{
 The higher this value, the more levels of progress and debug information is
