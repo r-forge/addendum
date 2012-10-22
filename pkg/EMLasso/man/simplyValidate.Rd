@@ -1,25 +1,19 @@
 \name{simplyValidate}
 \alias{simplyValidate}
-\alias{simplyValidate.EMLasso}
-\alias{simplyValidate.EMLasso1l}
-\alias{sv.EMLasso}
-\alias{sv.EMLasso-class}
-\alias{sv.EMLasso1l}
-\alias{sv.EMLasso1l-class}
+\alias{simplyValidate.EMLassoGLoMo}
+\alias{sv.EMLasso.lognet}
+\alias{sv.EMLassoGLoMo-class}
 \title{Validate a model (to its original data)}
 \usage{
   simplyValidate(model, ..., verbosity = 0)
 
-  \method{simplyValidate}{EMLasso1l}(model, ds=model$dfr,
-    out=model$resp, wts, dsconvprobs, needPredict=0,
-    betweenColAndLevel="", type.measure="auc", ...,
+  \method{simplyValidate}{EMLassoGLoMo}(model,
+    ds=model$result[[1]]$ds, out=model$result[[1]]$out,
+    wts=rep(1, nrow(ds)),
+    imputeDs2FitDsProperties=model$imputeDs2FitDsProperties,
+    imputations=10, ..., type.measure="auc",
+    keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE,
     verbosity=0)
-
-  \method{simplyValidate}{EMLasso}(model,
-    ds=model$result[[1]]$dfr, out=model$result[[1]]$resp,
-    wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0,
-    betweenColAndLevel="",..., type.measure="auc",
-    keepResultPerLambda=FALSE, verbosity=0)
 }
 \arguments{
   \item{model}{model fit}
@@ -37,37 +31,40 @@
   \item{wts}{vector of weights (defaults to equal weights
   for all rows)}
 
-  \item{dsconvprobs}{see \code{\link{dfrConversionProps}}}
+  \item{imputeDs2FitDsProperties}{see
+  \code{\link{imputeDs2FitDs}} object that will provide the
+  conversion from imputed dataset to one that is ready for
+  fitting the predictor model}
 
-  \item{needPredict}{If \code{> 0}, the number of rows that
-  is predicted from the \code{GLoMo} in \code{model} for
-  rows with missing data in \code{ds}}
+  \item{imputations}{Number of multiple imputations on the
+  complete dataset (defaults to 10)}
 
-  \item{betweenColAndLevel}{see
-  \code{\link{dfrConversionProps}}}
-
-  \item{type.measure}{see \code{\link{cv.glmnet}} - for
-  now, only "auc"" is supported}
+  \item{type.measure}{see \code{\link{cv.glmnet}}}
 
   \item{keepResultPerLambda}{if \code{TRUE} (not the
   default), the individual results from the
   \code{simplyValidate.EMLasso1l} are also returned in an
   extra item \code{resultPerLambda}}
+
+  \item{nobs}{how many observations are simulated for each
+  row with missing data}
+
+  \item{unpenalized}{if \code{TRUE} (not the default) a
+  simple regression model is fit with the selected
+  variables}
 }
 \value{
-  object of type "sv.EMLasso1l": \item{sv.logreg
-  }{\code{\link{cv.glmnet}}-like objects} \item{ds }{as
-  passed in or reduced if predicted} \item{out }{as passed
-  in or extended if predicted} \item{wts }{as passed in or
-  extended if predicted} \item{fromLambda }{as passed in,
-  the lambda that came from the original model}
-
-  object of type "sv.EMLasso". This is mainly the same as a
-  \code{\link{cv.glmnet}}. The added/altered items are:
-  \item{glmnet.fit }{is now the model passed in, so of
-  class "EMLasso", besides "glmnet"} \item{resultPerLambda
-  }{list of "sv.EMLasso1l" objects per lambda. Not present
-  if \code{keepResultPerLambda=FALSE}}
+  object that has as class: "sv." pasted before the class
+  of \code{model}. Normally, \code{model} will will be the
+  return value of \code{\link{EMLasso}}, so this result is
+  mainly the same as a \code{\link{cv.glmnet}}. The
+  added/altered items are: \item{glmnet.fit}{is now the
+  \code{model} passed in, so has more classes besides
+  "glmnet" (e.g. "EMLasso")} \item{resultPerLambda }{matrix
+  with one column per imputation. The top rows are the
+  estimates for the criterion per lambda, below that are
+  their SD estimates. Not present if
+  \code{keepResultPerLambda=FALSE}}
 }
 \description{
   Validate a model (to its original data)
@@ -75,13 +72,20 @@
 \note{
   aids to generalize validation
 }
+\examples{
+y<-rbinom(nrow(iris), 1, 0.5)
+iris.cpy<-randomNA(iris, n=0.1)
+iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,
+	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
+sfStop()
+iris.sv.emlognet<-simplyValidate(iris.emlognet, verbosity=2)
+}
 \author{
   Nick Sabbe \email{nick.sabbe@ugent.be}
 }
 \seealso{
-  \code{\link{EMLasso.1l}}
-
-  \code{\link{EMLasso.1l}}, \code{\link{cv.glmnet}}
+  \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 }
 \keyword{EMLasso}
 \keyword{GLoMo}

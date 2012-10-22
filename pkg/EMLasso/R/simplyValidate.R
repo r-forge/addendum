@@ -14,157 +14,64 @@ simplyValidate<-function(model, ..., verbosity=0) UseMethod("simplyValidate")
 
 #' @rdname simplyValidate
 #' 
-#' @aliases simplyValidate.EMLasso1l sv.EMLasso1l-class sv.EMLasso1l
-#' @method simplyValidate.EMLasso1l
-#' @usage \method{simplyValidate}{EMLasso1l}(model, ds=model$dfr, out=model$resp, wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc", ..., verbosity=0)
+#' @aliases simplyValidate.EMLassoGLoMo sv.EMLassoGLoMo-class sv.EMLasso.lognet
+#' @method simplyValidate EMLassoGLoMo
+#' @usage \method{simplyValidate}{EMLassoGLoMo}(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, ..., type.measure="auc", keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE, verbosity=0)
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
 #' @param wts vector of weights (defaults to equal weights for all rows)
-#' @param dsconvprobs see \code{\link{dfrConversionProps}}
-#' @param needPredict If \code{> 0}, the number of rows that is predicted from the \code{GLoMo}
-#' 	in \code{model} for rows with missing data in \code{ds}
-#' @param betweenColAndLevel see \code{\link{dfrConversionProps}}
-#' @param type.measure see \code{\link{cv.glmnet}} - for now, only "auc"" is supported
-#' @return object of type "sv.EMLasso1l":
-#' \item{sv.logreg }{\code{\link{cv.glmnet}}-like objects} 
-#' \item{ds }{as passed in or reduced if predicted}
-#' \item{out }{as passed in or extended if predicted}
-#' \item{wts }{as passed in or extended if predicted}
-#' \item{fromLambda }{as passed in, the lambda that came from the original model}
-#' @seealso \code{\link{EMLasso.1l}}
-#' @keywords GLoMo EMLasso
-#' @S3method simplyValidate EMLasso1l
-simplyValidate.EMLasso1l<-function(model, ds=model$dfr, out=model$resp, 
-	wts, dsconvprobs, needPredict=0, betweenColAndLevel="", type.measure="auc", ..., verbosity=0)
-{
-	if(missing(dsconvprobs))
-	{
-		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProps(ds, betweenColAndLevel=betweenColAndLevel)
-	}
-	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
-	{
-		catwif(verbosity>0, "Passed along betweenColAndLevel does not match the one in dsconvprobs. This last one (", dsconvprobs$betweenColAndLevel, ") will be used.")
-		betweenColAndLevel<-dsconvprobs$betweenColAndLevel
-	}
-	useVarIndexes<-as.vector(unlist(predict(model$lasso.fit, type="nonzero")))
-	useVarNames<-rownames(model$lasso.fit$beta)[useVarIndexes]
-	catwif(verbosity > 0, "For lambda ", model$lambda, ", use variables: ", useVarNames)
-	
-	if(needPredict>0)
-	{
-		newdta<-predict(model$glomo, nobs=needPredict, newdata=ds, returnRepeats=TRUE, 
-			verbosity=verbosity-1)
-		orgds<-ds
-		ds<-newdta$predicted
-		if(verbosity >5)
-		{
-			catw("dim of predicted dataset: ", dim(ds))
-			catw("repeats (length=", length(newdta$numRepPerRow), "):")
-			print(newdta$numRepPerRow)
-			catw("length of out=", length(out))
-		}
-		out<-rep(out, newdta$numRepPerRow)
-		wtfct<-rep(1/newdta$numRepPerRow, newdta$numRepPerRow)
-		if(missing(wts))
-		{
-			catwif(verbosity >5, "no wts was passed in")
-			wts<-wtfct
-		}
-		else
-		{
-			catwif(verbosity >5, "length of wts passed in=", length(wts))
-			wts<-rep(wts, newdta$numRepPerRow)*wtfct
-		}
-	}
-	else
-	{
-		wts<-rep(1, nrow(ds))
-	}
-	if(type.measure != "auc")
-	{
-		stop("Other measures than auc are not yet supported in simplyValidate.EMLasso1l")
-	}
-	mat<-factorsToDummyVariables(ds, dfrConvData=dsconvprobs)
-	#debug.tmp<<-list(mat=mat, wts=wts, out=out, ds=ds)
-	#nicked these lines from cv.lognet, simplified for 1 "fold" and 1 lambda
-	predmat<-matrix(predict(model$lasso.fit, mat, type = "response"), ncol=1)
-	#debug.tmp$predmat<<-predmat
-	y<-out #to be able to copy code from cv.lognet
-  nc<-dim(y)
-  if (is.null(nc)) {
-      y = as.factor(y)
-      ntab = table(y)
-      nc = as.integer(length(ntab))
-      y = diag(nc)[as.numeric(y), ]
-  }
-	#debug.tmp$y<<-y
-	cvraw<-matrix(auc.mat(y, predmat[, 1, drop=FALSE], wts))
-	#debug.tmp$cvraw<<-cvraw
-	#good<-matrix(1, 1, 1)
-	N<-1 #?? I think this is the right translation of the if (type.measure == "auc") part in cv.lognet
-	weights<-sum(wts) #yikes!
-
-  cvm<-apply(cvraw, 2, weighted.mean, w = weights, na.rm = TRUE)
-  cvsd<-sqrt(apply(scale(cvraw, cvm, FALSE)^2, 2, weighted.mean, 
-      w = weights, na.rm = TRUE)/(N - 1)) #oops, this will surely fail...
-  typenames<-c(mse = "Mean-Squared Error", mae = "Mean Absolute Error", 
-      deviance = "Binomial Deviance", auc = "AUC", class = "Misclassification Error")
-  name<-typenames[type.measure]
-
-	result<-list(lambda=model$lambda, cvm=cvm, cvsd=cvsd, cvup=cvm+cvsd, cvlo=cvm-cvsd,
-		nzero=length(useVarIndexes), name=name, glmnet.fit=model, lambda.min=model$lambda, 
-		lambda.1se=model$lambda)
-	class(result)<-c("cv.glmnet", "cv.lognet")
- 	if(needPredict>0)
- 	{
- 		#make the predicted ds object less memory intensive
- 		ds<-reduce(ds, orgdfr=orgds, repsperrow=newdta$numRepPerRow)
- 	}
-	retval<-list(sv.logreg=result, ds=ds, out=out, wts=wts, fromLambda=model$lambda)
-	class(retval)<-"sv.EMLasso1l"
-	return(retval)
-}
-
-		 
-#' @rdname simplyValidate
-#' 
-#' @aliases simplyValidate.EMLasso sv.EMLasso-class sv.EMLasso
-#' @method simplyValidate.EMLasso
-#' @usage \method{simplyValidate}{EMLasso}(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
+#' @param imputeDs2FitDsProperties see \code{\link{imputeDs2FitDs}} object that will provide the conversion from imputed
+#' 	dataset to one that is ready for fitting the predictor model
+#' @param imputations Number of multiple imputations on the complete dataset (defaults to 10)
+#' @param type.measure see \code{\link{cv.glmnet}}
 #' @param keepResultPerLambda if \code{TRUE} (not the default), the individual results
 #' 	from the \code{simplyValidate.EMLasso1l} are also returned in an extra item
 #' 	\code{resultPerLambda}
-#' @return object of type "sv.EMLasso". This is mainly the same as a \code{\link{cv.glmnet}}.
+#' @param nobs how many observations are simulated for each row with missing data
+#' @param unpenalized if \code{TRUE} (not the default) a simple regression model is fit with the selected variables
+#' @return object that has as class: "sv." pasted before the class of \code{model}. Normally, \code{model} will
+#' 	will be the return value of \code{\link{EMLasso}}, so this result is mainly the same as a \code{\link{cv.glmnet}}.
 #' The added/altered items are:
-#' \item{glmnet.fit }{is now the model passed in, so of class "EMLasso", besides "glmnet"} 
-#' \item{resultPerLambda }{list of "sv.EMLasso1l" objects per lambda. Not present if \code{keepResultPerLambda=FALSE}}
-#' @seealso \code{\link{EMLasso.1l}}, \code{\link{cv.glmnet}}
+#' \item{glmnet.fit}{is now the \code{model} passed in, so has more classes besides "glmnet" (e.g. "EMLasso")} 
+#' \item{resultPerLambda }{matrix with one column per imputation. The top rows are the estimates for the criterion per
+#' 	lambda, below that are their SD estimates. Not present if \code{keepResultPerLambda=FALSE}}
+#' @seealso \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 #' @keywords GLoMo EMLasso
-#' @S3method simplyValidate EMLasso
-simplyValidate.EMLasso<-function(model, ds=model$result[[1]]$dfr, out=model$result[[1]]$resp, 
-	wts=rep(1, nrow(ds)), dsconvprobs, needPredict=0, betweenColAndLevel="",..., type.measure="auc", 
-	keepResultPerLambda=FALSE, verbosity=0)
+#' @examples y<-rbinom(nrow(iris), 1, 0.5)
+#' iris.cpy<-randomNA(iris, n=0.1)
+#' iris.emlognet<-EMLasso(ds=numdfr(iris.cpy), out=y,  
+#' 	lambdas=c(0.03,0.002,0.0003), nrOfSamplesPerMDRow=7, verbosity=2,
+#' 	convergenceChecker=convergenceCheckCreator(minIt=5, maxIt=10))
+#' sfStop()
+#' iris.sv.emlognet<-simplyValidate(iris.emlognet, verbosity=2)
+#' @export
+simplyValidate.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, 
+																		 wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, 
+																		 ..., type.measure="auc", keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE, verbosity=0)
 {
-	if(missing(dsconvprobs))
-	{
-		catwif(verbosity>0, "dsconvprobs was not passed along. Calculating it now.")
-		dsconvprobs<-dfrConversionProps(ds, betweenColAndLevel=betweenColAndLevel)
-	}
-	if(dsconvprobs$betweenColAndLevel != betweenColAndLevel)
-	{
-		catwif(verbosity>0, "Passed along betweenColAndLevel does not match the one in dsconvprobs. This last one (", dsconvprobs$betweenColAndLevel, ") will be used.")
-		betweenColAndLevel<-dsconvprobs$betweenColAndLevel
-	}
-	partres<-lapply(model$result, simplyValidate, ds=ds, out=out, wts=wts, dsconvprobs=dsconvprobs,
-		needPredict=needPredict, ..., type.measure=type.measure, verbosity=verbosity-1)
-	cvlogreglist<-lapply(partres, "[[", "sv.logreg")
-	
 	lambda<-model$lambda
-	cvm<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvm"))))
-	#cvsd<-as.vector(unlist(try(sapply(cvlogreglist, "[[", "cvsd")))) these are all NaN!
-	#so we use the variability over the cvm
-	cvsd<-rep(sd(cvm), length(cvm))
+	impData<-collectImputationModels(model=model, ds=ds, ..., verbosity=verbosity-1)
+	partres<-vapply(seq(imputations), function(i){
+		catwif(verbosity > 1, "Imputation", i, "/", imputations)
+		predict(impData, newdata=ds, out=out, wts=wts, type.measure=type.measure, 
+						actualPredictAndEvaluateFunction=.predAndEvalGLNS, nobs=nobs, unpenalized=unpenalized, verbosity=verbosity-1)
+	}, rep(1.0, length(lambda)*2))
+	#one row per lambda, 1 col per repetition
+	cvms<-partres[seq_along(lambda),]
+	cvsds<-partres[-seq_along(lambda),]
+	#now use MI formulas per lambda
+	cvm<-rowMeans(cvms, na.rm = TRUE)
+	D<-imputations
+	cvsd<-cvm
+	cvwithinvar<-cvm
+	cvbetweenvar<-cvm
+	for(lami in seq_along(lambda))
+	{
+		cvwithinvar[lami]<-mean((cvsds[lami,])^2, na.rm = TRUE)
+		cvbetweenvar[lami]<-var(cvms[lami,], na.rm = TRUE)
+	} #calculate variance so far
+	cvsd<-sqrt(cvwithinvar + (D+1)/D*cvbetweenvar)
+	
 	nz<-try(sapply(predict(model, type = "nonzero"), length))
 	out<-list(
 		lambda=lambda,
@@ -173,16 +80,51 @@ simplyValidate.EMLasso<-function(model, ds=model$result[[1]]$dfr, out=model$resu
 		cvup=try(cvm+cvsd),
 		cvlo=try(cvm-cvsd),
 		nzero=nz,
-		glmnet.fit=model
+		glmnet.fit=model,
+		cvwithinvar=cvwithinvar,
+		cvbetweenvar=cvbetweenvar
 	)
-  lamin<-try(if (type.measure == "auc") 
-      getmin(lambda, -cvm, cvsd)
-  else getmin(lambda, cvm, cvsd))
-  obj = c(out, as.list(lamin))
+	cvsgn<- -2*(type.measure == "auc")+1
+	lamin<-getmin(lambda, cvsgn*cvm, cvsd)
+	obj = c(out, as.list(lamin))
 	if(keepResultPerLambda)
 	{
 		obj<-c(obj, list(resultPerLambda=partres))
 	}
-	class(obj)<-c("sv.EMLasso", "cv.glmnet")
+	class(obj)<-paste("cv", class(model), sep=".")
 	return(obj)
+}
+
+#just a helper function
+.predAndEvalGLNS<-function(useGLoMo, useReusable, useLambda, newdata, out, weights, type.measure, imputeDs2FitDsProperties, nobs=1, fakeLam, ..., verbosity=0)
+{
+	curds<-predict(useGLoMo, newdata=newdata, reusabledata=useReusable, nobs=nobs, verbosity=verbosity, returnRepeats=TRUE)
+	curreps<-curds$numRepPerRow
+	curds<-curds$predicted
+	extreps<-rep(seq_along(curreps), curreps)
+	
+	useWeights<-(weights / curreps)[extreps]
+	useOut<-out[extreps]
+	
+	if(is.list(useLambda) || is.character(useLambda))
+	{
+		#this means that we wanted to fit regular, unpenalized logistic regression instead
+		curln<-fit.logreg(ds=curds, out=useOut, wts=useWeights, verbosity=verbosity-1, useCols=useLambda, fakeLam=fakeLam,
+											imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
+	}
+	else
+	{
+		curln<-fit.glmnet(ds=curds, out=useOut, lambda=useLambda, weights=useWeights, verbosity=verbosity-1, 
+											standardize=FALSE, imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
+	}
+	
+	imputeDs2FitDsProperties <- imputeDs2FitDsProps(object = imputeDs2FitDsProperties, 
+																									ds = curds, verbosity = verbosity - 5)
+	dfr.mat <- imputeDs2FitDs(conversionData = imputeDs2FitDsProperties, 
+														ds = curds, verbosity = verbosity - 5)
+	
+	predprobs<-predict(curln, newx=dfr.mat, type="response")
+	
+	cvres<-aucLikeLognet(predictedprobabilities=predprobs, out=useOut, wts=useWeights)
+	c(cvres$cvm, cvres$cvsd)
 }

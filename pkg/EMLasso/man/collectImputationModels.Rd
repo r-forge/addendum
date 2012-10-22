@@ -15,7 +15,8 @@
 
   \method{predict}{EMLassoGLoMoImputationData}(object,
     newdata, out, wts=rep(1, nrow(newdata)),
-    type.measure="auc", ..., verbosity=0)
+    type.measure="auc", actualPredictAndEvaluateFunction,
+    unpenalized=FALSE, ..., verbosity=0)
 }
 \arguments{
   \item{model}{model fit}
@@ -54,6 +55,21 @@
   weights for all observations)}
 
   \item{type.measure}{see \code{\link{cv.glmnet}}}
+
+  \item{actualPredictAndEvaluateFunction}{function similar
+  to the nonexported \code{.predAndEvalGLN} function.
+  Expected to support parameters: \code{useGLoMo},
+  \code{useReusable}, \code{useLambda}, \code{newdata},
+  \code{out}, \code{weights}, \code{type.measure},
+  \code{imputeDs2FitDsProperties}, \code{nobs}, \code{...},
+  \code{verbosity=0}. Should return a vector twice the
+  length of the number of rows: first all evaluated values,
+  then all their sds. Note: if this is not specified,
+  \code{.predAndEvalGLN} is used.}
+
+  \item{unpenalized}{if \code{TRUE} (not the default) a
+  simple regression model is fit with the selected
+  variables}
 }
 \value{
   \code{collectImputationModels.EMLassoGLoMo} will return

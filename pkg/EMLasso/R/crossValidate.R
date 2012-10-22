@@ -16,7 +16,7 @@ crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
 #' 
 #' @aliases crossValidate.EMLassoGLoMo cv.EMLassoGLoMo-class cv.EMLasso.lognet
 #' @method crossValidate EMLassoGLoMo
-#' @usage \method{crossValidate}{EMLassoGLoMo}(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, ..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
+#' @usage \method{crossValidate}{EMLassoGLoMo}(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, ..., type.measure="auc", keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE, verbosity=0)
 #' @param ds dataset with predictors
 #' @param out vector (binary factor) of outcomes
 #' @param wts vector of weights (defaults to equal weights for all rows)
@@ -27,6 +27,8 @@ crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
 #' @param keepResultPerLambda if \code{TRUE} (not the default), the individual results
 #' 	from the \code{crossValidate.EMLasso1l} are also returned in an extra item
 #' 	\code{resultPerLambda}
+#' @param nobs how many observations are simulated for each row with missing data
+#' @param unpenalized if \code{TRUE} (not the default) a simple regression model is fit with the selected variables
 #' @return object that has as class: "cv." pasted before the class of \code{model}. Normally, \code{model} will
 #' 	will be the return value of \code{\link{EMLasso}}, so this result is mainly the same as a \code{\link{cv.glmnet}}.
 #' The added/altered items are:
@@ -45,13 +47,13 @@ crossValidate<-function(model, ..., verbosity=0) UseMethod("crossValidate")
 #' @export
 crossValidate.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, out=model$result[[1]]$out, 
 	wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=model$imputeDs2FitDsProperties, imputations=10, 
-	..., type.measure="auc", keepResultPerLambda=FALSE, verbosity=0)
+	..., type.measure="auc", keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE, verbosity=0)
 {
 	lambda<-model$lambda
 	impData<-collectImputationModels(model=model, ds=ds, ..., verbosity=verbosity-1)
 	partres<-vapply(seq(imputations), function(i){
 		catwif(verbosity > 1, "Imputation", i, "/", imputations)
-		predict(impData, newdata=ds, out=out, wts=wts, type.measure=type.measure, verbosity=verbosity-1)
+		predict(impData, newdata=ds, out=out, wts=wts, type.measure=type.measure, nobs=nobs, unpenalized=unpenalized, verbosity=verbosity-1)
 	}, rep(1.0, length(lambda)*2))
 	#one row per lambda, 1 col per repetition
 	cvms<-partres[seq_along(lambda),]

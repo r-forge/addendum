@@ -4,9 +4,9 @@
 \title{Fit logistic regression by using logistic LASSO with lambda=0}
 \usage{
   fit.logreg(ds, out, wts = rep(1, nrow(ds)),
-    verbosity = 0, useCols = NULL,
+    verbosity = 0, useCols = NULL, fakeLam,
     imputeDs2FitDsProperties = normalImputationConversion(),
-    ...)
+    ..., type.measure = NULL, nfolds = 10, foldid)
 
   logregLikeGlmnet(x, y, useLambda = Inf, verbosity = 0,
     ...)
@@ -27,12 +27,22 @@
   \item{useCols}{restrict the regression to only include
   these columns as predictors}
 
+  \item{fakeLam}{optionally pass in the lambdas here}
+
   \item{imputeDs2FitDsProperties}{see
   \code{\link{imputeDs2FitDs}} and \code{\link{EMLasso}}}
 
   \item{\dots}{passed on to
   \code{\link{glmnet}}/\code{\link{glm.fit}}. Not allowed:
   "x", "y", "family", ("weights", "lambda"), "standardize"}
+
+  \item{type.measure}{see \code{\link{cv.glmnet}} if
+  \code{NULL} (the default) no crossvalidation occurs
+  similar to what happens in fit.glmnet}
+
+  \item{nfolds}{see \code{\link{cv.glmnet}}}
+
+  \item{foldid}{see \code{\link{cv.glmnet}}}
 
   \item{x}{model matrix (as supported by \code{glm})}
 

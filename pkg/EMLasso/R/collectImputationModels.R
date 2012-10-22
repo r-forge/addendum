@@ -64,6 +64,8 @@ collectImputationModels.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, u
 	impMod$lambda<-model$lambda
 	impMod$family<-model$family
 	impMod$imputeDs2FitDsProperties<-model$imputeDs2FitDsProperties
+	impMod$varsPerLam<-apply(as.matrix(model$beta), 2, function(coefsForCurLam){rownames(model$beta)[abs(coefsForCurLam) > 0.0001]})
+	#note: smallest number of vars (so highest lambda) comes first
 	class(impMod)<-"EMLassoGLoMoImputationData"
 	return(impMod)
 }
@@ -71,33 +73,66 @@ collectImputationModels.EMLassoGLoMo<-function(model, ds=model$result[[1]]$ds, u
 #' 
 #' @aliases predict.EMLassoGLoMoImputationData
 #' @method predict EMLassoGLoMoImputationData
-#' @usage \method{predict}{EMLassoGLoMoImputationData}(object, newdata, out, wts=rep(1, nrow(newdata)), type.measure="auc", ..., verbosity=0)
+#' @usage \method{predict}{EMLassoGLoMoImputationData}(object, newdata, out, wts=rep(1, nrow(newdata)), type.measure="auc", actualPredictAndEvaluateFunction, unpenalized=FALSE, ..., verbosity=0)
 #' @param object "EMLassoGLoMoImputationData" that holds the information to perform imputations
 #' @param newdata dataset for which imputation needs to occur
 #' @param out outcomes that will be used for evaluating the models
 #' @param wts weights per observation (defaults to equal weights for all observations)
 #' @param type.measure see \code{\link{cv.glmnet}}
+#' @param actualPredictAndEvaluateFunction function similar to the nonexported \code{.predAndEvalGLN}
+#' 	function. Expected to support parameters: \code{useGLoMo}, \code{useReusable}, \code{useLambda}, 
+#' 	\code{newdata}, \code{out}, \code{weights}, \code{type.measure}, \code{imputeDs2FitDsProperties}, \code{nobs},
+#' 	\code{...}, \code{verbosity=0}. Should return a vector twice the length of the number of rows: first
+#' 	all evaluated values, then all their sds. Note: if this is not specified, \code{.predAndEvalGLN} is used.
+#' @param unpenalized if \code{TRUE} (not the default) a simple regression model is fit with the selected variables
 #' @seealso \code{\link{EMLasso}}, \code{\link{cv.glmnet}}
 #' @keywords GLoMo EMLasso
 #' @export
-predict.EMLassoGLoMoImputationData<-function(object, newdata, out, wts=rep(1, nrow(newdata)), type.measure="auc", ..., verbosity=0)
+predict.EMLassoGLoMoImputationData<-function(object, newdata, out, wts=rep(1, nrow(newdata)), type.measure="auc", actualPredictAndEvaluateFunction, unpenalized=FALSE, ..., verbosity=0)
 {
+	if(missing(actualPredictAndEvaluateFunction))
+	{
+		actualPredictAndEvaluateFunction<-.predAndEvalGLN
+	}
 	if(exists("combinedGLoMo", object))
 	{
 		useGLoMo<-object$combinedGLoMo
 		useReusable<-object$reusableData
-		useLambda=object$lambda
-		partres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
-			object$imputeDs2FitDsProperties, family=object$family, ..., verbosity=verbosity-1)
+		if(unpenalized)
+		{
+			useLambda=object$varsPerLam
+			partres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
+															 object$imputeDs2FitDsProperties, family=object$family, ..., 
+															 fakeLam=object$lambda, verbosity=verbosity-1)
+		}
+		else
+		{
+			useLambda=object$lambda
+			partres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
+															 object$imputeDs2FitDsProperties, family=object$family, ..., verbosity=verbosity-1)
+		}
 	}
 	else
 	{
 		partres<-vapply(seq_along(object$lambda), function(lambdaindex){
 			useGLoMo<-object$glomolist[[lambdaindex]]
 			useReusable<-object$reusableData[[lambdaindex]]
-			useLambda=object$lambda[lambdaindex]
-			tempres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
-				object$imputeDs2FitDsProperties, family=object$family, ..., verbosity=verbosity-1)
+
+			if(unpenalized)
+			{
+				useLambda=object$varsPerLam[[lambdaindex]]
+				partres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
+																 object$imputeDs2FitDsProperties, family=object$family, ..., 
+																 fakeLam=object$lambda[lambdaindex], verbosity=verbosity-1)
+			}
+			else
+			{
+				useLambda=object$lambda[lambdaindex]
+				tempres<-.predAndEvalGLN(useGLoMo, useReusable, useLambda, newdata, out, weights=wts, type.measure, 
+																 object$imputeDs2FitDsProperties, family=object$family, ..., verbosity=verbosity-1)
+			}
+			
+			
 			return(tempres)
 		}, c(1.0,1.0))
 		partres<-c(partres[1,],partres[2,])
@@ -106,10 +141,26 @@ predict.EMLassoGLoMoImputationData<-function(object, newdata, out, wts=rep(1, nr
 	
 }
 #just a helper function
-.predAndEvalGLN<-function(useGLoMo, useReusable, useLambda, newdata, out, weights, type.measure, imputeDs2FitDsProperties, ..., verbosity=0)
+.predAndEvalGLN<-function(useGLoMo, useReusable, useLambda, newdata, out, weights, type.measure, imputeDs2FitDsProperties, nobs=1, fakeLam, ..., verbosity=0)
 {
-	curds<-predict(useGLoMo, newdata=newdata, reusabledata=useReusable, verbosity=verbosity)
-	curcv<-fit.glmnet(ds=curds, out=out, lambda=useLambda, weights=weights, verbosity=verbosity, 
-		standardize=FALSE, type.measure=type.measure, imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
+	curds<-predict(useGLoMo, newdata=newdata, reusabledata=useReusable, nobs=nobs, verbosity=verbosity, returnRepeats=TRUE)
+	curreps<-curds$numRepPerRow
+	curds<-curds$predicted
+	extreps<-rep(seq_along(curreps), curreps)
+	
+	useWeights<-(weights / curreps)[extreps]
+	useOut<-out[extreps]
+	
+	if(is.list(useLambda) || is.character(useLambda))
+	{
+		#this means that we wanted to fit regular, unpenalized logistic regression instead
+		curcv<-fit.logreg(ds=curds, out=useOut, wts=useWeights, verbosity=verbosity, useCols=useLambda, fakeLam=fakeLam,
+											type.measure=type.measure, imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
+	}
+	else
+	{
+		curcv<-fit.glmnet(ds=curds, out=useOut, lambda=useLambda, weights=useWeights, verbosity=verbosity, 
+			standardize=FALSE, type.measure=type.measure, imputeDs2FitDsProperties=imputeDs2FitDsProperties, ...)
+	}
 	c(curcv$cvm, curcv$cvsd)
 }

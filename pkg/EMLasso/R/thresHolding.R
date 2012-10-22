@@ -14,6 +14,9 @@
 #' @param \dots passed on to \code{\link{collectImputationModels}}
 #' @param niceNames display names for each of the sets of variabels, to be used n the titles of the plots
 #' @param newWindow if \code{TRUE} (not the default), a new window is created for the plots
+#' @param showWanted if a vector of two numbers, the first is indicated in a green vertical line,
+#' 	and the second as a green horizontal line
+#' @param showThres see \code{\link{plotROCFromRepPredProb}}
 #' @param verbosity The higher this value, the more levels of progress and debug 
 #' information is displayed (note: in R for Windows, turn off buffered output)
 #' @return a list, holding the following items:
@@ -32,7 +35,8 @@
 thresHolding<-function(cvob, coefsUsed=NULL, reps=500, checkThres=seq(0,1, length.out=101),
 											 ds=cvob$glmnet.fit$result[[1]]$ds, out=cvob$glmnet.fit$result[[1]]$out, 
 											 wts=rep(1, nrow(ds)), imputeDs2FitDsProperties=cvob$glmnet.fit$imputeDs2FitDsProperties, 
-											  ..., niceNames=c(names(coefsUsed)), newWindow=FALSE, verbosity=0)
+											  ..., niceNames=c(names(coefsUsed)), newWindow=FALSE, showWanted=c(0.50,0.75), showThres=10,
+											 verbosity=0)
 {
 	if(is.null(coefsUsed))
 	{
@@ -59,10 +63,13 @@ thresHolding<-function(cvob, coefsUsed=NULL, reps=500, checkThres=seq(0,1, lengt
 	if(newWindow) windows()
 	squareLikeLayoutForNGraphs(n=length(coefsUsed))
 	ROC<-lapply(seq_along(coefsUsed), function(vsi){
-		rv<-plotROCFromRepPredProb(obsrepprob=predprobs.wcoef$result[[vsi]], out=out, thres=checkThres, verbosity=verbosity-2)
+		rv<-plotROCFromRepPredProb(obsrepprob=predprobs.wcoef$result[[vsi]], out=out, thres=checkThres, showThres=showThres, verbosity=verbosity-2)
 		title(main=niceNames[vsi])
-		abline(h=0.75, col="green", lty="dotted")
-		abline(v=0.50, col="green", lty="dotted")
+		if(length(showWanted) == 2)
+		{
+			if(! is.na(showWanted[2])) abline(h=showWanted[2], col="green", lty="dotted")
+			if(! is.na(showWanted[1]))abline(v=showWanted[1], col="green", lty="dotted")
+		}
 		oop<-rv[max(seq(nrow(rv))[rv[,"FPR"]<0.5]), ]
 		cat("Performance for", niceNames[vsi], ".\n")
 		print(oop)

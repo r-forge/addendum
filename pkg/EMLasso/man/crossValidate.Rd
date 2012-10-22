@@ -16,7 +16,8 @@
     wts=rep(1, nrow(ds)),
     imputeDs2FitDsProperties=model$imputeDs2FitDsProperties,
     imputations=10, ..., type.measure="auc",
-    keepResultPerLambda=FALSE, verbosity=0)
+    keepResultPerLambda=FALSE, nobs=1, unpenalized=FALSE,
+    verbosity=0)
 
   repeatedlyPredictOut(glomo, ds, out, varsets, reps = 10,
     nfolds = 10,
@@ -63,6 +64,13 @@
   default), the individual results from the
   \code{crossValidate.EMLasso1l} are also returned in an
   extra item \code{resultPerLambda}}
+
+  \item{nobs}{how many observations are simulated for each
+  row with missing data}
+
+  \item{unpenalized}{if \code{TRUE} (not the default) a
+  simple regression model is fit with the selected
+  variables}
 
   \item{glomo}{GLoMo model to predict from}
 
