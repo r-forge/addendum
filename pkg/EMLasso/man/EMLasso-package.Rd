@@ -8,8 +8,8 @@
 }
 \details{
   \tabular{ll}{ Package: \tab EMLasso\cr Type: \tab
-  Package\cr Version: \tab 2.0.5\cr Date: \tab
-  2012-10-16\cr License: \tab GPL (>= 2)\cr LazyLoad: \tab
+  Package\cr Version: \tab 2.0.6\cr Date: \tab
+  2012-10-23\cr License: \tab GPL (>= 2)\cr LazyLoad: \tab
   yes\cr Depends: Matrix, glmnet, snowfall, addendum,
   NumDfr, GLoMo\cr}
 }
