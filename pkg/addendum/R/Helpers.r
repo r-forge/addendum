@@ -4972,3 +4972,18 @@ glmnetNoPredictors<-function(y, xvarnames, family=c("gaussian","binomial","poiss
 	return(rv)
 }
 
+restrictForVars<-function(fit, vars,...) UseMethod("restrictForVars")
+restrictForVars.glmnet<-function(fit, vars,...)
+{
+	fit$beta<-fit$beta[vars,,drop=FALSE]
+	fit$dim[1]<-length(vars)
+	return(fit)
+}
+restrictForVars.cv.glmnet<-function(fit, vars, repsNeededForFirstOccurrence=3,...)
+{
+	vars<-getOrderOfAppearance(fit, showTop=vars, repsNeededForFirstOccurrence=repsNeededForFirstOccurrence)$legendForVars
+	vars<-match(vars, rownames(fit$glmnet.fit$beta))
+	
+	fit$glmnet.fit<-restrictForVars(fit$glmnet.fit, vars)
+	return(fit)
+}
