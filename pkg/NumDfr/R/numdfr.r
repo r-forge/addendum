@@ -10,7 +10,6 @@ numdfr<-function(dfr)
 	return(retval)
 }
 
-
 #returnAsMatrix TRUE will just return the matrix with the original dimensions
 #If drop _AND_ reduceIfPossible are both TRUE, then the 'typical' dimension
 #   reduction is applied to the resulting matrix
