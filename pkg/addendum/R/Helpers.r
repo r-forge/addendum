@@ -2111,6 +2111,12 @@ addCVPlot<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks,
 
 simpleplot<-function(object,beta.type=NULL,..., verbosity=0) UseMethod("simpleplot")
 simpleplot.default<-function(object, beta.type=NULL,..., verbosity=0) plot(object, ...)
+simpleplot.glmnet<-function(object, beta.type=NULL,..., verbosity=0)
+{
+	rv<-plot(object, ...)
+	abline(h=0)
+	invisible(rv)
+}
 simpleplot.cv.glmnet<-function(object, beta.type=NULL,..., verbosity=0) plot(object$glmnet.fit, ...)
 
 firstRepeatedAppearance<-function(cvobj, repsNeeded)

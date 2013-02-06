@@ -2,6 +2,7 @@
 \alias{plotex}
 \alias{simpleplot}
 \alias{simpleplot.default}
+\alias{simpleplot.glmnet}
 \alias{simpleplot.cv.glmnet}
 \alias{firstRepeatedAppearance}
 \alias{getOrderOfAppearance}
@@ -16,6 +17,7 @@ Plots both crossvalidation plot and coefficient plot from \code{glmnet} in one g
 plotex(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5, lamIndexAxisCol="red", lamIndexAxisPos=NULL, legendPos="topright", legendCex=0.5, legendOf=20, smoothCV=FALSE, errorbarcolor="darkgrey",	centercolor="red", fillsidecolor="#0000ff22", repsNeededForFirstOccurrence=3, beta.type=NULL, ..., verbosity=0, cvup=cvobj$cvup, cvlo=cvobj$cvlo, matplotCols,
 altColNameIn=NULL, altColExpressionOut=NULL, showApp=TRUE, skipMoreColors="black", cvby,
 addIdxAx=TRUE, addTitle=TRUE)
+\method{simpleplot}{glmnet}(object, beta.type=NULL,..., verbosity=0)
 \method{simpleplot}{cv.glmnet}(object, beta.type=NULL,..., verbosity=0)
 firstRepeatedAppearance(cvobj, repsNeeded)
 getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
