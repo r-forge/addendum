@@ -10,7 +10,7 @@ Create a copy of the (\code{cv.})\code{glmnet} object for a subset of the variab
 Create a copy of the (\code{cv.})\code{\link{glmnet}} object for a subset of the vriables
 }
 \usage{
-\method{restrictForVars}{glmnet}(fit, vars,...)
+\method{restrictForVars}{glmnet}(fit, vars, repsNeededForFirstOccurrence=3,...)
 \method{restrictForVars}{cv.glmnet}(fit, vars, repsNeededForFirstOccurrence=3,...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -19,9 +19,7 @@ Create a copy of the (\code{cv.})\code{\link{glmnet}} object for a subset of the
 \code{\link{glmnet}} or \code{\link{cv.glmnet}} object
 }
   \item{vars}{
-for the \code{cv.glmnet} version, the number of variables (in order of occurrence). For
-the \code{glmnet} version, the row indexes (in \code{beta}) of the variables you want 
-included.
+if \code{numeric} and of \code{length} 1, the number of variables (in order of occurrence). Otherwise, the row indexes (in \code{beta}) of the variables you want included. The default is 5.
 }
   \item{repsNeededForFirstOccurrence}{
 see among others  \code{\link{getOrderOfAppearance}}.
