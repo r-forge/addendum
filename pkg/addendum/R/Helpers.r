@@ -2257,14 +2257,14 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 		cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
 			errorbarcolor=errorbarcolor, centercolor=centercolor,
 			fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo, by=cvby)
-	}
-	if(! is.null(lamIndexAxisCol))
-	{
-		catwif(verbosity>0, "adding lambda index axis")
-		if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
-		addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,
-			pos=lamIndexAxisPos, col=lamIndexAxisCol, addIdxAx=addIdxAx, addTitle=addTitle, 
-			coldata=coldata, verbosity=verbosity-1)
+		if(! is.null(lamIndexAxisCol))
+		{
+			catwif(verbosity>0, "adding lambda index axis")
+			if(missing(lamIndexAxisPos)) lamIndexAxisPos<-par("yaxp")[1]
+			addLamIndexAxis(cvobj, xvar=xvar, numTicks=numTicks,side=3,
+											pos=lamIndexAxisPos, col=lamIndexAxisCol, addIdxAx=addIdxAx, addTitle=addTitle, 
+											coldata=coldata, verbosity=verbosity-1)
+		}
 	}
 
 	if(!is.null(legendPos))
