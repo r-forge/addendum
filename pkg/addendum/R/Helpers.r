@@ -2250,10 +2250,14 @@ plotex<-function(cvobj, xvar=c("norm", "lambda", "dev"), numTicks=5,
 		altColNameIn=altColNameIn, altColExpressionOut=altColExpressionOut)
 	
 	simpleplot(cvobj, xvar, beta.type=beta.type, col=coldata$matplotCols, ..., verbosity=verbosity-1)
-	catwif(verbosity>0, "adding cross validation plot")
-	cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
-		errorbarcolor=errorbarcolor, centercolor=centercolor,
-		fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo, by=cvby)
+	cvpsc<-NULL
+	if(inherits(cvobj, "cv.glmnet"))
+	{
+		catwif(verbosity>0, "adding cross validation plot")
+		cvpsc<-addCVPlot(cvobj, xvar=xvar, numTicks=numTicks, smoothed=smoothCV,
+			errorbarcolor=errorbarcolor, centercolor=centercolor,
+			fillsidecolor=fillsidecolor, verbosity=verbosity-1, cvup=cvup, cvlo=cvlo, by=cvby)
+	}
 	if(! is.null(lamIndexAxisCol))
 	{
 		catwif(verbosity>0, "adding lambda index axis")

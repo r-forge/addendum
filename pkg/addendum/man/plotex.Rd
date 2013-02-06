@@ -23,9 +23,9 @@ getOrderOfAppearance(cvobj, repsNeededForFirstOccurrence, showTop=NULL)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{cvobj}{
-	result of previous \code{cv.glmnet} call. Note: for \code{firstRepeatedAppearance} and 
-	\code{getOrderOfAppearance}, this may simply be a \code{\link{glmnet}} object too, in 
-	spite of its name.
+	result of previous \code{cv.glmnet} call. Note: for This may also simply be a 
+	\code{\link{glmnet}} object, in spite of its name (though then some of the other
+	parameters lose their meaning).
 }
   \item{xvar}{
 What is on the X-axis. \code{"norm"} plots against the L1-norm of the coefficients,
