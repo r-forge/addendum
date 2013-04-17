@@ -1153,7 +1153,15 @@ combineGLoMos<-function(..., listOfGLoMos=NULL, verbosity=0)
 			cntmat<-sapply(usedRowList,
 				function(curnumdfr){return(unlist(curnumdfr[1, cntcls, drop=TRUE]))})
 			#cntmat now holds a matrix with 1 row per cnt var and one col per 'used row'
-			retrow[1,cntcls]<-rowMeans(cntmat)
+			if(is.null(dim(cntmat)))
+			{
+				#This is what happens if there was only one continuous variable
+				retrow[1,cntcls]<-mean(cntmat)
+			}
+			else
+			{
+				retrow[1,cntcls]<-rowMeans(cntmat)
+			}
 			return(retrow)
 		})
 	catwif(verbosity > 0, "newUniqueFactorCombinationsAndContinuousMeans combine")
