@@ -1,6 +1,6 @@
 \name{EMLasso.1l.param}
-\alias{EMLasso.1l.param}
 \alias{[.EMLasso.1l.param}
+\alias{EMLasso.1l.param}
 \alias{length.EMLasso.1l.param}
 \title{Collect parameters to EMLasso.1l into one list}
 \usage{

@@ -1,8 +1,8 @@
 \name{predictorModelSamplingReusables}
-\alias{SamplingReusablesGLoMo}
-\alias{SamplingReusablesGLoMo-class}
 \alias{predictorModelSamplingReusables}
 \alias{predictorModelSamplingReusables.GLoMo}
+\alias{SamplingReusablesGLoMo}
+\alias{SamplingReusablesGLoMo-class}
 \title{Create reusable part of prediction for repeated sampling}
 \usage{
   predictorModelSamplingReusables(predictorModel,

@@ -2,8 +2,8 @@
 \alias{EMLassoGLoMo}
 \alias{EMLassoGLoMo-class}
 \alias{postProcessEMLasso}
-\alias{postProcessEMLasso.GLoMo}
 \alias{postProcessEMLasso.default}
+\alias{postProcessEMLasso.GLoMo}
 \title{Postprocess EMLasso (e.g. add extra members or change class)}
 \usage{
   postProcessEMLasso(predictorModel, retval, verbosity = 0)

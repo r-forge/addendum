@@ -55,7 +55,7 @@ cv.lnet<-fit.lognet(iris, y, lambda=0.05, weights=runif(nrow(iris)), verbosity=1
 \seealso{
   \code{\link{glmnet}}
 }
-\keyword{LASSO}
 \keyword{glmnet}
+\keyword{LASSO}
 \keyword{logistic}
 

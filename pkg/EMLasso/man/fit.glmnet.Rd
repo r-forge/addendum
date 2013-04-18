@@ -65,7 +65,7 @@ cv.lnet<-fit.glmnet(iris, y, lambda=0.05, weights=runif(nrow(iris)), verbosity=1
   \code{\link{glmnet}}, \code{\link{imputeDs2FitDs}},
   \code{\link{EMLasso}}
 }
-\keyword{LASSO}
 \keyword{glmnet}
+\keyword{LASSO}
 \keyword{logistic}
 

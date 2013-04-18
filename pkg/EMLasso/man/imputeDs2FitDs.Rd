@@ -6,10 +6,10 @@
 \alias{getUnsafeFunction}
 \alias{getUnsafeFunction.default}
 \alias{getUnsafeFunction.unsafefunction}
-\alias{illegalToSmryLegalFunction}
 \alias{illegals2Null}
 \alias{illegalsCalculatedConstCountered}
 \alias{illegalsCountered}
+\alias{illegalToSmryLegalFunction}
 \alias{imputeDs2FitDs}
 \alias{imputeDs2FitDs.default}
 \alias{imputeDs2FitDs.dfrConversionProps}
