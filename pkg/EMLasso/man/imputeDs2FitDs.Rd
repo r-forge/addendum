@@ -17,6 +17,7 @@
 \alias{imputeDs2FitDsProps}
 \alias{imputeDs2FitDsProps.default}
 \alias{imputeDs2FitDsProps.normalImputationConversion}
+\alias{interactionAdderAllNonSelf}
 \alias{isIllegal}
 \alias{newIllegals}
 \alias{normalImputationConversion}
@@ -94,6 +95,8 @@
 
   illegalToSmryLegalFunction(f, smry=min, dflt=1e-10,
     warn=TRUE)
+
+  interactionAdderAllNonSelf(fitcol, orgcoln)
 }
 \arguments{
   \item{conversionData}{object that holds information to
@@ -164,6 +167,12 @@
 
   \item{dflt}{if the calculated summary still fails, this
   value is taken}
+
+  \item{fitcol}{column names to be included in
+  interactions}
+
+  \item{orgcoln}{original coumns name (relevant for
+  factors)}
 }
 \value{
   dataset or matrix that can be used for fitting - depends
@@ -259,6 +268,10 @@
   a function that is a wrapper around \code{f} which
   replaces illegal values with the return value for the
   summary value of the legal \code{x}s.
+
+  For \code{interactionAdderAllNonSelf}: a matrix with 2
+  rows. Each column holds a combination of 2 rowindexes
+  that should be included as an interaction term.
 }
 \description{
   Reusable information to convert an imputed dataset to

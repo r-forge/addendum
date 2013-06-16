@@ -20,6 +20,7 @@
 #' @param maxNumLower How many lambdas lower than the optimum do you maximally want
 #' @param imputeDs2FitDsProperties see \code{\link{imputeDs2FitDs}} and \code{\link{EMLasso}}
 #' @param standardize see \code{\link{glmnet}}. Defaults to FALSE.
+#' @param nfolds see \code{\link{glmnet}}. Defaults to 10.
 #' @return list of class "LambdaHelper":
 #' \item{topres }{\code{data.frame} with \code{showFirst} rows, and columns: 
 #' \code{variable} (name), \code{lambda},\code{critl} (lower bound of criterion),
@@ -45,11 +46,11 @@
 findReasonableLambdaHelper<-function(ds, out, family="binomial", showFirst=20, showPlot=TRUE,
 	type.measure="auc", repsNeededForFirstOccurrence=3, weights=rep(1, nrow(ds)), ..., verbosity=0,
 	minNumHigher=20, minNumLower=20, maxNumLower=30, 
-	imputeDs2FitDsProperties=normalImputationConversion(), standardize=FALSE)
+	imputeDs2FitDsProperties=normalImputationConversion(), standardize=FALSE, nfolds=10)
 {
 	cv<-fit.glmnet(ds=ds, out=out, lambda=NULL, weights=weights, verbosity=verbosity-1, 
 		standardize=standardize, type.measure=type.measure, 
-		imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family)
+		imputeDs2FitDsProperties=imputeDs2FitDsProperties, family=family, nfolds=nfolds)
 	fit<-cv$glmnet.fit
 	if(showPlot)
 	{

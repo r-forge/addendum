@@ -781,3 +781,26 @@ illegalToSmryLegalFunction<-function(f, smry=min, dflt=1e-10, warn=TRUE)
 	}
 	return(rv)
 }
+#' @rdname imputeDs2FitDs
+#' 
+#' @aliases interactionAdderAllNonSelf
+#' @param fitcol column names to be included in interactions
+#' @param orgcoln original coumns name (relevant for factors)
+#' @return For \code{interactionAdderAllNonSelf}: a matrix with 2 rows. Each column holds a combination
+#' 	of 2 rowindexes that should be included as an interaction term.
+#' @export interactionAdderAllNonSelf
+interactionAdderAllNonSelf<-function(fitcol, orgcoln)
+{
+	sourcecolpercol<-sapply(fitcol, function(convnm){
+		matchcol<-sapply(orgcoln, grepl, x=convnm, fixed=TRUE)
+		if(sum(matchcol) > 1) stop(paste("More than one potential source column found for column", convnm))
+		if(sum(matchcol) < 1) stop(paste("No potential source column found for column", convnm))
+		return(matchcol)
+	})
+	#now get all combinations where sourcecolpercol is not the same
+	#I'll be lazy for now and first generate all of them:
+	res<-combn(length(fitcol), 2)
+	srcsequal<-sourcecolpercol[res[1,]] == sourcecolpercol[res[2,]]
+	res<-res[,!srcsequal]
+	return(res)
+}

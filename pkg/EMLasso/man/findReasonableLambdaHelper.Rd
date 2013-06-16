@@ -12,7 +12,7 @@
     weights = rep(1, nrow(ds)), ..., verbosity = 0,
     minNumHigher = 20, minNumLower = 20, maxNumLower = 30,
     imputeDs2FitDsProperties = normalImputationConversion(),
-    standardize = FALSE)
+    standardize = FALSE, nfolds = 10)
 
   \method{[}{LambdaHelper}(object, i, j, drop = TRUE)
 
@@ -66,6 +66,8 @@
 
   \item{standardize}{see \code{\link{glmnet}}. Defaults to
   FALSE.}
+
+  \item{nfolds}{see \code{\link{glmnet}}. Defaults to 10.}
 
   \item{object}{\code{LambdaHelper}}
 
